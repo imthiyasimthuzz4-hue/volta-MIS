@@ -155,7 +155,7 @@
       width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      margin: 14px 0;
+      margin: 12px 0;
     }
     .table-inv {
       width: 100%;
@@ -166,19 +166,20 @@
     .table-inv th {
       background: #003366;
       color: #ffffff;
-      padding: 7px 6px;
+      padding: 6px 7px;
       text-transform: uppercase;
-      font-size: 10px;
+      font-size: 9.5px;
+      font-weight: 700;
       letter-spacing: 0.2px;
       border: 1px solid #002244;
-      text-align: left;
-      white-space: nowrap;
+      white-space: normal;
+      word-break: normal;
     }
     .table-inv td {
-      padding: 6px 6px;
+      padding: 6px 7px;
       border: 1px solid #cbd5e1;
-      vertical-align: top;
-      word-break: break-word;
+      vertical-align: middle;
+      font-size: 11px;
     }
 
     /* Calculations & Words */
@@ -372,21 +373,22 @@
       .table-responsive {
         overflow: visible !important;
         border: none !important;
-        margin: 8px 0 !important;
+        margin: 6px 0 !important;
       }
       .table-inv {
         width: 100% !important;
         min-width: 100% !important;
-        table-layout: fixed !important;
-        font-size: 8pt !important;
+        table-layout: auto !important;
+        font-size: 8.5pt !important;
       }
       .table-inv th, .table-inv td {
-        padding: 4px 4px !important;
-        word-break: break-word !important;
+        padding: 4px 6px !important;
       }
       .table-inv th {
         background-color: #003366 !important;
         color: #ffffff !important;
+        font-size: 8pt !important;
+        white-space: normal !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -396,19 +398,6 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-
-      /* Proportional column widths summing exactly to 100% */
-      .col-sl      { width: 4% !important; text-align: center !important; }
-      .col-desc    { width: 30% !important; }
-      .col-hsn     { width: 9% !important; text-align: center !important; }
-      .col-qty     { width: 6% !important; text-align: right !important; }
-      .col-unit    { width: 6% !important; text-align: center !important; }
-      .col-rate    { width: 10% !important; text-align: right !important; }
-      .col-taxable { width: 11% !important; text-align: right !important; }
-      .col-cgst    { width: 6.5% !important; text-align: right !important; }
-      .col-sgst    { width: 6.5% !important; text-align: right !important; }
-      .col-igst    { width: 13% !important; text-align: right !important; }
-      .col-total   { width: 11% !important; text-align: right !important; font-weight: 700 !important; }
 
       .calc-summary-wrap {
         display: flex !important;
@@ -513,46 +502,47 @@
     <table class="table-inv">
       <thead>
         <tr>
-          <th class="col-sl">Sl</th>
-          <th class="col-desc">Description of Electrical Works / Materials</th>
-          <th class="col-hsn">HSN/SAC</th>
-          <th class="col-qty">Qty</th>
-          <th class="col-unit">Unit</th>
-          <th class="col-rate">Rate (₹)</th>
-          <th class="col-taxable">Taxable (₹)</th>
-          <th class="col-cgst" th:if="${invoice.supplyType != 'INTER_STATE'}">CGST (₹)</th>
-          <th class="col-sgst" th:if="${invoice.supplyType != 'INTER_STATE'}">SGST (₹)</th>
-          <th class="col-igst" th:if="${invoice.supplyType == 'INTER_STATE'}">IGST (₹)</th>
-          <th class="col-total">Total (₹)</th>
+          <th style="width: 28px; text-align: center;">#</th>
+          <th>Description of Works / Materials</th>
+          <th style="text-align: center; width: 68px;">HSN/SAC</th>
+          <th style="text-align: right; width: 72px;">Qty</th>
+          <th style="text-align: right; width: 75px;">Rate (₹)</th>
+          <th style="text-align: right; width: 85px;">Taxable (₹)</th>
+          <th th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right; width: 75px;">CGST</th>
+          <th th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right; width: 75px;">SGST</th>
+          <th th:if="${invoice.supplyType == 'INTER_STATE'}" style="text-align: right; width: 85px;">IGST</th>
+          <th style="text-align: right; width: 90px;">Total (₹)</th>
         </tr>
       </thead>
       <tbody>
         <tr th:each="it, stat : ${invoice.items}">
-          <td class="col-sl" th:text="${stat.index + 1}">1</td>
-          <td class="col-desc">
-            <strong th:text="${it.description}">Electrical Installation Works</strong>
+          <td style="text-align: center; color: #64748b;" th:text="${stat.index + 1}">1</td>
+          <td>
+            <strong style="color: #0f172a;" th:text="${it.description}">Electrical Installation Works</strong>
           </td>
-          <td class="col-hsn" style="font-family: 'JetBrains Mono', monospace;" th:text="${it.hsnSac}">995461</td>
-          <td class="col-qty" th:text="${it.quantity}">1.00</td>
-          <td class="col-unit" th:text="${it.unit}">Lot</td>
-          <td class="col-rate" th:text="${#numbers.formatDecimal(it.unitPrice, 1, 2)}">0.00</td>
-          <td class="col-taxable" style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.taxableValue, 1, 2)}">0.00</td>
+          <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 10px;" th:text="${it.hsnSac}">995461</td>
+          <td style="text-align: right; white-space: nowrap;">
+            <span style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.quantity, 1, 2)}">1.00</span>
+            <small style="color: #64748b; margin-left: 2px;" th:text="${it.unit}">Lot</small>
+          </td>
+          <td style="text-align: right;" th:text="${#numbers.formatDecimal(it.unitPrice, 1, 2)}">0.00</td>
+          <td style="text-align: right; font-weight: 600;" th:text="${#numbers.formatDecimal(it.taxableValue, 1, 2)}">0.00</td>
           <!-- CGST -->
-          <td class="col-cgst" th:if="${invoice.supplyType != 'INTER_STATE'}">
-            <div th:text="${#numbers.formatDecimal(it.cgstAmount, 1, 2)}">0.00</div>
-            <small style="color: #64748b;" th:text="'(' + ${it.cgstRate} + '%)'">(9%)</small>
+          <td th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right; white-space: nowrap;">
+            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.cgstAmount, 1, 2)}">0.00</div>
+            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.cgstRate, 1, (it.cgstRate % 1 == 0 ? 0 : 2))} + '%)'">(9%)</div>
           </td>
           <!-- SGST -->
-          <td class="col-sgst" th:if="${invoice.supplyType != 'INTER_STATE'}">
-            <div th:text="${#numbers.formatDecimal(it.sgstAmount, 1, 2)}">0.00</div>
-            <small style="color: #64748b;" th:text="'(' + ${it.sgstRate} + '%)'">(9%)</small>
+          <td th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right; white-space: nowrap;">
+            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.sgstAmount, 1, 2)}">0.00</div>
+            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.sgstRate, 1, (it.sgstRate % 1 == 0 ? 0 : 2))} + '%)'">(9%)</div>
           </td>
           <!-- IGST -->
-          <td class="col-igst" th:if="${invoice.supplyType == 'INTER_STATE'}">
-            <div th:text="${#numbers.formatDecimal(it.igstAmount, 1, 2)}">0.00</div>
-            <small style="color: #64748b;" th:text="'(' + ${it.igstRate} + '%)'">(18%)</small>
+          <td th:if="${invoice.supplyType == 'INTER_STATE'}" style="text-align: right; white-space: nowrap;">
+            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.igstAmount, 1, 2)}">0.00</div>
+            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.igstRate, 1, (it.igstRate % 1 == 0 ? 0 : 2))} + '%)'">(18%)</div>
           </td>
-          <td class="col-total" th:text="${#numbers.formatDecimal(it.totalAmount, 1, 2)}">0.00</td>
+          <td style="text-align: right; font-weight: 700; color: #003366;" th:text="${#numbers.formatDecimal(it.totalAmount, 1, 2)}">0.00</td>
         </tr>
       </tbody>
     </table>
@@ -618,7 +608,11 @@
 
     <div class="bank-card">
       <div style="font-weight: 700; color: #003366; text-transform: uppercase; margin-bottom: 4px;">Terms & Conditions:</div>
-      <div style="color: #475569; font-size: 10px; white-space: pre-wrap;" th:text="${invoice.notes != null and !invoice.notes.isBlank() ? invoice.notes : '1. Goods & materials supplied are subject to warranty terms.\n2. Payment strictly as per agreed payment schedule.\n3. Subject to Malappuram jurisdiction only.'}">Terms</div>
+      <div style="color: #475569; font-size: 9.5px; line-height: 1.5;">
+        <div>1. Goods & materials supplied are subject to warranty terms.</div>
+        <div>2. Payment strictly as per agreed payment schedule.</div>
+        <div>3. Subject to Malappuram jurisdiction only.</div>
+      </div>
     </div>
   </div>
 
