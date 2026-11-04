@@ -169,25 +169,36 @@
 
     /* Mobile screens */
     @media screen and (max-width: 768px) {
-      body {
-        padding: 8px 4px !important;
+      html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 6px 4px !important;
         font-size: 12px !important;
       }
       .jobcard-container {
-        padding: 16px 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 14px 10px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
         box-shadow: none !important;
       }
       .no-print-toolbar {
         flex-direction: column !important;
         align-items: stretch !important;
+        gap: 8px !important;
       }
       .no-print-toolbar .btn-group {
         flex-direction: column !important;
+        gap: 6px !important;
       }
       .no-print-toolbar a, .no-print-toolbar button {
         width: 100% !important;
         text-align: center !important;
         padding: 10px !important;
+        box-sizing: border-box !important;
       }
       .letterhead-wrap {
         flex-direction: column !important;
@@ -215,13 +226,7 @@
       }
       .sig-block {
         text-align: left !important;
-      }
-      .table-responsive {
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-      }
-      .table-jobcard {
-        min-width: 480px;
+        width: 100% !important;
       }
     }
 

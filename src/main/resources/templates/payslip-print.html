@@ -146,24 +146,72 @@
       width: 180px;
     }
 
+    /* Desktop Table & Mobile Breakdown */
+    .desktop-print-table-wrap {
+      width: 100%;
+      margin: 12px 0;
+    }
+    .mobile-slip-breakdown {
+      display: none;
+    }
+    .mobile-slip-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    .mobile-slip-card-title {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #003366;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+    .mobile-slip-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      font-size: 11.5px;
+      border-bottom: 1px dashed #f1f5f9;
+    }
+    .mobile-slip-row:last-child {
+      border-bottom: none;
+    }
+
     /* Mobile screens */
     @media screen and (max-width: 768px) {
-      body {
-        padding: 8px 4px !important;
+      html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 6px 4px !important;
         font-size: 12px !important;
       }
       .payslip-box {
-        padding: 16px 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 14px 10px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
         box-shadow: none !important;
       }
       .no-print-toolbar {
         flex-direction: column !important;
         align-items: stretch !important;
+        gap: 8px !important;
       }
       .no-print-toolbar a, .no-print-toolbar button {
         width: 100% !important;
         text-align: center !important;
         padding: 10px !important;
+        box-sizing: border-box !important;
       }
       .letterhead-wrap {
         flex-direction: column !important;
@@ -184,12 +232,12 @@
         grid-template-columns: 1fr !important;
         gap: 8px !important;
       }
-      .table-responsive {
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
+      .desktop-print-table-wrap {
+        display: none !important;
       }
-      .table-slip {
-        min-width: 540px;
+      .mobile-slip-breakdown {
+        display: block !important;
+        margin: 10px 0 !important;
       }
       .signatures {
         flex-direction: column !important;
@@ -210,7 +258,7 @@
         margin: 0 !important;
         width: 100% !important;
         color: #0f172a !important;
-        font-size: 9pt !important;
+        font-size: 8.5pt !important;
         line-height: 1.3 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -237,13 +285,18 @@
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
-      .table-responsive {
+      .mobile-slip-breakdown {
+        display: none !important;
+      }
+      .desktop-print-table-wrap {
+        display: block !important;
         overflow: visible !important;
         border: none !important;
         margin: 8px 0 !important;
       }
       .table-slip {
         width: 100% !important;
+        table-layout: fixed !important;
         font-size: 8.5pt !important;
       }
       .table-slip th, .table-slip td {
@@ -314,8 +367,8 @@
     </div>
   </div>
 
-  <!-- Earnings & Deductions Breakdown Table -->
-  <div class="table-responsive">
+  <!-- Desktop & Print Earnings & Deductions Breakdown Table -->
+  <div class="desktop-print-table-wrap">
     <table class="table-slip">
       <thead>
         <tr>
@@ -358,6 +411,56 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Mobile Screen Breakdown (Active only on phones <= 768px, 100% viewport fit) -->
+  <div class="mobile-slip-breakdown">
+    <div class="mobile-slip-card">
+      <div class="mobile-slip-card-title">💵 Gross Earnings</div>
+      <div class="mobile-slip-row">
+        <span>Earned Wages:</span>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(summary.grossEarnedWages, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="mobile-slip-row" th:if="${summary.totalBonuses.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+        <span>Bonuses & Incentives:</span>
+        <strong style="color: #16a34a;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalBonuses, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="mobile-slip-row" style="font-weight: 700; color: #003366; border-top: 1px solid #cbd5e1; margin-top: 4px; padding-top: 6px;">
+        <span>Total Gross:</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(summary.grossEarnedWages.add(summary.totalBonuses), 1, 2)}">₹ 0.00</span>
+      </div>
+    </div>
+
+    <div class="mobile-slip-card">
+      <div class="mobile-slip-card-title">✂️ Deductions & Advances</div>
+      <div class="mobile-slip-row">
+        <span>Advances Taken:</span>
+        <strong style="color: #dc2626;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalAdvances, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="mobile-slip-row" th:if="${summary.totalDeductions.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+        <span>Other Deductions:</span>
+        <strong style="color: #dc2626;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalDeductions, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="mobile-slip-row" style="font-weight: 700; color: #b45309; border-top: 1px solid #cbd5e1; margin-top: 4px; padding-top: 6px;">
+        <span>Total Deductions:</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalAdvances.add(summary.totalDeductions), 1, 2)}">₹ 0.00</span>
+      </div>
+    </div>
+
+    <div class="mobile-slip-card" style="background: #f0fdf4; border-color: #86efac;">
+      <div class="mobile-slip-row" style="font-size: 13px; font-weight: 800; color: #166534;">
+        <span>NET PAYABLE:</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(summary.netPayable, 1, 2)}">₹ 0.00</span>
+      </div>
+      <div class="mobile-slip-row" style="font-size: 11px;">
+        <span>Total Disbursed:</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalPaidSalary, 1, 2)}">₹ 0.00</span>
+      </div>
+      <div class="mobile-slip-row" style="font-size: 12.5px; font-weight: 800; color: #dc2626; border-top: 1px solid #bbf7d0; margin-top: 4px; padding-top: 6px;">
+        <span>REMAINING BALANCE:</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(summary.pendingBalance, 1, 2)}">₹ 0.00</span>
+      </div>
+    </div>
   </div>
 
   <!-- Itemized Disbursal History Table if any -->

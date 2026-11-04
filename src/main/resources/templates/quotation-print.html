@@ -191,27 +191,86 @@
       margin-bottom: 4px;
     }
 
+    /* Desktop Table & Mobile Cards */
+    .desktop-print-table-wrap {
+      width: 100%;
+      margin: 12px 0;
+    }
+    .mobile-items-list {
+      display: none;
+    }
+    .mobile-item-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    .mobile-item-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-bottom: 6px;
+    }
+    .mobile-item-num {
+      background: #003366;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 2px 6px;
+      flex-shrink: 0;
+    }
+    .mobile-item-desc {
+      font-weight: 700;
+      font-size: 13px;
+      color: #0f172a;
+      flex: 1;
+      line-height: 1.35;
+    }
+    .mobile-item-total {
+      font-size: 13px;
+      font-weight: 800;
+      color: #003366;
+      white-space: nowrap;
+    }
+
     /* Mobile screens */
     @media screen and (max-width: 768px) {
-      body {
-        padding: 8px 4px !important;
+      html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 6px 4px !important;
         font-size: 12px !important;
       }
       .quote-box {
-        padding: 16px 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 14px 10px !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
         box-shadow: none !important;
       }
       .no-print-toolbar {
         flex-direction: column !important;
         align-items: stretch !important;
+        gap: 8px !important;
       }
       .no-print-toolbar .btn-group {
         flex-direction: column !important;
+        gap: 6px !important;
       }
       .no-print-toolbar a, .no-print-toolbar button {
         width: 100% !important;
         text-align: center !important;
         padding: 10px !important;
+        box-sizing: border-box !important;
       }
       .letterhead-wrap {
         flex-direction: column !important;
@@ -232,8 +291,17 @@
         grid-template-columns: 1fr !important;
         gap: 8px !important;
       }
+      .desktop-print-table-wrap {
+        display: none !important;
+      }
+      .mobile-items-list {
+        display: block !important;
+        margin: 10px 0 !important;
+      }
       .total-box {
         width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
         margin-left: 0 !important;
       }
       .letterhead-footer {
@@ -243,13 +311,7 @@
       }
       .signature-box {
         text-align: left !important;
-      }
-      .table-responsive {
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-      }
-      .table-quote {
-        min-width: 480px;
+        width: 100% !important;
       }
     }
 
@@ -261,7 +323,7 @@
         margin: 0 !important;
         width: 100% !important;
         color: #0f172a !important;
-        font-size: 9pt !important;
+        font-size: 8.5pt !important;
         line-height: 1.3 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
@@ -288,14 +350,18 @@
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
-      .table-responsive {
+      .mobile-items-list {
+        display: none !important;
+      }
+      .desktop-print-table-wrap {
+        display: block !important;
         overflow: visible !important;
         border: none !important;
-        margin: 8px 0 !important;
+        margin: 6px 0 !important;
       }
       .table-quote {
         width: 100% !important;
-        table-layout: auto !important;
+        table-layout: fixed !important;
         font-size: 8.5pt !important;
       }
       .table-quote th {
@@ -377,7 +443,8 @@
     </div>
   </div>
 
-  <div class="table-responsive">
+  <!-- Desktop & Print Table -->
+  <div class="desktop-print-table-wrap">
     <table class="table-quote">
       <thead>
         <tr>
@@ -397,6 +464,18 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Mobile Screen Items View (Active only on phone screens <= 768px, fits 100% viewport) -->
+  <div class="mobile-items-list">
+    <div class="mobile-item-card">
+      <div class="mobile-item-header">
+        <span class="mobile-item-num">#1</span>
+        <div class="mobile-item-desc" th:text="${quotation.projectName}">Project Name</div>
+        <div class="mobile-item-total" th:text="'₹ ' + ${#numbers.formatDecimal(quotation.subTotal, 1, 2)}">₹ 0.00</div>
+      </div>
+      <div style="color: #475569; font-size: 11.5px; margin-top: 4px; line-height: 1.45; white-space: pre-wrap;" th:text="${quotation.description}">Technical details</div>
+    </div>
   </div>
 
   <!-- Calculation Summary -->
