@@ -6,14 +6,19 @@
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <style>
+    @page {
+      size: A4 portrait;
+      margin: 8mm 10mm 8mm 10mm;
+    }
+    * { box-sizing: border-box; }
     body { background: #e2e8f0; padding: 24px; font-size: 13px; font-family: 'DM Sans', -apple-system, sans-serif; color: #0f172a; }
     .invoice-box {
-      max-width: 920px;
+      max-width: 860px;
       margin: 0 auto;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
-      padding: 36px 40px;
+      padding: 32px 36px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
@@ -44,8 +49,8 @@
     .tax-invoice-header {
       text-align: center;
       border-bottom: 2px solid #003366;
-      padding-bottom: 14px;
-      margin-bottom: 18px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
     }
     .tax-badge {
       display: inline-block;
@@ -57,7 +62,7 @@
       padding: 4px 16px;
       border-radius: 4px;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .copy-type {
       font-size: 11px;
@@ -70,8 +75,8 @@
       justify-content: space-between;
       align-items: flex-start;
       border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 18px;
-      margin-bottom: 18px;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
     }
     .letterhead-brand-left {
       display: flex;
@@ -80,35 +85,78 @@
       max-width: 580px;
     }
     .letterhead-logo-img {
-      height: 72px;
-      max-width: 180px;
+      height: 68px;
+      max-width: 170px;
       object-fit: contain;
     }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
-    .bill-box { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 6px; line-height: 1.6; }
-    .bill-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
-    .table-inv { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
-    .table-inv th { background: #003366; color: #fff; padding: 9px 10px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.3px; border: 1px solid #002244; }
-    .table-inv td { padding: 9px 10px; border: 1px solid #cbd5e1; }
-    .calc-box-print { margin-left: auto; width: 380px; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; margin-top: 10px; font-size: 12.5px; background: rgba(255,255,255,0.9); }
-    .calc-row-print { display: flex; justify-content: space-between; padding: 6px 14px; border-bottom: 1px solid #f1f5f9; }
-    .calc-row-print.grand { background: #003366; color: #fff; font-size: 15px; font-weight: 800; border-bottom: none; }
-    .words-box { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; margin: 16px 0; font-size: 12.5px; }
-    .bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
-    .bank-card { background: rgba(248, 250, 252, 0.85); border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 14px; font-size: 12px; line-height: 1.6; }
-    .signatures { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding-top: 10px; }
-    .sig-block { text-align: center; min-width: 200px; }
-    .sig-line { border-bottom: 1px solid #475569; height: 50px; margin-bottom: 6px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+    .bill-box { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; padding: 12px 14px; border-radius: 6px; line-height: 1.5; }
+    .bill-title { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+    .table-inv { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 11.5px; }
+    .table-inv th { background: #003366; color: #fff; padding: 8px 9px; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.3px; border: 1px solid #002244; }
+    .table-inv td { padding: 7px 9px; border: 1px solid #cbd5e1; }
+    .calc-box-print { margin-left: auto; width: 360px; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; margin-top: 8px; font-size: 11.5px; background: rgba(255,255,255,0.9); }
+    .calc-row-print { display: flex; justify-content: space-between; padding: 5px 12px; border-bottom: 1px solid #f1f5f9; }
+    .calc-row-print.grand { background: #003366; color: #fff; font-size: 14px; font-weight: 800; border-bottom: none; }
+    .words-box { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; margin: 12px 0; font-size: 11.5px; }
+    .bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+    .bank-card { background: rgba(248, 250, 252, 0.85); border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; font-size: 11px; line-height: 1.5; }
+    .signatures { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 28px; padding-top: 8px; }
+    .sig-block { text-align: center; min-width: 180px; }
+    .sig-line { border-bottom: 1px solid #475569; height: 42px; margin-bottom: 4px; }
+    
     @media print {
-      body { background: #fff !important; padding: 0 !important; font-size: 11.5px; }
-      .invoice-box { border: none !important; box-shadow: none !important; padding: 8px !important; max-width: 100% !important; }
+      html, body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        color: #0f172a !important;
+        font-size: 10.5pt !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .invoice-box {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
       .no-print { display: none !important; }
       .top-accent-stripe { display: none !important; }
       .watermark-logo {
         display: block !important;
-        opacity: 0.065 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        opacity: 0.05 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .letterhead-wrap, .tax-invoice-header, .grid-2, .calc-box-print, .words-box, .bank-grid, .bank-card, .signatures, .sig-block {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .table-inv tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .table-inv th {
+        background-color: #003366 !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .tax-badge {
+        background-color: #003366 !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .calc-row-print.grand {
+        background-color: #003366 !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
     }
   </style>
