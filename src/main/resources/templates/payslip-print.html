@@ -2,23 +2,36 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title th:text="'Salary Slip - ' + ${staff.fullName} + ' (' + ${monthDisplay} + ') | VOLTA ELECTRICAL ASSOCIATES'">Salary Slip</title>
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <style>
     @page {
       size: A4 portrait;
-      margin: 8mm 10mm 8mm 10mm;
+      margin: 8mm 8mm 8mm 8mm;
     }
-    * { box-sizing: border-box; }
-    body { background: #e2e8f0; padding: 24px; font-size: 13px; font-family: 'DM Sans', -apple-system, sans-serif; color: #0f172a; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #e2e8f0;
+      padding: 20px 10px;
+      font-size: 13px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      line-height: 1.45;
+    }
     .payslip-box {
-      max-width: 840px;
+      max-width: 820px;
+      width: 100%;
       margin: 0 auto;
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 32px 36px;
+      border-radius: 10px;
+      padding: 28px 24px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
@@ -28,22 +41,30 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 440px;
-      height: 440px;
+      width: 420px;
+      height: 420px;
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
-      opacity: 0.055;
+      opacity: 0.05;
       pointer-events: none;
       z-index: 0;
     }
     .top-accent-stripe {
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 6px;
+      height: 5px;
       background: linear-gradient(90deg, #003366 0%, #003366 75%, #f59e0b 75%, #f59e0b 100%);
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+    .no-print-toolbar {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
     .slip-header {
       text-align: center;
@@ -51,11 +72,137 @@
       padding-bottom: 10px;
       margin-bottom: 14px;
     }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
-    .info-card { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; padding: 10px 14px; border-radius: 6px; line-height: 1.5; font-size: 11.5px; }
-    .table-slip { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 11.5px; }
-    .table-slip th, .table-slip td { border: 1px solid #cbd5e1; padding: 7px 10px; }
-    .table-slip th { background: #f1f5f9; color: #003366; font-weight: 700; }
+    .letterhead-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      gap: 14px;
+    }
+    .letterhead-brand-left {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex: 1;
+    }
+    .letterhead-logo-img {
+      height: 64px;
+      max-width: 150px;
+      object-fit: contain;
+    }
+    .meta-details-box {
+      text-align: right;
+      min-width: 180px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .info-card {
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 6px;
+      line-height: 1.5;
+      font-size: 11.5px;
+    }
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 14px 0;
+    }
+    .table-slip {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+    .table-slip th, .table-slip td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 8px;
+    }
+    .table-slip th {
+      background: #f1f5f9;
+      color: #003366;
+      font-weight: 700;
+      font-size: 10.5px;
+      text-transform: uppercase;
+    }
+    .signatures {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+      padding-top: 14px;
+      border-top: 1px dashed #cbd5e1;
+    }
+    .sig-box {
+      text-align: center;
+      width: 180px;
+    }
+
+    /* Mobile screens */
+    @media screen and (max-width: 768px) {
+      body {
+        padding: 8px 4px !important;
+        font-size: 12px !important;
+      }
+      .payslip-box {
+        padding: 16px 12px !important;
+        box-shadow: none !important;
+      }
+      .no-print-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+      .no-print-toolbar a, .no-print-toolbar button {
+        width: 100% !important;
+        text-align: center !important;
+        padding: 10px !important;
+      }
+      .letterhead-wrap {
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+      .letterhead-brand-left {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+      }
+      .meta-details-box {
+        text-align: left !important;
+        width: 100% !important;
+        border-top: 1px dashed #cbd5e1;
+        padding-top: 8px;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+      .table-responsive {
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+      }
+      .table-slip {
+        min-width: 540px;
+      }
+      .signatures {
+        flex-direction: column !important;
+        gap: 20px !important;
+        align-items: stretch !important;
+      }
+      .sig-box {
+        width: 100% !important;
+        text-align: left !important;
+      }
+    }
+
+    /* Exact A4 Print */
     @media print {
       html, body {
         background: #ffffff !important;
@@ -63,7 +210,8 @@
         margin: 0 !important;
         width: 100% !important;
         color: #0f172a !important;
-        font-size: 10.5pt !important;
+        font-size: 9pt !important;
+        line-height: 1.3 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -74,18 +222,38 @@
         margin: 0 !important;
         width: 100% !important;
         max-width: 100% !important;
+        overflow: visible !important;
       }
-      .no-print { display: none !important; }
-      .top-accent-stripe { display: none !important; }
+      .no-print, .top-accent-stripe {
+        display: none !important;
+      }
       .watermark-logo {
         display: block !important;
-        opacity: 0.05 !important;
+        opacity: 0.045 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .grid-2, .info-card, .table-slip tr, .slip-header {
+      .letterhead-wrap, .slip-header, .grid-2, .info-card, .table-slip tr, .signatures {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+      }
+      .table-responsive {
+        overflow: visible !important;
+        border: none !important;
+        margin: 8px 0 !important;
+      }
+      .table-slip {
+        width: 100% !important;
+        font-size: 8.5pt !important;
+      }
+      .table-slip th, .table-slip td {
+        padding: 4px 6px !important;
+      }
+      .signatures {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        margin-top: 24px !important;
       }
     }
   </style>
@@ -97,151 +265,141 @@
   <div class="top-accent-stripe"></div>
 
   <!-- Print Action Toolbar -->
-  <div class="no-print" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+  <div class="no-print no-print-toolbar">
     <a class="button-link button-secondary" th:href="@{/payroll/staff/{id}(id=${staff.id}, month=${selectedMonth})}">← Back to Worker Ledger</a>
     <button class="primary" onclick="window.print()">🖨️ Print Official Payslip</button>
   </div>
 
   <!-- Letterhead Header -->
-  <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #e2e8f0; padding-bottom:14px; margin-bottom:14px;">
-    <div style="display:flex; gap:16px; align-items:center;">
-      <img th:src="@{${company.logoPath}}" alt="Volta Logo" style="height:64px; max-width:180px; object-fit:contain;" onerror="this.onerror=null;this.src='/images/favicon.png';">
+  <div class="letterhead-wrap">
+    <div class="letterhead-brand-left">
+      <img th:src="@{${company.logoPath}}" alt="Volta Logo" class="letterhead-logo-img" onerror="this.onerror=null;this.src='/images/favicon.png';">
       <div>
-        <h1 style="font-size: 20px; color: #003366; margin: 0; font-weight: 800;" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</h1>
-        <p style="font-size: 11.5px; color: #d97706; font-weight: 700; margin: 2px 0;" th:text="${company.tagline}">Govt. Licensed Electrical Contractors & Engineers</p>
-        <p style="font-size: 11px; color: #475569; margin: 1px 0;" th:text="${company.address}">Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642</p>
-        <p style="font-size: 11px; color: #475569; margin: 1px 0;">📞 <span th:text="${company.phone}">+91 94474 12235</span> | ✉️ <span th:text="${company.email}">zubairvoltavvm@gmail.com</span></p>
+        <h1 style="font-size: 18px; color: #003366; margin: 0; font-weight: 800;" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</h1>
+        <p style="font-size: 11px; color: #d97706; font-weight: 700; margin: 2px 0;" th:text="${company.tagline}">Govt. Licensed Electrical Contractors & Engineers</p>
+        <p style="font-size: 10.5px; color: #475569; margin: 1px 0;" th:text="${company.address}">Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642</p>
+        <p style="font-size: 10.5px; color: #475569; margin: 1px 0;">📞 <span th:text="${company.phone}">+91 94474 12235</span> | ✉️ <span th:text="${company.email}">zubairvoltavvm@gmail.com</span></p>
       </div>
     </div>
-    <div style="text-align:right; font-size:11px; color:#64748b; line-height:1.5;">
+    <div class="meta-details-box">
       <div><strong>License:</strong> <span th:text="${company.licenseNo}">EA/KER/2026/8841</span></div>
       <div><strong>GSTIN:</strong> <span th:text="${company.gstin}">32AAAAA0000A1Z5</span></div>
     </div>
   </div>
 
   <div class="slip-header">
-    <div style="display:inline-block; background:#003366; color:#fff; font-size:13px; font-weight:800; letter-spacing:1px; padding:4px 16px; border-radius:4px; text-transform:uppercase;">
+    <div style="display:inline-block; background:#003366; color:#fff; font-size:12px; font-weight:800; letter-spacing:1px; padding:4px 14px; border-radius:4px; text-transform:uppercase;">
       EMPLOYEE SALARY VOUCHER / PAYSLIP
     </div>
-    <div style="font-size:12px; color:#475569; font-weight:700; margin-top:4px;" th:text="'Pay Period: ' + ${monthDisplay}">Pay Period: October 2026</div>
+    <div style="font-size:11.5px; color:#475569; font-weight:700; margin-top:4px;" th:text="'Pay Period: ' + ${monthDisplay}">Pay Period: October 2026</div>
   </div>
 
   <!-- Employee and Compensation Information Grid -->
   <div class="grid-2">
     <div class="info-card">
-      <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:4px;">Employee Information</div>
-      <div><strong>Name:</strong> <span th:text="${staff.fullName}">Arun Kumar</span></div>
-      <div><strong>Designation:</strong> <span th:text="${staff.designation}">Site Supervisor</span></div>
-      <div><strong>Contact:</strong> <span th:text="${staff.phone}">+91 94474 12235</span></div>
-      <div><strong>Wage Structure:</strong> <span th:text="${staff.effectiveWageDisplay}">₹ 950 / Day</span></div>
+      <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:4px;">Employee Information</div>
+      <div><strong>Employee Name:</strong> <span style="color:#003366; font-weight:700;" th:text="${staff.fullName}">Arun Kumar K</span></div>
+      <div><strong>Designation:</strong> <span th:text="${staff.designation}">Senior Electrical Engineer</span></div>
+      <div><strong>Mobile:</strong> <span th:text="${staff.phone}">+91 98471 23456</span></div>
+      <div><strong>Joining Date:</strong> <span th:text="${staff.joiningDate}">2025-04-01</span></div>
+      <div><strong>Status:</strong> <span class="badge badge-success" th:text="${staff.status}">ACTIVE</span></div>
     </div>
 
     <div class="info-card">
-      <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:4px;">Attendance & Banking Details</div>
-      <div><strong>Effective Days Worked:</strong> <strong th:text="${summary.effectiveWorkingDays} + ' Days'">0 Days</strong></div>
-      <div><strong>Overtime Hours:</strong> <span th:text="${summary.totalOvertimeHours} + ' hrs'">0 hrs</span></div>
-      <div th:if="${staff.bankName}"><strong>Bank:</strong> <span th:text="${staff.bankName}">Bank</span></div>
-      <div th:if="${staff.bankAccountNumber}"><strong>A/C:</strong> <span th:text="${staff.bankAccountNumber}">12345678</span> (IFSC: <span th:text="${staff.ifscCode}">IFSC</span>)</div>
-      <div th:if="${staff.upiId}"><strong>UPI ID:</strong> <span th:text="${staff.upiId}">upi@okaxis</span></div>
+      <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; margin-bottom:4px;">Attendance & Wage Basis</div>
+      <div><strong>Base Wage Rate:</strong> <span th:text="${staff.getEffectiveWageDisplay()}">₹ 150.00 / hour</span></div>
+      <div><strong>Total Working Days:</strong> <strong th:text="${summary.presentDays}">0</strong> Days Present</div>
+      <div><strong>Regular Hours:</strong> <span th:text="${#numbers.formatDecimal(summary.totalRegularHours, 1, 1)}">0.0</span> hrs (<span th:text="'₹ ' + ${#numbers.formatDecimal(summary.hourlyEarned, 1, 2)}">₹ 0.00</span>)</div>
+      <div><strong>Overtime Hours:</strong> <span th:text="${#numbers.formatDecimal(summary.overtimeHours, 1, 1)}">0.0</span> hrs (<span th:text="'₹ ' + ${#numbers.formatDecimal(summary.overtimeEarned, 1, 2)}">₹ 0.00</span>)</div>
+      <div><strong>Total Hours Logged:</strong> <strong style="color:#003366;" th:text="${#numbers.formatDecimal(summary.totalWorkingHours, 1, 1)}">0.0</strong> hrs</div>
     </div>
   </div>
 
-  <!-- Salary Calculation Statement Table -->
-  <table class="table-slip">
-    <thead>
-      <tr>
-        <th style="width:50%;">Earnings Description</th>
-        <th style="text-align:right;">Amount (₹)</th>
-        <th style="width:30%;">Deductions / Advances</th>
-        <th style="text-align:right;">Amount (₹)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <strong>Gross Wages Earned</strong><br>
-          <small style="color:#64748b;" th:text="'Based on ' + ${summary.effectiveWorkingDays} + ' days attendance @ ' + ${staff.effectiveWageDisplay}">Attendance</small>
-        </td>
-        <td style="text-align:right; font-weight:700;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.grossEarnedWages, 1, 2)}">₹ 0.00</td>
-        <td>
-          <strong style="color:#b45309;">Advances Deducted</strong><br>
-          <small style="color:#64748b;">Emergency / site advances taken</small>
-        </td>
-        <td style="text-align:right; color:#b45309; font-weight:700;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalAdvances, 1, 2)}">₹ 0.00</td>
-      </tr>
-      <tr>
-        <td>
-          <strong>Site Allowances & Bonuses</strong>
-        </td>
-        <td style="text-align:right;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalBonuses, 1, 2)}">₹ 0.00</td>
-        <td>
-          <strong>Other Deductions</strong>
-        </td>
-        <td style="text-align:right;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalDeductions, 1, 2)}">₹ 0.00</td>
-      </tr>
-      <tr style="background:#f8fafc; font-weight:700;">
-        <td>TOTAL GROSS EARNINGS</td>
-        <td style="text-align:right; color:#003366;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.grossEarnedWages.add(summary.totalBonuses), 1, 2)}">₹ 0.00</td>
-        <td>TOTAL DEDUCTIONS & ADVANCES</td>
-        <td style="text-align:right; color:#b45309;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalAdvances.add(summary.totalDeductions), 1, 2)}">₹ 0.00</td>
-      </tr>
-      <tr style="background:#f0fdf4; font-size:14px; font-weight:800;">
-        <td colspan="3" style="color:#166534;">NET SALARY PAYABLE FOR THIS MONTH</td>
-        <td style="text-align:right; color:#166534;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.netPayable, 1, 2)}">₹ 0.00</td>
-      </tr>
-      <tr>
-        <td colspan="3">Total Salary Paid / Disbursed to Date</td>
-        <td style="text-align:right; font-weight:700;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalPaidSalary, 1, 2)}">₹ 0.00</td>
-      </tr>
-      <tr style="background:#fef2f2; font-size:14px; font-weight:800;">
-        <td colspan="3" style="color:#dc2626;">REMAINING PENDING BALANCE (NET DUE)</td>
-        <td style="text-align:right; color:#dc2626;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.pendingBalance, 1, 2)}">₹ 0.00</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- Itemized Disbursal History Table if any -->
-  <div th:if="${!#lists.isEmpty(transactions)}" style="margin: 18px 0;">
-    <strong style="font-size:12px; color:#003366; text-transform:uppercase;">Itemized Payouts & Advances for this Month:</strong>
-    <table class="table-slip" style="margin-top:8px;">
+  <!-- Earnings & Deductions Breakdown Table -->
+  <div class="table-responsive">
+    <table class="table-slip">
       <thead>
         <tr>
-          <th>Date</th>
-          <th>Type</th>
-          <th>Amount (₹)</th>
-          <th>Mode</th>
-          <th>Reference / Notes</th>
+          <th style="width: 32%;">Earnings Component</th>
+          <th style="width: 18%; text-align:right;">Amount (₹)</th>
+          <th style="width: 32%;">Deductions / Advances</th>
+          <th style="width: 18%; text-align:right;">Amount (₹)</th>
         </tr>
       </thead>
       <tbody>
-        <tr th:each="t : ${transactions}">
-          <td th:text="${t.transactionDate}">2026-10-19</td>
-          <td th:text="${t.typeLabel}">Advance</td>
-          <td class="strong" th:text="'₹ ' + ${#numbers.formatDecimal(t.amount, 1, 2)}">₹ 0.00</td>
-          <td th:text="${t.paymentMode}">UPI</td>
-          <td style="font-size:11.5px; color:#475569;" th:text="${(t.referenceNo != null ? t.referenceNo + ' - ' : '') + (t.notes != null ? t.notes : '')}">Notes</td>
+        <tr>
+          <td>Earned Wages (Hourly / Daily)</td>
+          <td style="text-align:right; font-weight:600;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.grossEarnedWages, 1, 2)}">₹ 0.00</td>
+          <td>Salary Advances Taken</td>
+          <td style="text-align:right; color:#dc2626;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalAdvances, 1, 2)}">₹ 0.00</td>
+        </tr>
+        <tr>
+          <td>Bonuses & Incentives</td>
+          <td style="text-align:right; color:#16a34a;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalBonuses, 1, 2)}">₹ 0.00</td>
+          <td>Other Deductions / Penalties</td>
+          <td style="text-align:right; color:#dc2626;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalDeductions, 1, 2)}">₹ 0.00</td>
+        </tr>
+        <tr style="background:#f8fafc; font-weight:700;">
+          <td>TOTAL GROSS EARNINGS</td>
+          <td style="text-align:right; color:#003366;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.grossEarnedWages.add(summary.totalBonuses), 1, 2)}">₹ 0.00</td>
+          <td>TOTAL DEDUCTIONS & ADVANCES</td>
+          <td style="text-align:right; color:#b45309;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalAdvances.add(summary.totalDeductions), 1, 2)}">₹ 0.00</td>
+        </tr>
+        <tr style="background:#f0fdf4; font-size:12.5px; font-weight:800;">
+          <td colspan="3" style="color:#166534;">NET SALARY PAYABLE FOR THIS MONTH</td>
+          <td style="text-align:right; color:#166534;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.netPayable, 1, 2)}">₹ 0.00</td>
+        </tr>
+        <tr>
+          <td colspan="3">Total Salary Paid / Disbursed to Date</td>
+          <td style="text-align:right; font-weight:700;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalPaidSalary, 1, 2)}">₹ 0.00</td>
+        </tr>
+        <tr style="background:#fef2f2; font-size:12.5px; font-weight:800;">
+          <td colspan="3" style="color:#dc2626;">REMAINING PENDING BALANCE (NET DUE)</td>
+          <td style="text-align:right; color:#dc2626;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.pendingBalance, 1, 2)}">₹ 0.00</td>
         </tr>
       </tbody>
     </table>
   </div>
 
+  <!-- Itemized Disbursal History Table if any -->
+  <div th:if="${!#lists.isEmpty(transactions)}" style="margin: 14px 0;">
+    <strong style="font-size:11px; color:#003366; text-transform:uppercase;">Itemized Payouts & Advances for this Month:</strong>
+    <div class="table-responsive">
+      <table class="table-slip" style="margin-top:6px;">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th style="text-align:right;">Amount (₹)</th>
+            <th>Mode</th>
+            <th>Reference / Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="t : ${transactions}">
+            <td th:text="${t.transactionDate}">2026-10-19</td>
+            <td th:text="${t.typeLabel}">Advance</td>
+            <td style="text-align:right; font-weight:600;" th:text="'₹ ' + ${#numbers.formatDecimal(t.amount, 1, 2)}">₹ 0.00</td>
+            <td th:text="${t.paymentMode}">UPI</td>
+            <td style="font-size:10.5px; color:#475569;" th:text="${(t.referenceNo != null ? t.referenceNo + ' - ' : '') + (t.notes != null ? t.notes : '')}">Notes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- Signatures Section -->
-  <div style="display:flex; justify-content:space-between; margin-top:40px; padding-top:20px; border-top:1px dashed #cbd5e1;">
-    <div style="text-align:center; width:200px;">
-      <div style="height:35px;"></div>
-      <div style="border-top:1px solid #475569; padding-top:4px; font-weight:700; font-size:11px;">EMPLOYEE SIGNATURE</div>
+  <div class="signatures">
+    <div class="sig-box">
+      <div style="border-top:1px solid #475569; padding-top:4px; font-weight:700; font-size:10.5px;">EMPLOYEE SIGNATURE</div>
     </div>
-
-    <div style="text-align:center; width:200px;">
-      <div style="height:35px;"></div>
-      <div style="border-top:1px solid #475569; padding-top:4px; font-weight:700; font-size:11px;">ACCOUNTS OFFICER</div>
+    <div class="sig-box">
+      <div style="border-top:1px solid #475569; padding-top:4px; font-weight:700; font-size:10.5px;">ACCOUNTS OFFICER</div>
     </div>
-
-    <div style="text-align:center; width:240px;">
-      <div style="height:35px;"></div>
-      <div style="border-top:1px solid #003366; padding-top:4px; font-weight:800; font-size:11px; color:#003366;">
+    <div class="sig-box" style="width:220px;">
+      <div style="border-top:1px solid #003366; padding-top:4px; font-weight:800; font-size:10.5px; color:#003366;">
         FOR VOLTA ELECTRICAL ASSOCIATES<br>
-        <span style="font-size:10px; font-weight:600; color:#64748b;">(Managing Director / Authorized Signatory)</span>
+        <span style="font-size:9.5px; font-weight:600; color:#64748b;">(Authorized Signatory)</span>
       </div>
     </div>
   </div>

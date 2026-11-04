@@ -2,23 +2,36 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title th:text="'GST Tax Invoice ' + ${invoice.invoiceNumber} + ' | ' + ${company.companyName}">GST Tax Invoice</title>
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
   <link rel="stylesheet" th:href="@{/css/style.css}">
   <style>
     @page {
       size: A4 portrait;
-      margin: 8mm 10mm 8mm 10mm;
+      margin: 8mm 8mm 8mm 8mm;
     }
-    * { box-sizing: border-box; }
-    body { background: #e2e8f0; padding: 24px; font-size: 13px; font-family: 'DM Sans', -apple-system, sans-serif; color: #0f172a; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #e2e8f0;
+      padding: 20px 10px;
+      font-size: 13px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      line-height: 1.45;
+    }
     .invoice-box {
-      max-width: 860px;
+      max-width: 820px;
+      width: 100%;
       margin: 0 auto;
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 32px 36px;
+      border-radius: 10px;
+      padding: 28px 24px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
@@ -28,83 +41,302 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 480px;
-      height: 480px;
+      width: 420px;
+      height: 420px;
       background-image: url('/images/logo.png');
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
-      opacity: 0.055;
+      opacity: 0.05;
       pointer-events: none;
       z-index: 0;
     }
     .top-accent-stripe {
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 6px;
+      height: 5px;
       background: linear-gradient(90deg, #003366 0%, #003366 75%, #f59e0b 75%, #f59e0b 100%);
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
     }
+    
+    /* Toolbar */
+    .no-print-toolbar {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .no-print-toolbar .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Tax Invoice Header */
     .tax-invoice-header {
       text-align: center;
       border-bottom: 2px solid #003366;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
     }
     .tax-badge {
       display: inline-block;
       background: #003366;
       color: #fff;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
-      letter-spacing: 1.5px;
-      padding: 4px 16px;
+      letter-spacing: 1.2px;
+      padding: 4px 14px;
       border-radius: 4px;
       text-transform: uppercase;
       margin-bottom: 4px;
     }
     .copy-type {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #64748b;
       font-weight: 600;
       text-transform: uppercase;
     }
+
+    /* Letterhead */
     .letterhead-wrap {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 14px;
+      padding-bottom: 12px;
       margin-bottom: 14px;
+      gap: 16px;
     }
     .letterhead-brand-left {
       display: flex;
-      gap: 16px;
+      gap: 14px;
       align-items: center;
-      max-width: 580px;
+      flex: 1;
     }
     .letterhead-logo-img {
-      height: 68px;
-      max-width: 170px;
+      height: 64px;
+      max-width: 150px;
       object-fit: contain;
     }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
-    .bill-box { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; padding: 12px 14px; border-radius: 6px; line-height: 1.5; }
-    .bill-title { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
-    .table-inv { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 11.5px; }
-    .table-inv th { background: #003366; color: #fff; padding: 8px 9px; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.3px; border: 1px solid #002244; }
-    .table-inv td { padding: 7px 9px; border: 1px solid #cbd5e1; }
-    .calc-box-print { margin-left: auto; width: 360px; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; margin-top: 8px; font-size: 11.5px; background: rgba(255,255,255,0.9); }
-    .calc-row-print { display: flex; justify-content: space-between; padding: 5px 12px; border-bottom: 1px solid #f1f5f9; }
-    .calc-row-print.grand { background: #003366; color: #fff; font-size: 14px; font-weight: 800; border-bottom: none; }
-    .words-box { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; margin: 12px 0; font-size: 11.5px; }
-    .bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
-    .bank-card { background: rgba(248, 250, 252, 0.85); border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; font-size: 11px; line-height: 1.5; }
-    .signatures { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 28px; padding-top: 8px; }
-    .sig-block { text-align: center; min-width: 180px; }
-    .sig-line { border-bottom: 1px solid #475569; height: 42px; margin-bottom: 4px; }
-    
+    .meta-details-box {
+      text-align: right;
+      min-width: 200px;
+      font-size: 11.5px;
+      line-height: 1.5;
+    }
+
+    /* 2 Column Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .bill-box {
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      line-height: 1.5;
+    }
+    .bill-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    /* Responsive Table Wrap */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 14px 0;
+    }
+    .table-inv {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      table-layout: auto;
+    }
+    .table-inv th {
+      background: #003366;
+      color: #ffffff;
+      padding: 7px 6px;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.2px;
+      border: 1px solid #002244;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .table-inv td {
+      padding: 6px 6px;
+      border: 1px solid #cbd5e1;
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    /* Calculations & Words */
+    .calc-summary-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin: 12px 0;
+    }
+    .words-box {
+      flex: 1;
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+    }
+    .calc-box-print {
+      width: 330px;
+      max-width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 11px;
+      background: rgba(255,255,255,0.95);
+    }
+    .calc-row-print {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 10px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .calc-row-print.grand {
+      background: #003366;
+      color: #ffffff;
+      font-size: 13.5px;
+      font-weight: 800;
+      border-bottom: none;
+    }
+
+    /* Bank Details */
+    .bank-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0;
+    }
+    .bank-card {
+      background: rgba(248, 250, 252, 0.9);
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 10.5px;
+      line-height: 1.45;
+    }
+
+    /* Signatures */
+    .signatures {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 24px;
+      padding-top: 8px;
+    }
+    .sig-block {
+      text-align: center;
+      min-width: 170px;
+    }
+    .sig-line {
+      border-bottom: 1px solid #475569;
+      height: 38px;
+      margin-bottom: 4px;
+    }
+
+    /* ==================================================================== */
+    /* MOBILE PHONE SCREEN RESPONSIVENESS (Fits 100% without horizontal scroll) */
+    /* ==================================================================== */
+    @media screen and (max-width: 768px) {
+      body {
+        padding: 8px 4px !important;
+        font-size: 12px !important;
+      }
+      .invoice-box {
+        padding: 16px 12px !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+      }
+      .no-print-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+      .no-print-toolbar .btn-group {
+        flex-direction: column !important;
+      }
+      .no-print-toolbar a, .no-print-toolbar button {
+        width: 100% !important;
+        text-align: center !important;
+        padding: 10px !important;
+        font-size: 13px !important;
+      }
+      .letterhead-wrap {
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+      .letterhead-brand-left {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+      }
+      .meta-details-box {
+        text-align: left !important;
+        width: 100% !important;
+        border-top: 1px dashed #cbd5e1;
+        padding-top: 8px;
+        font-size: 11px !important;
+      }
+      .grid-2, .bank-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+      .table-responsive {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+      }
+      .table-inv {
+        min-width: 580px !important;
+      }
+      .calc-summary-wrap {
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+      .words-box {
+        width: 100% !important;
+      }
+      .calc-box-print {
+        width: 100% !important;
+        margin-left: 0 !important;
+      }
+      .signatures {
+        flex-direction: column !important;
+        gap: 20px !important;
+        align-items: stretch !important;
+      }
+      .sig-block {
+        text-align: left !important;
+        min-width: 100% !important;
+      }
+      .sig-line {
+        height: 30px !important;
+      }
+    }
+
+    /* ==================================================================== */
+    /* EXACT A4 PRINT ALIGNMENT (Fits 100% inside A4 margins - No Overflow) */
+    /* ==================================================================== */
     @media print {
       html, body {
         background: #ffffff !important;
@@ -112,7 +344,8 @@
         margin: 0 !important;
         width: 100% !important;
         color: #0f172a !important;
-        font-size: 10.5pt !important;
+        font-size: 9pt !important;
+        line-height: 1.3 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -123,22 +356,35 @@
         margin: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
+        overflow: visible !important;
       }
-      .no-print { display: none !important; }
-      .top-accent-stripe { display: none !important; }
+      .no-print, .top-accent-stripe {
+        display: none !important;
+      }
       .watermark-logo {
         display: block !important;
-        opacity: 0.05 !important;
+        opacity: 0.045 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .letterhead-wrap, .tax-invoice-header, .grid-2, .calc-box-print, .words-box, .bank-grid, .bank-card, .signatures, .sig-block {
+      .letterhead-wrap, .tax-invoice-header, .grid-2, .calc-summary-wrap, .bank-grid, .signatures, .sig-block {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
-      .table-inv tr {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
+      .table-responsive {
+        overflow: visible !important;
+        border: none !important;
+        margin: 8px 0 !important;
+      }
+      .table-inv {
+        width: 100% !important;
+        min-width: 100% !important;
+        table-layout: fixed !important;
+        font-size: 8pt !important;
+      }
+      .table-inv th, .table-inv td {
+        padding: 4px 4px !important;
+        word-break: break-word !important;
       }
       .table-inv th {
         background-color: #003366 !important;
@@ -146,17 +392,52 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .tax-badge {
+      .tax-badge, .calc-row-print.grand {
         background-color: #003366 !important;
         color: #ffffff !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .calc-row-print.grand {
-        background-color: #003366 !important;
-        color: #ffffff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+
+      /* Proportional column widths summing exactly to 100% */
+      .col-sl      { width: 4% !important; text-align: center !important; }
+      .col-desc    { width: 30% !important; }
+      .col-hsn     { width: 9% !important; text-align: center !important; }
+      .col-qty     { width: 6% !important; text-align: right !important; }
+      .col-unit    { width: 6% !important; text-align: center !important; }
+      .col-rate    { width: 10% !important; text-align: right !important; }
+      .col-taxable { width: 11% !important; text-align: right !important; }
+      .col-cgst    { width: 6.5% !important; text-align: right !important; }
+      .col-sgst    { width: 6.5% !important; text-align: right !important; }
+      .col-igst    { width: 13% !important; text-align: right !important; }
+      .col-total   { width: 11% !important; text-align: right !important; font-weight: 700 !important; }
+
+      .calc-summary-wrap {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 12px !important;
+      }
+      .words-box {
+        width: 54% !important;
+        margin: 0 !important;
+        font-size: 8pt !important;
+      }
+      .calc-box-print {
+        width: 44% !important;
+        margin-left: auto !important;
+        font-size: 8pt !important;
+      }
+      .bank-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        margin: 8px 0 !important;
+      }
+      .signatures {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        margin-top: 18px !important;
       }
     }
   </style>
@@ -166,10 +447,10 @@
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 
-  <!-- Print Actions -->
-  <div class="no-print" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+  <!-- Print Actions Toolbar -->
+  <div class="no-print no-print-toolbar">
     <a class="button-link button-secondary" th:href="@{/invoices}">← Back to Invoices</a>
-    <div style="display: flex; gap: 10px;">
+    <div class="btn-group">
       <a class="button-link button-secondary" th:href="@{/company-settings}">⚙️ Company Profile</a>
       <button class="primary" onclick="window.print()">🖨️ Print GST Tax Invoice</button>
     </div>
@@ -186,18 +467,17 @@
     <div class="letterhead-brand-left">
       <img class="letterhead-logo-img" th:src="@{${company.logoPath}}" alt="Volta Logo" onerror="this.onerror=null;this.src='/images/favicon.png';">
       <div>
-        <h1 style="font-size: 20px; color: #003366; margin: 0; font-weight: 800;" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</h1>
-        <p style="font-size: 11.5px; color: #d97706; font-weight: 700; margin: 2px 0;" th:text="${company.tagline}">Govt. Licensed Electrical Contractors & Engineers</p>
-        <p style="font-size: 11px; color: #475569; margin: 1px 0;" th:text="${company.address}">Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642</p>
-        <p style="font-size: 11px; color: #475569; margin: 1px 0;">
+        <h1 style="font-size: 18px; color: #003366; margin: 0; font-weight: 800;" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</h1>
+        <p style="font-size: 11px; color: #d97706; font-weight: 700; margin: 2px 0;" th:text="${company.tagline}">Govt. Licensed Electrical Contractors & Engineers</p>
+        <p style="font-size: 10.5px; color: #475569; margin: 1px 0;" th:text="${company.address}">Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642</p>
+        <p style="font-size: 10.5px; color: #475569; margin: 1px 0;">
           <span>📞 <strong th:text="${company.phone}">+91 94474 12235, +91 85903 94345</strong></span> | 
           <span>✉️ <span th:text="${company.email}">zubairvoltavvm@gmail.com</span></span>
         </p>
-        <p style="font-size: 11px; color: #003366; margin: 1px 0; font-weight: 600;">
-          <span>🌐 <span th:text="${company.website}">https://voltaelectricalassociates.com</span></span> | 
-          <span>📸 Instagram: <span th:text="${company.instagram}">@volta_vvm</span></span>
+        <p style="font-size: 10.5px; color: #003366; margin: 1px 0; font-weight: 600;">
+          <span>🌐 <span th:text="${company.website}">https://voltaelectricalassociates.com</span></span>
         </p>
-        <div style="font-size: 10.5px; color: #334155; margin-top: 3px; display: flex; gap: 8px;">
+        <div style="font-size: 10px; color: #334155; margin-top: 3px; display: flex; flex-wrap: wrap; gap: 8px;">
           <span><strong>GSTIN:</strong> <span th:text="${company.gstin}">32AAAAA0000A1Z5</span></span>
           <span><strong>State:</strong> Kerala (32)</span>
           <span><strong>PAN:</strong> <span th:text="${company.panNo}">AAAAA0000A</span></span>
@@ -207,8 +487,8 @@
     </div>
 
     <!-- Meta Details Box -->
-    <div style="text-align: right; min-width: 220px; font-size: 12px; line-height: 1.6;">
-      <div style="font-size: 14px; font-weight: 800; color: #003366;" th:text="'Invoice No: ' + ${invoice.invoiceNumber}">INV-2026-001</div>
+    <div class="meta-details-box">
+      <div style="font-size: 13.5px; font-weight: 800; color: #003366;" th:text="'Invoice No: ' + ${invoice.invoiceNumber}">INV-2026-001</div>
       <div><strong>Invoice Date:</strong> <span th:text="${invoice.invoiceDate}">2026-10-15</span></div>
       <div><strong>Due Date:</strong> <span th:text="${invoice.dueDate}">2026-10-30</span></div>
       <div><strong>Place of Supply:</strong> <span th:text="${invoice.placeOfSupply}">32-Kerala</span></div>
@@ -223,79 +503,79 @@
   <div class="grid-2">
     <div class="bill-box">
       <div class="bill-title">Details of Receiver / Billed To:</div>
-      <div style="font-size: 15px; font-weight: 700; color: #003366;" th:text="${invoice.customerName}">Client Name</div>
+      <div style="font-size: 14px; font-weight: 700; color: #003366;" th:text="${invoice.customerName}">Client Name</div>
       <div><strong>GSTIN:</strong> <span style="font-family:'JetBrains Mono',monospace;font-weight:600;" th:text="${invoice.customerGstin}">32AAAAA0000A1Z5</span></div>
       <div><strong>Address:</strong> <span th:text="${invoice.customerAddress != null and !invoice.customerAddress.isBlank() ? invoice.customerAddress : 'N/A'}">Address</span></div>
       <div><strong>Phone:</strong> <span th:text="${invoice.customerPhone != null ? invoice.customerPhone : 'N/A'}">+91 94470 00000</span></div>
     </div>
     <div class="bill-box">
       <div class="bill-title">Project Site / Work Details:</div>
-      <div style="font-size: 14px; font-weight: 700; color: #0b1528;" th:text="${invoice.projectName != null and !invoice.projectName.isBlank() ? invoice.projectName : 'Electrical Contract Works'}">Project Name</div>
+      <div style="font-size: 13px; font-weight: 700; color: #0b1528;" th:text="${invoice.projectName != null and !invoice.projectName.isBlank() ? invoice.projectName : 'Electrical Contract Works'}">Project Name</div>
       <div><strong>State / Place:</strong> <span th:text="${invoice.placeOfSupply}">32-Kerala</span></div>
       <div><strong>Supply Type:</strong> <span th:text="${invoice.supplyType == 'INTER_STATE' ? 'Inter-State (IGST)' : 'Intra-State (CGST + SGST)'}">Intra-State</span></div>
       <div><strong>Payment Status:</strong> <span style="font-weight:700;" th:text="${invoice.paymentStatus}">UNPAID</span></div>
     </div>
   </div>
 
-  <!-- Itemized GST Goods & Services Table -->
-  <table class="table-inv">
-    <thead>
-      <tr>
-        <th style="width: 35px; text-align: center;">Sl</th>
-        <th>Description of Electrical Works / Materials</th>
-        <th style="width: 75px; text-align: center;">HSN/SAC</th>
-        <th style="width: 50px; text-align: right;">Qty</th>
-        <th style="width: 50px; text-align: center;">Unit</th>
-        <th style="width: 85px; text-align: right;">Rate (₹)</th>
-        <th style="width: 95px; text-align: right;">Taxable (₹)</th>
-        <th th:if="${invoice.supplyType != 'INTER_STATE'}" style="width: 90px; text-align: right;">CGST (₹)</th>
-        <th th:if="${invoice.supplyType != 'INTER_STATE'}" style="width: 90px; text-align: right;">SGST (₹)</th>
-        <th th:if="${invoice.supplyType == 'INTER_STATE'}" style="width: 100px; text-align: right;">IGST (₹)</th>
-        <th style="width: 100px; text-align: right;">Total (₹)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr th:each="it, stat : ${invoice.items}">
-        <td style="text-align: center;" th:text="${stat.index + 1}">1</td>
-        <td>
-          <strong th:text="${it.description}">Electrical Installation Works</strong>
-        </td>
-        <td style="text-align: center; font-family: 'JetBrains Mono', monospace;" th:text="${it.hsnSac}">995461</td>
-        <td style="text-align: right;" th:text="${it.quantity}">1.00</td>
-        <td style="text-align: center;" th:text="${it.unit}">Lot</td>
-        <td style="text-align: right;" th:text="${#numbers.formatDecimal(it.unitPrice, 1, 2)}">0.00</td>
-        <td style="text-align: right; font-weight: 600;" th:text="${#numbers.formatDecimal(it.taxableValue, 1, 2)}">0.00</td>
-        <!-- CGST -->
-        <td th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right;">
-          <div th:text="${#numbers.formatDecimal(it.cgstAmount, 1, 2)}">0.00</div>
-          <small style="color: #64748b;" th:text="'(' + ${it.cgstRate} + '%)'">(9%)</small>
-        </td>
-        <!-- SGST -->
-        <td th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right;">
-          <div th:text="${#numbers.formatDecimal(it.sgstAmount, 1, 2)}">0.00</div>
-          <small style="color: #64748b;" th:text="'(' + ${it.sgstRate} + '%)'">(9%)</small>
-        </td>
-        <!-- IGST -->
-        <td th:if="${invoice.supplyType == 'INTER_STATE'}" style="text-align: right;">
-          <div th:text="${#numbers.formatDecimal(it.igstAmount, 1, 2)}">0.00</div>
-          <small style="color: #64748b;" th:text="'(' + ${it.igstRate} + '%)'">(18%)</small>
-        </td>
-        <td style="text-align: right; font-weight: 700;" th:text="${#numbers.formatDecimal(it.totalAmount, 1, 2)}">0.00</td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Itemized GST Goods & Services Table in Responsive Wrapper -->
+  <div class="table-responsive">
+    <table class="table-inv">
+      <thead>
+        <tr>
+          <th class="col-sl">Sl</th>
+          <th class="col-desc">Description of Electrical Works / Materials</th>
+          <th class="col-hsn">HSN/SAC</th>
+          <th class="col-qty">Qty</th>
+          <th class="col-unit">Unit</th>
+          <th class="col-rate">Rate (₹)</th>
+          <th class="col-taxable">Taxable (₹)</th>
+          <th class="col-cgst" th:if="${invoice.supplyType != 'INTER_STATE'}">CGST (₹)</th>
+          <th class="col-sgst" th:if="${invoice.supplyType != 'INTER_STATE'}">SGST (₹)</th>
+          <th class="col-igst" th:if="${invoice.supplyType == 'INTER_STATE'}">IGST (₹)</th>
+          <th class="col-total">Total (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="it, stat : ${invoice.items}">
+          <td class="col-sl" th:text="${stat.index + 1}">1</td>
+          <td class="col-desc">
+            <strong th:text="${it.description}">Electrical Installation Works</strong>
+          </td>
+          <td class="col-hsn" style="font-family: 'JetBrains Mono', monospace;" th:text="${it.hsnSac}">995461</td>
+          <td class="col-qty" th:text="${it.quantity}">1.00</td>
+          <td class="col-unit" th:text="${it.unit}">Lot</td>
+          <td class="col-rate" th:text="${#numbers.formatDecimal(it.unitPrice, 1, 2)}">0.00</td>
+          <td class="col-taxable" style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.taxableValue, 1, 2)}">0.00</td>
+          <!-- CGST -->
+          <td class="col-cgst" th:if="${invoice.supplyType != 'INTER_STATE'}">
+            <div th:text="${#numbers.formatDecimal(it.cgstAmount, 1, 2)}">0.00</div>
+            <small style="color: #64748b;" th:text="'(' + ${it.cgstRate} + '%)'">(9%)</small>
+          </td>
+          <!-- SGST -->
+          <td class="col-sgst" th:if="${invoice.supplyType != 'INTER_STATE'}">
+            <div th:text="${#numbers.formatDecimal(it.sgstAmount, 1, 2)}">0.00</div>
+            <small style="color: #64748b;" th:text="'(' + ${it.sgstRate} + '%)'">(9%)</small>
+          </td>
+          <!-- IGST -->
+          <td class="col-igst" th:if="${invoice.supplyType == 'INTER_STATE'}">
+            <div th:text="${#numbers.formatDecimal(it.igstAmount, 1, 2)}">0.00</div>
+            <small style="color: #64748b;" th:text="'(' + ${it.igstRate} + '%)'">(18%)</small>
+          </td>
+          <td class="col-total" th:text="${#numbers.formatDecimal(it.totalAmount, 1, 2)}">0.00</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <!-- Calculation Summary Table & Amount in Words -->
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
-    <!-- Amount in Words -->
-    <div style="flex: 1;">
-      <div class="words-box">
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 4px;">Total Invoice Amount in Words:</div>
-        <div style="font-size: 13.5px; font-weight: 700; color: #003366;" th:text="${invoice.getAmountInWords()}">One Lakh Rupees Only</div>
-      </div>
+  <div class="calc-summary-wrap">
+    <!-- Amount in Words & Payment Status -->
+    <div class="words-box">
+      <div style="font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 4px;">Total Invoice Amount in Words:</div>
+      <div style="font-size: 12.5px; font-weight: 700; color: #003366; margin-bottom: 8px;" th:text="${invoice.getAmountInWords()}">One Lakh Rupees Only</div>
 
       <!-- Payment Summary -->
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; font-size: 12px; line-height: 1.6;">
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 6px 10px; font-size: 11px; line-height: 1.5;">
         <div><strong>Paid Amount:</strong> ₹ <span th:text="${#numbers.formatDecimal(invoice.paidAmount, 1, 2)}">0.00</span> (<span th:text="${invoice.paymentMode}">BANK_TRANSFER</span>)</div>
         <div><strong>Balance Due:</strong> <strong style="color: #dc2626;">₹ <span th:text="${#numbers.formatDecimal(invoice.balanceAmount, 1, 2)}">0.00</span></strong></div>
       </div>
@@ -337,7 +617,7 @@
   <!-- Bank Details & Terms -->
   <div class="bank-grid">
     <div class="bank-card">
-      <div style="font-weight: 700; color: #003366; text-transform: uppercase; margin-bottom: 6px;">Bank Details for RTGS / NEFT / UPI:</div>
+      <div style="font-weight: 700; color: #003366; text-transform: uppercase; margin-bottom: 4px;">Bank Details for RTGS / NEFT / UPI:</div>
       <div>Bank Name: <strong th:text="${company.bankName}">State Bank of India</strong></div>
       <div>Account No: <strong th:text="${company.accountNumber}">3000123456789</strong></div>
       <div>IFSC Code: <strong th:text="${company.ifscCode}">SBIN0000861</strong></div>
@@ -346,8 +626,8 @@
     </div>
 
     <div class="bank-card">
-      <div style="font-weight: 700; color: #003366; text-transform: uppercase; margin-bottom: 6px;">Terms & Conditions:</div>
-      <div style="color: #475569; font-size: 11.5px; white-space: pre-wrap;" th:text="${invoice.notes != null and !invoice.notes.isBlank() ? invoice.notes : '1. Goods & materials supplied are subject to warranty terms.\n2. Payment strictly as per agreed payment schedule.\n3. Subject to Malappuram jurisdiction only.'}">Terms</div>
+      <div style="font-weight: 700; color: #003366; text-transform: uppercase; margin-bottom: 4px;">Terms & Conditions:</div>
+      <div style="color: #475569; font-size: 10px; white-space: pre-wrap;" th:text="${invoice.notes != null and !invoice.notes.isBlank() ? invoice.notes : '1. Goods & materials supplied are subject to warranty terms.\n2. Payment strictly as per agreed payment schedule.\n3. Subject to Malappuram jurisdiction only.'}">Terms</div>
     </div>
   </div>
 
@@ -355,20 +635,20 @@
   <div class="signatures">
     <div class="sig-block">
       <div class="sig-line"></div>
-      <div style="font-weight: 700; font-size: 11.5px;">Customer / Receiver's Acknowledgment</div>
-      <div style="font-size: 10.5px; color: #64748b;">Signature with Seal</div>
+      <div style="font-weight: 700; font-size: 11px;">Customer / Receiver's Acknowledgment</div>
+      <div style="font-size: 10px; color: #64748b;">Signature with Seal</div>
     </div>
 
     <div class="sig-block">
-      <div style="font-size: 11px; font-weight: 700; margin-bottom: 30px;" th:text="'For ' + ${company.companyName}">For VOLTA ELECTRICAL ASSOCIATES</div>
+      <div style="font-size: 10.5px; font-weight: 700; margin-bottom: 24px;" th:text="'For ' + ${company.companyName}">For VOLTA ELECTRICAL ASSOCIATES</div>
       <div class="sig-line"></div>
-      <div style="font-weight: 700; font-size: 12px;" th:text="${company.authorizedSignatory}">Managing Partner / Chief Engineer</div>
-      <div style="font-size: 10.5px; color: #64748b;">Authorised Signatory</div>
+      <div style="font-weight: 700; font-size: 11.5px;" th:text="${company.authorizedSignatory}">Managing Partner / Chief Engineer</div>
+      <div style="font-size: 10px; color: #64748b;">Authorised Signatory</div>
     </div>
   </div>
 
   <!-- Bottom Notice -->
-  <div style="text-align: center; margin-top: 24px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 10.5px; color: #94a3b8;">
+  <div style="text-align: center; margin-top: 20px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 9.5px; color: #94a3b8;">
     This is a Computer Generated GST Tax Invoice issued by Volta Electrical Associates · Kozhikode Road, Valluvambram, Kerala
   </div>
 </div>
