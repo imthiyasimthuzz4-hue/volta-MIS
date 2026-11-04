@@ -77,27 +77,29 @@
     .letterhead-wrap {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       border-bottom: 2px solid #003366;
-      padding-bottom: 14px;
-      margin-bottom: 14px;
-      gap: 14px;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      gap: 12px;
     }
     .letterhead-brand-left {
       display: flex;
-      gap: 14px;
+      gap: 10px;
       align-items: center;
       flex: 1;
     }
     .letterhead-logo-img {
-      height: 64px;
-      max-width: 150px;
+      height: 46px;
+      max-width: 120px;
       object-fit: contain;
     }
     .meta-quote-box {
       text-align: right;
-      min-width: 180px;
-      font-size: 11.5px;
+      min-width: 160px;
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
       line-height: 1.5;
     }
     .grid-2 {
@@ -339,33 +341,26 @@
     </div>
   </div>
 
-  <!-- Official Letterhead Header -->
+  <!-- Official Letterhead Header (Compact) -->
   <div class="letterhead-wrap">
     <div class="letterhead-brand-left">
       <img class="letterhead-logo-img" th:src="@{${company.logoPath}}" alt="Volta Logo" onerror="this.onerror=null;this.src='/images/favicon.png';">
       <div>
-        <h1 style="font-size: 18px; color: #003366; margin: 0; font-weight: 800; letter-spacing: 0.3px;" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</h1>
-        <p style="font-size: 11px; color: #d97706; font-weight: 700; margin: 2px 0;" th:text="${company.tagline}">Govt. Licensed Electrical Contractors & Engineers</p>
-        <p style="font-size: 10.5px; color: #475569; margin: 1px 0;" th:text="${company.address}">Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642</p>
-        <p style="font-size: 10.5px; color: #475569; margin: 1px 0;">
-          <span>📞 <strong th:text="${company.phone}">+91 94474 12235, +91 85903 94345</strong></span> | 
-          <span>✉️ <span th:text="${company.email}">zubairvoltavvm@gmail.com</span></span>
-        </p>
-        <p style="font-size: 10.5px; color: #003366; margin: 1px 0; font-weight: 600;">
-          <span>🌐 <span th:text="${company.website}">https://voltaelectricalassociates.com</span></span>
-        </p>
-        <div style="font-size: 10px; color: #64748b; margin-top: 2px; display: flex; flex-wrap: wrap; gap: 6px;">
-          <span>License: <strong th:text="${company.licenseNo}">EA/KER/2026/8841</strong></span>
+        <h1 style="font-size: 14.5px; color: #003366; margin: 0; font-weight: 800; letter-spacing: 0.2px;" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</h1>
+        <p style="font-size: 10px; color: #d97706; font-weight: 700; margin: 1px 0;" th:text="${company.tagline}">Govt. Licensed Electrical Contractors & Engineers</p>
+        <p style="font-size: 9.5px; color: #475569; margin: 1px 0;" th:text="${company.address}">Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642</p>
+        <div style="font-size: 9.5px; color: #64748b; margin-top: 2px; display: flex; flex-wrap: wrap; gap: 6px;">
+          <span>📞 <strong th:text="${company.phone}">+91 94474 12235</strong></span>
+          <span>Lic: <strong th:text="${company.licenseNo}">EA/KER/2026/8841</strong></span>
           <span>GSTIN: <strong th:text="${company.gstin}">32AAAAA0000A1Z5</strong></span>
-          <span>PAN: <strong th:text="${company.panNo}">AAAAA0000A</strong></span>
         </div>
       </div>
     </div>
     <div class="meta-quote-box">
-      <div style="font-size: 15px; font-weight: 800; color: #003366; text-transform: uppercase;" th:text="${quotation.status == 'INVOICED' ? 'TAX INVOICE' : 'OFFICIAL ESTIMATE / QUOTE'}">QUOTATION</div>
-      <div style="font-size: 12.5px; font-weight: 700; color: #d97706; margin-top: 3px;" th:text="'Ref: ' + ${quotation.quotationNumber}">QT-101</div>
-      <div style="font-size: 11.5px; color: #475569; margin-top: 3px;" th:text="'Date: ' + ${quotation.quotationDate}">2026-10-15</div>
-      <div style="font-size: 11.5px; color: #475569;" th:text="'Valid Until: ' + ${quotation.validUntil}">2026-11-15</div>
+      <div style="font-size: 14px; font-weight: 800; color: #003366; text-transform: uppercase;" th:text="${quotation.status == 'INVOICED' ? 'TAX INVOICE' : 'OFFICIAL ESTIMATE'}">QUOTATION</div>
+      <div style="font-size: 12px; font-weight: 700; color: #d97706; margin-top: 2px;" th:text="'Ref: ' + ${quotation.quotationNumber}">QT-101</div>
+      <div style="font-size: 10.5px; color: #475569; margin-top: 2px;" th:text="'Date: ' + ${quotation.quotationDate}">2026-10-15</div>
+      <div style="font-size: 10.5px; color: #475569;" th:text="'Valid Until: ' + ${quotation.validUntil}">2026-11-15</div>
     </div>
   </div>
 
