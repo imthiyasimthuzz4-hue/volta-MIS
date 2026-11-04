@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GST Invoices & Tax Billing | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    .items-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .items-table th { background: #003366; color: #fff; padding: 10px 12px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .items-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    .items-table input, .items-table select { padding: 6px 8px; font-size: 13px; border: 1px solid var(--line); border-radius: 6px; width: 100%; }
+    .calc-box { margin-left: auto; width: 360px; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-top: 14px; }
+    .calc-row { display: flex; justify-content: space-between; padding: 7px 14px; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+    .calc-row.grand { background: #003366; color: #fff; font-size: 15px; font-weight: 800; border-bottom: none; }
+    .preset-btn { background: #eef5fc; color: #003366; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px; font-size: 11px; cursor: pointer; margin-right: 4px; margin-bottom: 4px; }
+    .preset-btn:hover { background: #003366; color: #fff; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('invoices')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">GST TAX BILLING & COMPLIANCE (KERALA - 32)</p>
+        <h1>GST Tax Invoices & Billing</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" href="#invoice-form" th:if="${canManageFinancials}">＋ Create New GST Invoice</a>
+        <span th:if="${isReadOnly}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;">👁️ Auditor / Read-Only Mode</span>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <!-- GST KPI Summary Stats -->
+    <section class="stats">
+      <article class="stat-card">
+        <span class="stat-icon">🧾</span>
+        <p>Total Invoiced Value</p>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(totalInvoiced != null ? totalInvoiced : 0, 1, 2)}">₹ 0.00</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">📊</span>
+        <p>Total Taxable Amount</p>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(totalTaxable != null ? totalTaxable : 0, 1, 2)}">₹ 0.00</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">🏛️</span>
+        <p>Total GST Collected (CGST+SGST)</p>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(totalGst != null ? totalGst : 0, 1, 2)}">₹ 0.00</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">⏳</span>
+        <p>Pending Client Balance</p>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(totalPending != null ? totalPending : 0, 1, 2)}">₹ 0.00</strong>
+      </article>
+    </section>
+
+    <div class="alert" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing GST Tax Invoices in inspection mode. Generating invoices and recording payments are managed by Chief Accountant and System Administrator.
+    </div>
+
+    <!-- Create / Edit Invoice Panel -->
+    <section class="panel" id="invoice-form" th:if="${canManageFinancials}">
+      <h3 th:text="${editing} ? 'Edit GST Tax Invoice (' + ${invoice.invoiceNumber} + ')' : 'Generate New GST Tax Invoice'">Generate New GST Tax Invoice</h3>
+
+      <form th:action="@{/invoices/save}" th:object="${invoice}" method="post" id="gstInvoiceForm">
+        <input type="hidden" th:field="*{id}">
+
+        <div class="form-grid">
+          <label>Invoice Number *
+            <input th:field="*{invoiceNumber}" required placeholder="INV-2026-001">
+          </label>
+
+          <label>Invoice Date *
+            <input type="date" th:field="*{invoiceDate}" required>
+          </label>
+
+          <label>Payment Due Date *
+            <input type="date" th:field="*{dueDate}" required>
+          </label>
+
+          <label>Client / Customer Name *
+            <input list="customerOptions" th:field="*{customerName}" required placeholder="Select or type customer..." id="clientNameInput">
+            <datalist id="customerOptions">
+              <option th:each="c : ${customers}" th:value="${c.name}" th:attr="data-gstin=${c.gstin},data-address=${c.address},data-phone=${c.phone}" th:text="${c.name} + ' (' + (${c.gstin != null and !c.gstin.isBlank()} ? ${c.gstin} : 'URP') + ')'"></option>
+            </datalist>
+          </label>
+
+          <label>Customer GSTIN Number
+            <input th:field="*{customerGstin}" id="clientGstinInput" placeholder="32AAAAA0000A1Z5 or URP">
+          </label>
+
+          <label>Project / Site Name
+            <input list="projectOptions" th:field="*{projectName}" placeholder="Select or enter project...">
+            <datalist id="projectOptions">
+              <option th:each="p : ${projects}" th:value="${p.projectName}"></option>
+            </datalist>
+          </label>
+
+          <label>Place of Supply *
+            <input th:field="*{placeOfSupply}" required placeholder="32-Kerala">
+          </label>
+
+          <label>Supply Type *
+            <select th:field="*{supplyType}" id="supplyTypeSelect" onchange="recalculate()">
+              <option value="INTRA_STATE">Intra-State (CGST 9% + SGST 9%) - Kerala</option>
+              <option value="INTER_STATE">Inter-State (IGST 18%) - Outside Kerala</option>
+            </select>
+          </label>
+
+          <label>Client Contact Phone
+            <input th:field="*{customerPhone}" id="clientPhoneInput" placeholder="+91 94470 00000">
+          </label>
+
+          <label class="full-span">Client Billing Address
+            <textarea th:field="*{customerAddress}" id="clientAddressInput" rows="2" placeholder="Full billing address with PIN code"></textarea>
+          </label>
+        </div>
+
+        <!-- HSN Presets Helper -->
+        <div style="margin: 18px 0 8px;">
+          <strong style="font-size:12px;color:var(--navy);">Quick Presets for Electrical Services & Materials:</strong><br>
+          <button type="button" class="preset-btn" onclick="addPresetItem('11kV/33kV Substation Supply, Erection & Testing', '995461', '1', 'Lot', '150000.00', '18.00')">⚡ Substation Works (SAC 995461)</button>
+          <button type="button" class="preset-btn" onclick="addPresetItem('Commercial Electrical Wiring & Conduit Piping', '995461', '1', 'Lot', '65000.00', '18.00')">🔌 Commercial Wiring (SAC 995461)</button>
+          <button type="button" class="preset-btn" onclick="addPresetItem('Main LT Distribution Panel Board & Switchgear Erection', '8537', '1', 'Set', '85000.00', '18.00')">🎛️ Panel Board / DB (HSN 8537)</button>
+          <button type="button" class="preset-btn" onclick="addPresetItem('HT / LT Armoured Power Cables Laying & Jointing', '8544', '100', 'Mtrs', '650.00', '18.00')">📦 Armoured Cable (HSN 8544)</button>
+          <button type="button" class="preset-btn" onclick="addPresetItem('Chemical Earthing Pit Construction & Resistance Testing', '995461', '4', 'Nos', '8500.00', '18.00')">⏚ Earthing Works (SAC 995461)</button>
+        </div>
+
+        <!-- Godown Stock Picker (Add Material from Central Godown) -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;margin:14px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <strong style="color:#166534;font-size:13px;">📦 Add Material from Godown Stock:</strong>
+            <p style="margin:2px 0 0 0;font-size:11.5px;color:#15803d;">Items selected from godown inventory will automatically have their quantities deducted from stock when this invoice is saved.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <select id="godownStockSelect" style="min-width:280px;padding:6px 10px;font-size:12.5px;border-radius:6px;border:1px solid #86efac;">
+              <option value="">-- Choose Godown Material --</option>
+              <option th:each="m : ${materials}" 
+                      th:value="${m.id}"
+                      th:data-id="${m.id}"
+                      th:data-name="${m.name}"
+                      th:data-hsn="${m.hsnSac}"
+                      th:data-unit="${m.unit}"
+                      th:data-rate="${m.unitPrice}"
+                      th:data-qty="${m.quantity}"
+                      th:text="${m.name + ' (Stock: ' + m.quantity + ' ' + m.unit + ' | ₹ ' + m.unitPrice + ')'}">
+              </option>
+            </select>
+            <button type="button" class="button-link" style="background:#16a34a;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-weight:700;" onclick="addStockItemToInvoice()">＋ Add to Invoice</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Itemized Table -->
+        <div style="overflow-x:auto;">
+          <table class="items-table" id="itemsTable">
+            <thead>
+              <tr>
+                <th style="width:40px;">#</th>
+                <th style="min-width:280px;">Description of Electrical Work / Material</th>
+                <th style="width:110px;">HSN / SAC</th>
+                <th style="width:80px;">Qty</th>
+                <th style="width:80px;">Unit</th>
+                <th style="width:120px;">Rate (₹)</th>
+                <th style="width:90px;">GST %</th>
+                <th style="width:120px;text-align:right;">Taxable (₹)</th>
+                <th style="width:45px;"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody">
+              <!-- Render existing items if editing or default -->
+              <tr th:each="it, stat : ${invoice.items}">
+                <td style="text-align:center;font-weight:700;" th:text="${stat.index + 1}">1</td>
+                <td>
+                  <input type="hidden" name="itemMaterialId" th:value="${it.materialId}">
+                  <input type="text" name="itemDescription" th:value="${it.description}" required placeholder="Work description...">
+                  <small th:if="${it.materialId != null}" style="color:#16a34a;font-weight:600;font-size:11px;">📦 Linked to Godown Inventory (Auto-deducted on save)</small>
+                </td>
+                <td><input type="text" name="itemHsn" th:value="${it.hsnSac}" placeholder="995461"></td>
+                <td><input type="number" step="0.01" name="itemQty" th:value="${it.quantity}" oninput="recalculate()" required></td>
+                <td><input type="text" name="itemUnit" th:value="${it.unit}" placeholder="Nos"></td>
+                <td><input type="number" step="0.01" name="itemRate" th:value="${it.unitPrice}" oninput="recalculate()" required></td>
+                <td>
+                  <select name="itemGstRate" onchange="recalculate()">
+                    <option value="18.00" th:selected="${it.gstRate == 18.00}">18%</option>
+                    <option value="12.00" th:selected="${it.gstRate == 12.00}">12%</option>
+                    <option value="5.00" th:selected="${it.gstRate == 5.00}">5%</option>
+                    <option value="28.00" th:selected="${it.gstRate == 28.00}">28%</option>
+                    <option value="0.00" th:selected="${it.gstRate == 0.00}">0%</option>
+                  </select>
+                </td>
+                <td style="text-align:right;font-weight:700;" class="item-taxable-cell" th:text="${#numbers.formatDecimal(it.taxableValue, 1, 2)}">0.00</td>
+                <td style="text-align:center;"><button type="button" onclick="removeRow(this)" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;">✕</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="button-link button-secondary" onclick="addNewItemRow()" style="font-size:12px;">＋ Add Item Row</button>
+
+        <!-- Live Calculation Box -->
+        <div class="calc-box">
+          <div class="calc-row">
+            <span>Total Taxable Amount:</span>
+            <strong id="dispTaxable">₹ 0.00</strong>
+          </div>
+          <div class="calc-row" id="cgstRow">
+            <span id="cgstLabel">CGST (9%):</span>
+            <strong id="dispCgst">₹ 0.00</strong>
+          </div>
+          <div class="calc-row" id="sgstRow">
+            <span id="sgstLabel">SGST (9%):</span>
+            <strong id="dispSgst">₹ 0.00</strong>
+          </div>
+          <div class="calc-row" id="igstRow" style="display:none;">
+            <span>IGST (18%):</span>
+            <strong id="dispIgst">₹ 0.00</strong>
+          </div>
+          <div class="calc-row">
+            <span>Total GST Tax:</span>
+            <strong id="dispTotalGst">₹ 0.00</strong>
+          </div>
+          <div class="calc-row grand">
+            <span>Grand Total:</span>
+            <span id="dispGrandTotal">₹ 0.00</span>
+          </div>
+        </div>
+
+        <!-- Payment & Notes Information -->
+        <div class="form-grid" style="margin-top:20px;">
+          <label>Initial Paid Amount (₹)
+            <input type="number" step="0.01" th:field="*{paidAmount}" placeholder="0.00">
+          </label>
+
+          <label>Payment Mode
+            <select th:field="*{paymentMode}">
+              <option value="BANK_TRANSFER">Bank Transfer / NEFT / RTGS</option>
+              <option value="UPI">UPI / GPay / PhonePe</option>
+              <option value="CHEQUE">Bank Cheque</option>
+              <option value="CASH">Cash</option>
+            </select>
+          </label>
+
+          <label>Quotation Reference
+            <input th:field="*{quotationReference}" placeholder="QT-2026-101 (optional)">
+          </label>
+
+          <label class="full-span">Invoice Terms & Notes
+            <textarea th:field="*{notes}" rows="3" placeholder="1. Payment terms, warranty details, bank transfer info..."></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions" style="margin-top:20px;">
+          <button class="primary" type="submit" th:text="${editing} ? '💾 Update GST Invoice' : '💾 Save & Generate GST Invoice'">Save & Generate GST Invoice</button>
+          <a class="button-link button-secondary" th:href="@{/invoices}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- GST Invoices Directory Table -->
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>GST Invoices Directory</h3>
+        <span class="count" th:text="${invoices.size()} + ' invoices'">0 invoices</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice No</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Project</th>
+              <th>Taxable (₹)</th>
+              <th>GST Tax (₹)</th>
+              <th>Grand Total (₹)</th>
+              <th>Paid / Balance</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="inv : ${invoices}">
+              <td class="strong">
+                <a th:href="@{/invoices/print/{id}(id=${inv.id})}" target="_blank" style="color:var(--navy);font-family:'JetBrains Mono',monospace;font-weight:700;" th:text="${inv.invoiceNumber}">INV-001</a>
+              </td>
+              <td th:text="${inv.invoiceDate}">2026-10-15</td>
+              <td>
+                <strong th:text="${inv.customerName}">Customer</strong>
+                <div style="font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;" th:text="'GSTIN: ' + ${inv.customerGstin}">32AAAA</div>
+              </td>
+              <td th:text="${inv.projectName}">Project</td>
+              <td th:text="'₹ ' + ${#numbers.formatDecimal(inv.taxableAmount, 1, 2)}">₹ 0.00</td>
+              <td style="color:#059669;font-weight:600;" th:text="'₹ ' + ${#numbers.formatDecimal(inv.totalGstAmount, 1, 2)}">₹ 0.00</td>
+              <td class="strong" th:text="'₹ ' + ${#numbers.formatDecimal(inv.grandTotal, 1, 2)}">₹ 0.00</td>
+              <td style="font-size:12px;">
+                <span style="color:#059669;">₹ <span th:text="${#numbers.formatDecimal(inv.paidAmount, 1, 2)}">0</span></span> / 
+                <span style="color:#dc2626;">₹ <span th:text="${#numbers.formatDecimal(inv.balanceAmount, 1, 2)}">0</span></span>
+              </td>
+              <td>
+                <span th:class="'badge ' + (${inv.paymentStatus == 'PAID'} ? 'badge-green' : (${inv.paymentStatus == 'PARTIAL'} ? 'badge-blue' : 'badge-red'))" th:text="${inv.paymentStatus}">UNPAID</span>
+              </td>
+              <td style="white-space:nowrap;">
+                <a class="button-link" style="padding:5px 9px;font-size:11px;" th:href="@{/invoices/print/{id}(id=${inv.id})}" target="_blank">🖨️ Print Tax Invoice</a>
+                <a class="button-link button-secondary" style="padding:5px 8px;font-size:11px;" th:href="@{/invoices/edit/{id}(id=${inv.id})}" th:if="${canManageFinancials}">Edit</a>
+                <form style="display:inline" th:action="@{/invoices/delete/{id}(id=${inv.id})}" method="post" onsubmit="return confirm('Delete this GST Invoice?')" th:if="${canDelete}">
+                  <button class="danger" style="padding:5px 8px;font-size:11px;" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(invoices)}">
+              <td colspan="10" class="empty">No GST Invoices issued yet. Generate your first invoice above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+
+<script>
+  function recalculate() {
+    const tbody = document.getElementById('itemsBody');
+    const rows = tbody.querySelectorAll('tr');
+    const isInterState = document.getElementById('supplyTypeSelect').value === 'INTER_STATE';
+
+    let totalTaxable = 0;
+    let totalCgst = 0;
+    let totalSgst = 0;
+    let totalIgst = 0;
+
+    rows.forEach(row => {
+      const qtyInput = row.querySelector('input[name="itemQty"]');
+      const rateInput = row.querySelector('input[name="itemRate"]');
+      const gstSelect = row.querySelector('select[name="itemGstRate"]');
+      const cell = row.querySelector('.item-taxable-cell');
+
+      const qty = parseFloat(qtyInput ? qtyInput.value : 0) || 0;
+      const rate = parseFloat(rateInput ? rateInput.value : 0) || 0;
+      const gst = parseFloat(gstSelect ? gstSelect.value : 18) || 0;
+
+      const taxable = qty * rate;
+      totalTaxable += taxable;
+      if (cell) cell.innerText = taxable.toFixed(2);
+
+      if (isInterState) {
+        totalIgst += taxable * (gst / 100);
+      } else {
+        totalCgst += taxable * (gst / 200);
+        totalSgst += taxable * (gst / 200);
+      }
+    });
+
+    const totalGst = isInterState ? totalIgst : (totalCgst + totalSgst);
+    const grandTotal = Math.round(totalTaxable + totalGst);
+
+    document.getElementById('dispTaxable').innerText = '₹ ' + totalTaxable.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('dispTotalGst').innerText = '₹ ' + totalGst.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('dispGrandTotal').innerText = '₹ ' + grandTotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+    if (isInterState) {
+      document.getElementById('cgstRow').style.display = 'none';
+      document.getElementById('sgstRow').style.display = 'none';
+      document.getElementById('igstRow').style.display = 'flex';
+      document.getElementById('dispIgst').innerText = '₹ ' + totalIgst.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    } else {
+      document.getElementById('cgstRow').style.display = 'flex';
+      document.getElementById('sgstRow').style.display = 'flex';
+      document.getElementById('igstRow').style.display = 'none';
+      document.getElementById('dispCgst').innerText = '₹ ' + totalCgst.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('dispSgst').innerText = '₹ ' + totalSgst.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+  }
+
+  function addStockItemToInvoice() {
+    const sel = document.getElementById('godownStockSelect');
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) {
+      alert('Please select a material from the godown inventory dropdown.');
+      return;
+    }
+    const id = opt.getAttribute('data-id');
+    const name = opt.getAttribute('data-name');
+    const hsn = opt.getAttribute('data-hsn') || '8544';
+    const unit = opt.getAttribute('data-unit') || 'pcs';
+    const rate = opt.getAttribute('data-rate') || '0.00';
+    const availStock = opt.getAttribute('data-qty') || '0';
+
+    const tbody = document.getElementById('itemsBody');
+    const rowCount = tbody.querySelectorAll('tr').length + 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center;font-weight:700;">${rowCount}</td>
+      <td>
+        <input type="hidden" name="itemMaterialId" value="${id}">
+        <input type="text" name="itemDescription" value="${name}" required>
+        <small style="color:#16a34a;font-weight:600;font-size:11px;">📦 Godown Stock: ${availStock} ${unit} (Auto-deducted on save)</small>
+      </td>
+      <td><input type="text" name="itemHsn" value="${hsn}"></td>
+      <td><input type="number" step="0.01" name="itemQty" value="1" oninput="recalculate()" required></td>
+      <td><input type="text" name="itemUnit" value="${unit}"></td>
+      <td><input type="number" step="0.01" name="itemRate" value="${rate}" oninput="recalculate()" required></td>
+      <td>
+        <select name="itemGstRate" onchange="recalculate()">
+          <option value="18.00" selected>18%</option>
+          <option value="12.00">12%</option>
+          <option value="5.00">5%</option>
+          <option value="28.00">28%</option>
+          <option value="0.00">0%</option>
+        </select>
+      </td>
+      <td style="text-align:right;font-weight:700;" class="item-taxable-cell">0.00</td>
+      <td style="text-align:center;"><button type="button" onclick="removeRow(this)" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    recalculate();
+    sel.selectedIndex = 0;
+  }
+
+  function addNewItemRow() {
+    const tbody = document.getElementById('itemsBody');
+    const rowCount = tbody.querySelectorAll('tr').length + 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center;font-weight:700;">${rowCount}</td>
+      <td>
+        <input type="hidden" name="itemMaterialId" value="">
+        <input type="text" name="itemDescription" required placeholder="Work description...">
+      </td>
+      <td><input type="text" name="itemHsn" value="995461" placeholder="995461"></td>
+      <td><input type="number" step="0.01" name="itemQty" value="1" oninput="recalculate()" required></td>
+      <td><input type="text" name="itemUnit" value="Nos" placeholder="Nos"></td>
+      <td><input type="number" step="0.01" name="itemRate" value="0.00" oninput="recalculate()" required></td>
+      <td>
+        <select name="itemGstRate" onchange="recalculate()">
+          <option value="18.00" selected>18%</option>
+          <option value="12.00">12%</option>
+          <option value="5.00">5%</option>
+          <option value="28.00">28%</option>
+          <option value="0.00">0%</option>
+        </select>
+      </td>
+      <td style="text-align:right;font-weight:700;" class="item-taxable-cell">0.00</td>
+      <td style="text-align:center;"><button type="button" onclick="removeRow(this)" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    recalculate();
+  }
+
+  function addPresetItem(desc, hsn, qty, unit, rate, gst) {
+    const tbody = document.getElementById('itemsBody');
+    const rowCount = tbody.querySelectorAll('tr').length + 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center;font-weight:700;">${rowCount}</td>
+      <td>
+        <input type="hidden" name="itemMaterialId" value="">
+        <input type="text" name="itemDescription" value="${desc}" required>
+      </td>
+      <td><input type="text" name="itemHsn" value="${hsn}"></td>
+      <td><input type="number" step="0.01" name="itemQty" value="${qty}" oninput="recalculate()" required></td>
+      <td><input type="text" name="itemUnit" value="${unit}"></td>
+      <td><input type="number" step="0.01" name="itemRate" value="${rate}" oninput="recalculate()" required></td>
+      <td>
+        <select name="itemGstRate" onchange="recalculate()">
+          <option value="18.00" ${gst === '18.00' ? 'selected' : ''}>18%</option>
+          <option value="12.00" ${gst === '12.00' ? 'selected' : ''}>12%</option>
+          <option value="5.00" ${gst === '5.00' ? 'selected' : ''}>5%</option>
+          <option value="28.00" ${gst === '28.00' ? 'selected' : ''}>28%</option>
+          <option value="0.00" ${gst === '0.00' ? 'selected' : ''}>0%</option>
+        </select>
+      </td>
+      <td style="text-align:right;font-weight:700;" class="item-taxable-cell">0.00</td>
+      <td style="text-align:center;"><button type="button" onclick="removeRow(this)" style="background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+    recalculate();
+  }
+
+  function removeRow(btn) {
+    const tbody = document.getElementById('itemsBody');
+    if (tbody.querySelectorAll('tr').length > 1) {
+      btn.closest('tr').remove();
+      // Re-index
+      tbody.querySelectorAll('tr').forEach((row, idx) => {
+        row.querySelector('td').innerText = idx + 1;
+      });
+      recalculate();
+    } else {
+      alert('An invoice must have at least one line item.');
+    }
+  }
+
+  // Auto-populate customer fields
+  const clientInput = document.getElementById('clientNameInput');
+  if (clientInput) {
+    clientInput.addEventListener('change', function() {
+      const val = this.value;
+      const option = document.querySelector('#customerOptions option[value="' + val + '"]');
+      if (option) {
+        const gstin = option.getAttribute('data-gstin');
+        const addr = option.getAttribute('data-address');
+        const phone = option.getAttribute('data-phone');
+        if (gstin) document.getElementById('clientGstinInput').value = gstin;
+        if (addr) document.getElementById('clientAddressInput').value = addr;
+        if (phone) document.getElementById('clientPhoneInput').value = phone;
+      }
+    });
+  }
+
+  // Initial calculation on load
+  window.addEventListener('DOMContentLoaded', recalculate);
+</script>
+</body>
+</html>

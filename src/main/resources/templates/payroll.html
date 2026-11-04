@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Payroll & Wages Management | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('payroll')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ATTENDANCE-LINKED COMPENSATION & FINANCIAL BALANCES</p>
+        <h1>Payroll, Wages & Advance Management</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <a class="button-link" href="#record-payment">＋ Record Payment / Advance</a>
+        <a class="button-link button-secondary" th:href="@{/attendance}">🕒 Attendance Register</a>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <!-- Month Selector Bar -->
+    <div style="background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <span style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;">Active Payroll Month:</span>
+        <h3 style="margin:2px 0 0 0;color:#003366;" th:text="${monthDisplay}">October 2026</h3>
+      </div>
+
+      <form th:action="@{/payroll}" method="get" style="display:flex;align-items:center;gap:8px;">
+        <label style="margin:0;font-size:12.5px;font-weight:600;color:#334155;">Select Month:
+          <input type="month" name="month" th:value="${selectedMonth}" style="padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;">
+        </label>
+        <button type="submit" class="button-link" style="padding:7px 14px;font-size:12px;">View Payroll →</button>
+      </form>
+    </div>
+
+    <div class="alert" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing Staff Payroll & Wage registers in audit inspection mode. Salary disbursement and advance recordings are handled by Chief Accountant and System Admin.
+    </div>
+
+    <!-- Aggregate Stats Cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px;margin-bottom:24px;">
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #003366;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Gross Wages Earned</span>
+        <div style="font-size:24px;font-weight:800;color:#003366;margin-top:4px;" th:text="'₹ ' + ${#numbers.formatDecimal(totalGrossWages, 1, 2)}">₹ 0.00</div>
+        <small style="font-size:11px;color:#64748b;">Calculated from monthly attendance</small>
+      </div>
+
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #f59e0b;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Advances Disbursed</span>
+        <div style="font-size:24px;font-weight:800;color:#b45309;margin-top:4px;" th:text="'₹ ' + ${#numbers.formatDecimal(totalAdvancesGiven, 1, 2)}">₹ 0.00</div>
+        <small style="font-size:11px;color:#64748b;">Auto-deducted from balance</small>
+      </div>
+
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #16a34a;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Salaries Paid</span>
+        <div style="font-size:24px;font-weight:800;color:#16a34a;margin-top:4px;" th:text="'₹ ' + ${#numbers.formatDecimal(totalSalariesDisbursed, 1, 2)}">₹ 0.00</div>
+        <small style="font-size:11px;color:#64748b;">Settled wage payments</small>
+      </div>
+
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #dc2626;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Net Pending Dues</span>
+        <div style="font-size:24px;font-weight:800;color:#dc2626;margin-top:4px;" th:text="'₹ ' + ${#numbers.formatDecimal(totalPendingDues, 1, 2)}">₹ 0.00</div>
+        <small style="font-size:11px;color:#64748b;">Outstanding balance payable</small>
+      </div>
+    </div>
+
+    <!-- Master Payroll Table -->
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Monthly Staff Compensation & Pending Balance Register</h3>
+          <p style="margin:2px 0 0 0;font-size:12px;color:var(--muted);">Gross wages are automatically computed based on daily attendance, on-site duties, and overtime hours.</p>
+        </div>
+        <span class="count" th:text="${summaries.size()} + ' staff members'">0 staff members</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee Name & Role</th>
+              <th>Wage Structure</th>
+              <th>Attendance</th>
+              <th>Gross Wages (₹)</th>
+              <th>Advances (₹)</th>
+              <th>Paid (₹)</th>
+              <th>Pending Balance (₹)</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s : ${summaries}">
+              <td>
+                <strong th:text="${s.staff.fullName}">Worker Name</strong>
+                <div style="font-size:11.5px;color:#64748b;" th:text="${s.staff.designation}">Electrician</div>
+              </td>
+              <td>
+                <span class="pill" th:text="${s.staff.effectiveWageDisplay}">₹ 800 / Day</span>
+                <div style="font-size:10.5px;color:#16a34a;font-weight:700;margin-top:2px;" th:text="'Rate: ₹ ' + ${s.hourlyRate} + '/hr'">Rate: ₹ 100/hr</div>
+                <div th:if="${s.staff.hasOvertimeRate()}" style="font-size:10.5px;color:#64748b;margin-top:1px;" th:text="'OT Rate: ₹ ' + ${s.staff.overtimeHourlyRate} + '/hr'">OT: ₹ 150/hr</div>
+              </td>
+              <td>
+                <div><strong style="color:#003366;" th:text="${s.totalWorkingHours} + ' hrs worked'">0 hrs worked</strong></div>
+                <div style="font-size:10.5px;color:#64748b;">
+                  <span th:text="${s.effectiveWorkingDays} + ' days (' + ${s.daysPresent} + ' Office, ' + ${s.onSiteDays} + ' Site)'"></span>
+                  <span th:if="${s.hasOvertime()}" style="color:#b45309;font-weight:700;" th:text="', OT: ' + ${s.totalOvertimeHours} + 'h'"></span>
+                </div>
+              </td>
+              <td class="strong" style="color:#003366;" th:text="'₹ ' + ${#numbers.formatDecimal(s.grossEarnedWages, 1, 2)}">₹ 0.00</td>
+              <td style="color:#b45309;font-weight:700;" th:text="'₹ ' + ${#numbers.formatDecimal(s.totalAdvances, 1, 2)}">₹ 0.00</td>
+              <td style="color:#16a34a;font-weight:700;" th:text="'₹ ' + ${#numbers.formatDecimal(s.totalPaidSalary, 1, 2)}">₹ 0.00</td>
+              <td>
+                <strong th:style="${s.hasPendingSalary()} ? 'color:#dc2626;font-size:15px;' : 'color:#16a34a;font-size:14px;'" th:text="'₹ ' + ${#numbers.formatDecimal(s.pendingBalance, 1, 2)}">₹ 0.00</strong>
+              </td>
+              <td>
+                <span th:if="${s.isFullySettled()}" style="background:#dcfce7;color:#15803d;border:1px solid #86efac;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;">✅ Settled</span>
+                <span th:if="${s.hasPendingSalary()}" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700;">⏳ Pending</span>
+              </td>
+              <td>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <button type="button" class="button-link" style="padding:4px 8px;font-size:11px;background:#003366;" 
+                          th:if="${canManageFinancials}"
+                          th:data-id="${s.staff.id}" th:data-pending="${s.pendingBalance}"
+                          onclick="prefillFromButton(this)">
+                    💳 Pay / Advance
+                  </button>
+                  <a class="button-link button-secondary" style="padding:4px 8px;font-size:11px;" th:href="@{/payroll/staff/{id}(id=${s.staff.id}, month=${selectedMonth})}">📑 Ledger</a>
+                  <a class="button-link button-secondary" style="padding:4px 8px;font-size:11px;" th:href="@{/payroll/payslip/{id}(id=${s.staff.id}, month=${selectedMonth})}" target="_blank">🖨️ Payslip</a>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(summaries)}">
+              <td colspan="9" class="empty">No staff members found. Add personnel in the Staff directory.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Record Salary Payment / Advance Section -->
+    <section class="panel" id="record-payment" style="margin-top:24px;" th:if="${canManageFinancials}">
+      <h3>Record Salary Payment, Advance or Allowance</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">
+        Advances and payouts are immediately reflected in the employee's financial ledger and update the pending salary balance in real time.
+      </p>
+
+      <form class="form-grid" th:action="@{/payroll/save-transaction}" th:object="${newTransaction}" method="post">
+        <label>Employee (Staff Member) *
+          <select th:field="*{staffId}" id="txStaffSelect" required>
+            <option value="">-- Choose Employee --</option>
+            <option th:each="s : ${staffList}" th:value="${s.id}" th:text="${s.fullName + ' (' + s.designation + ')'}"></option>
+          </select>
+        </label>
+
+        <label>Transaction Type *
+          <select th:field="*{transactionType}" id="txTypeSelect" required>
+            <option value="ADVANCE_PAYMENT">⚡ Salary Advance (Given before payday)</option>
+            <option value="SALARY_PAYMENT" selected>✅ Salary Payout (Regular wage disbursement)</option>
+            <option value="BONUS_ALLOWANCE">🎁 Site Allowance / Festival Bonus</option>
+            <option value="DEDUCTION">⚠️ Deduction (Recovery / Penalties)</option>
+          </select>
+        </label>
+
+        <label>Amount (₹) *
+          <input type="number" step="0.01" min="1" th:field="*{amount}" id="txAmountInput" required placeholder="5000.00">
+        </label>
+
+        <label>Payment Mode *
+          <select th:field="*{paymentMode}" required>
+            <option value="CASH">💵 Cash</option>
+            <option value="UPI_GPAY" selected>📱 Google Pay / PhonePe / UPI</option>
+            <option value="BANK_TRANSFER">🏦 Direct Bank Transfer (NEFT/IMPS)</option>
+            <option value="CHEQUE">📝 Cheque</option>
+          </select>
+        </label>
+
+        <label>Payment Date *
+          <input type="date" th:field="*{transactionDate}" required>
+        </label>
+
+        <label>Payroll Month *
+          <input type="month" th:field="*{salaryMonth}" required>
+        </label>
+
+        <label>Reference No / UTR / Voucher
+          <input th:field="*{referenceNo}" placeholder="e.g. UPI/2026/894120 or Voucher #104">
+        </label>
+
+        <label class="full-span">Notes / Purpose of Payment
+          <input th:field="*{notes}" placeholder="e.g. Site advance for Manjeri substation work, or October month salary installment">
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">💾 Save Transaction & Update Balance</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Recent Transactions History -->
+    <section class="panel" style="margin-top:24px;">
+      <div class="panel-heading">
+        <div>
+          <h3>Recent Disbursal & Advance History</h3>
+          <p style="margin:2px 0 0 0;font-size:12px;color:var(--muted);">Audit log of all advances, salary payments, bonuses, and deductions across all personnel.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Amount (₹)</th>
+              <th>Mode</th>
+              <th>Reference</th>
+              <th>Notes</th>
+              <th>Recorded By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="tx : ${recentTransactions}">
+              <td th:text="${tx.transactionDate}">2026-10-19</td>
+              <td><strong th:text="${tx.staffName}">Employee</strong></td>
+              <td>
+                <span th:style="${tx.typeBadgeStyle} + 'padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;'" th:text="${tx.typeLabel}">Advance</span>
+              </td>
+              <td class="strong" th:text="'₹ ' + ${#numbers.formatDecimal(tx.amount, 1, 2)}">₹ 0.00</td>
+              <td th:text="${tx.paymentMode}">UPI</td>
+              <td style="font-family:monospace;font-size:11.5px;" th:text="${tx.referenceNo != null ? tx.referenceNo : '-'}">-</td>
+              <td style="font-size:12px;color:#475569;" th:text="${tx.notes}">Notes</td>
+              <td style="font-size:11.5px;color:#64748b;" th:text="${tx.recordedBy}">Admin</td>
+              <td>
+                <form th:action="@{/payroll/delete-transaction/{id}(id=${tx.id})}" method="post" onsubmit="return confirm('Delete this payment transaction? This will reverse the employee balance.')" style="display:inline;">
+                  <button class="danger" style="padding:3px 6px;font-size:11px;" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentTransactions)}">
+              <td colspan="9" class="empty">No recent payment transactions recorded.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <script>
+      function prefillFromButton(btn) {
+        const staffId = btn.getAttribute('data-id');
+        const pendingBal = btn.getAttribute('data-pending');
+        document.getElementById('txStaffSelect').value = staffId;
+        const amtInput = document.getElementById('txAmountInput');
+        if (pendingBal && parseFloat(pendingBal) > 0) {
+          amtInput.value = parseFloat(pendingBal).toFixed(2);
+        }
+        document.getElementById('record-payment').scrollIntoView({ behavior: 'smooth' });
+      }
+    </script>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Site Work Orders | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('work-orders')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">SITE OPERATIONS & JOB CARDS</p>
+        <h1>Electrical Site Work Orders</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" href="#add-order" th:if="${canManageOperations}">＋ New Work Order</a>
+        <span th:if="${isReadOnly}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;">👁️ Auditor / Read-Only Mode</span>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <div class="alert" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing Site Work Orders in inspection mode. Creating and modifying work orders is managed by Site Engineers and System Admin.
+    </div>
+
+    <!-- Create / Edit Work Order Form -->
+    <section class="panel" id="add-order" th:if="${canManageOperations}">
+      <h3 th:text="${editing} ? 'Edit Work Order / Job Card' : 'Create New Site Work Order'">Create New Site Work Order</h3>
+      <form class="form-grid" th:action="@{/work-orders/save}" th:object="${workOrder}" method="post">
+        <input type="hidden" th:field="*{id}">
+        
+        <label>Work Order Ref No *
+          <input th:field="*{workOrderNumber}" required placeholder="WO-2026-001">
+        </label>
+
+        <label>Work Order Title *
+          <input th:field="*{title}" required placeholder="e.g. Substation Transformer Cabling & Testing">
+        </label>
+
+        <label>Project Name
+          <input th:field="*{projectName}" placeholder="Link to Project or Site">
+        </label>
+
+        <label>Customer / Client Name
+          <input th:field="*{customerName}" placeholder="Client Name">
+        </label>
+
+        <label>Assigned Lead Engineer / Electrician
+          <input th:field="*{assignedStaff}" placeholder="e.g. Arun Kumar / Site Engineer">
+        </label>
+
+        <label>Site Location
+          <input th:field="*{siteLocation}" placeholder="Site location / Building / Substation">
+        </label>
+
+        <label>Priority
+          <select th:field="*{priority}">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="EMERGENCY">Emergency / Urgent</option>
+          </select>
+        </label>
+
+        <label>Execution Status
+          <select th:field="*{status}">
+            <option value="PENDING">Pending</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="ON_HOLD">On Hold</option>
+          </select>
+        </label>
+
+        <label>Issue Date
+          <input type="date" th:field="*{issueDate}">
+        </label>
+
+        <label>Target Completion Date
+          <input type="date" th:field="*{targetDate}">
+        </label>
+
+        <label class="full-span">Scope of Electrical Work
+          <textarea th:field="*{scopeOfWork}" placeholder="Detailed technical scope: cable laying, DB installation, earthing, testing..."></textarea>
+        </label>
+
+        <label class="full-span">Materials Required / Issued
+          <textarea th:field="*{materialsRequired}" placeholder="Cables, switches, conduits, chemical earthing electrodes..."></textarea>
+        </label>
+
+        <label class="full-span">Testing / Inspector / Site Engineer Notes
+          <textarea th:field="*{engineerNotes}" placeholder="KSEB Inspection notes, safety gear, megger test values..."></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit" th:text="${editing} ? 'Update Work Order' : 'Issue Work Order'">Issue Work Order</button>
+          <a class="button-link button-secondary" th:if="${editing}" th:href="@{/work-orders}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- Work Orders List Table -->
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>Active Work Orders</h3>
+        <span class="count" th:text="${workOrders.size()} + ' records'">0 records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>WO Number</th>
+              <th>Work Title</th>
+              <th>Customer & Project</th>
+              <th>Assigned Staff</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Target Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="w : ${workOrders}">
+              <td class="strong" th:text="${w.workOrderNumber}">WO-001</td>
+              <td>
+                <strong th:text="${w.title}">Title</strong>
+                <div style="font-size:11px;color:var(--muted)" th:text="${w.siteLocation}">Location</div>
+              </td>
+              <td>
+                <div th:text="${w.customerName}">Customer</div>
+                <div style="font-size:11px;color:var(--muted)" th:text="${w.projectName}">Project</div>
+              </td>
+              <td th:text="${w.assignedStaff}">Staff</td>
+              <td>
+                <span th:class="'pill priority-' + ${#strings.toLowerCase(w.priority)}" th:text="${w.priority}">MEDIUM</span>
+              </td>
+              <td>
+                <span th:class="'badge badge-' + ${#strings.toLowerCase(w.status)}" th:text="${w.status}">PENDING</span>
+              </td>
+              <td th:text="${w.targetDate}">-</td>
+              <td>
+                <a class="button-link" style="padding:6px 10px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}" target="_blank">🖨️ Job Card</a>
+                <a class="button-link button-secondary" style="padding:6px 10px;font-size:11px" th:href="@{/work-orders/edit/{id}(id=${w.id})}" th:if="${canManageOperations}">Edit</a>
+                <form style="display:inline" th:action="@{/work-orders/delete/{id}(id=${w.id})}" method="post" onsubmit="return confirm('Delete this Work Order?')" th:if="${canDelete}">
+                  <button class="danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(workOrders)}">
+              <td colspan="8" class="empty">No work orders recorded yet. Issue the first work order above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>

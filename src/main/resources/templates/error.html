@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>System Notice | VOLTA Electrical Associates</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <style>
+    :root {
+      --primary: #003366;
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 30px 16px; display: flex; align-items: center; justify-content: center; min-height: 90vh; }
+    .error-card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 32px 24px;
+      width: min(100%, 460px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .icon { font-size: 48px; margin-bottom: 12px; }
+    h2 { color: var(--primary); font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    p { font-size: 13.5px; color: #64748b; line-height: 1.5; margin-bottom: 24px; }
+    .btn-group { display: flex; flex-direction: column; gap: 10px; }
+    .btn {
+      display: block;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div class="error-card">
+    <div class="icon">⚡</div>
+    <h2>VOLTA Electrical Associates</h2>
+    <p>The requested page was refreshed or updated. You can return directly to the mobile portal or dashboard below.</p>
+    
+    <div class="btn-group">
+      <a th:href="@{/mobile}" class="btn btn-primary">📱 Open Mobile App Portal</a>
+      <a th:href="@{/attendance/self-punch}" class="btn btn-secondary">⚡ Site Attendance Punch</a>
+      <a th:href="@{/dashboard}" class="btn btn-secondary">🖥️ Management Dashboard</a>
+    </div>
+  </div>
+</body>
+</html>

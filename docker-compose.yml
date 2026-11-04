@@ -1,0 +1,73 @@
+services:
+  # ----------------------------------------------------------------------------
+  # VOLTA MIS Web Application (Spring Boot 3 + Java 21)
+  # ----------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: volta-mis:1.0.0
+    container_name: volta_mis_app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - PORT=8080
+      - DB_URL=jdbc:mysql://db:3306/volta_mis?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD:-Volta@2026}
+      - UPLOAD_DIR=/app/uploads
+      - JPA_DDL_AUTO=update
+    volumes:
+      - volta_uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - volta_network
+
+  # ----------------------------------------------------------------------------
+  # Production MySQL 8.0 Database
+  # ----------------------------------------------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: volta_mis_db
+    restart: unless-stopped
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-time-zone=+05:30
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-Volta@2026}
+      - MYSQL_DATABASE=volta_mis
+      - TZ=Asia/Kolkata
+    ports:
+      - "3306:3306"
+    volumes:
+      - volta_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-Volta@2026}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - volta_network
+
+# ------------------------------------------------------------------------------
+# Persistent Docker Named Volumes
+# ------------------------------------------------------------------------------
+volumes:
+  volta_mysql_data:
+    name: volta_mysql_data
+  volta_uploads:
+    name: volta_uploads
+
+# ------------------------------------------------------------------------------
+# Internal Application Network
+# ------------------------------------------------------------------------------
+networks:
+  volta_network:
+    name: volta_network
+    driver: bridge

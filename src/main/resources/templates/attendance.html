@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Staff Attendance & Daily Time Tracking | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    .att-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .att-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; }
+    .att-card.present { border-left: 5px solid #16a34a; }
+    .att-card.site { border-left: 5px solid #0284c7; }
+    .att-card.half { border-left: 5px solid #eab308; }
+    .att-card.absent { border-left: 5px solid #ef4444; }
+    .att-card.total { border-left: 5px solid #003366; }
+    .att-num { font-size: 26px; font-weight: 800; color: #0f172a; margin: 4px 0 0; }
+    .att-label { font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+
+    .quick-in-box { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #86efac; border-radius: 10px; padding: 20px; margin-bottom: 24px; }
+    .time-badge { background: #003366; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 700; font-family: monospace; }
+    .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .status-present { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .status-site { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+    .status-half { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+    .status-absent { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    @media print {
+      .no-print, .sidebar, .quick-in-box, .topbar button, .topbar form { display: none !important; }
+      body { background: #fff !important; }
+      .layout { display: block !important; }
+      .main { padding: 0 !important; }
+      .panel { border: none !important; box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('attendance')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">STAFF MANAGEMENT & DAILY TIME REGISTRATION</p>
+        <h1>Staff Attendance & Daily Time Registration</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;" class="no-print">
+        <a class="button-link" th:href="@{/attendance/self-punch}" target="_blank" style="background:#16a34a;box-shadow:0 3px 10px rgba(22,163,74,0.3);">📱 Mobile Site Self-Punch</a>
+        <a class="button-link" th:href="@{/payroll}" style="background:#003366;">💰 Payroll & Wages</a>
+        <!-- Date Selector Form -->
+        <form th:action="@{/attendance}" method="get" style="display:flex;align-items:center;gap:6px;">
+          <label style="margin:0;font-size:12px;font-weight:700;color:var(--navy);">Date:</label>
+          <input type="date" name="date" th:value="${selectedDate}" onchange="this.form.submit()" style="padding:6px 10px;font-size:12px;border-radius:6px;border:1px solid #cbd5e1;">
+        </form>
+        <button class="button-link button-secondary" onclick="window.print()" style="font-size:12px;">🖨️ Print Sheet</button>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <!-- Daily Attendance Stats -->
+    <div class="att-grid">
+      <div class="att-card total">
+        <span class="att-label">Total Staff</span>
+        <div class="att-num" th:text="${totalStaffCount}">0</div>
+      </div>
+      <div class="att-card present">
+        <span class="att-label">Office & Godown Present</span>
+        <div class="att-num" style="color:#16a34a;" th:text="${presentCount}">0</div>
+      </div>
+      <div class="att-card site">
+        <span class="att-label">On Duty (Site Work)</span>
+        <div class="att-num" style="color:#0284c7;" th:text="${onSiteCount}">0</div>
+      </div>
+      <div class="att-card half">
+        <span class="att-label">Half Day</span>
+        <div class="att-num" style="color:#ca8a04;" th:text="${halfDayCount}">0</div>
+      </div>
+      <div class="att-card absent">
+        <span class="att-label">Absent / On Leave</span>
+        <div class="att-num" style="color:#dc2626;" th:text="${absentCount}">0</div>
+      </div>
+    </div>
+
+    <div class="alert no-print" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing Staff Attendance logs in inspection mode. Daily check-ins are recorded by staff and site engineers.
+    </div>
+
+    <!-- ⚡ Quick 1-Click Check-In Box -->
+    <div class="quick-in-box no-print" th:if="${canManageOperations}">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div>
+          <h3 style="margin:0;color:#166534;font-size:16px;">⚡ Quick Check-In (Automatic Time Punch)</h3>
+          <p style="margin:2px 0 0 0;font-size:12px;color:#15803d;">Select staff member and punch in. System automatically captures the exact live time.</p>
+        </div>
+        <div style="background:#fff;border:1px solid #86efac;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;color:#166534;">
+          🕒 Live System Clock: <span id="liveClock" style="font-family:monospace;font-size:13px;">--:--:--</span>
+        </div>
+      </div>
+
+      <form th:action="@{/attendance/quick-check-in}" method="post" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+        <label style="flex:1;min-width:220px;margin:0;">Staff Member *
+          <select name="staffId" required style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #86efac;background:#fff;">
+            <option value="">-- Select Staff Member --</option>
+            <option th:each="s : ${staffList}" th:value="${s.id}" th:text="${s.fullName + ' (' + s.designation + ')'}"></option>
+          </select>
+        </label>
+
+        <label style="flex:1;min-width:200px;margin:0;">Assigned Work Site / Project
+          <select name="workSite" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #86efac;background:#fff;">
+            <option value="Valluvambram Office / Godown">🏢 Valluvambram Office / Godown</option>
+            <option th:each="p : ${projects}" th:value="${p.projectName + ' - ' + p.location}" th:text="${'⚡ ' + p.projectName + ' (' + p.location + ')'}"></option>
+            <option value="Site Inspection & Maintenance">🚗 Site Inspection & Maintenance</option>
+            <option value="KSEB Substation Works">⚡ KSEB Substation Works</option>
+          </select>
+        </label>
+
+        <label style="min-width:140px;margin:0;">Status
+          <select name="status" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #86efac;background:#fff;">
+            <option value="PRESENT">✅ Present</option>
+            <option value="ON_DUTY_SITE">⚡ On Site Duty</option>
+            <option value="HALF_DAY">🌓 Half Day</option>
+            <option value="ABSENT">❌ Absent</option>
+          </select>
+        </label>
+
+        <button type="submit" class="button-link" style="background:#16a34a;color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <span>⚡ Punch Check-In Now</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Daily Attendance Sheet Table -->
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3 th:text="'Daily Attendance Sheet: ' + ${#temporals.format(selectedDate, 'dd-MM-yyyy (EEEE)')}">Daily Attendance Sheet</h3>
+          <p style="margin:2px 0 0 0;font-size:12px;color:var(--muted);">View daily check-in times, check-out times, and total work hours.</p>
+        </div>
+        <span class="count" th:text="${records.size()} + ' records'">0 records</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;">#</th>
+              <th>Staff Name</th>
+              <th>Designation</th>
+              <th>Status</th>
+              <th>In-Time</th>
+              <th>Out-Time</th>
+              <th>Hours (OT)</th>
+              <th>Work Site / Project</th>
+              <th>📸 Photo Proof</th>
+              <th>Punch Mode & GPS</th>
+              <th>Recorded By</th>
+              <th class="no-print" style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="r, stat : ${records}">
+              <td style="text-align:center;font-weight:700;" th:text="${stat.index + 1}">1</td>
+              <td class="strong" th:text="${r.staffName}">Muhammed Zubair</td>
+              <td th:text="${r.designation}">Supervisor</td>
+              <td>
+                <span th:if="${r.status == 'PRESENT'}" class="status-badge status-present">✅ PRESENT</span>
+                <span th:if="${r.status == 'ON_DUTY_SITE'}" class="status-badge status-site">⚡ ON SITE</span>
+                <span th:if="${r.status == 'HALF_DAY'}" class="status-badge status-half">🌓 HALF DAY</span>
+                <span th:if="${r.status == 'ABSENT' or r.status == 'LEAVE'}" class="status-badge status-absent">❌ ABSENT</span>
+              </td>
+              <td>
+                <span class="time-badge" th:text="${r.inTime != null ? r.inTime : '--:--'}">08:30 AM</span>
+              </td>
+              <td>
+                <span th:if="${r.outTime != null}" class="time-badge" style="background:#0284c7;" th:text="${r.outTime}">05:30 PM</span>
+                <!-- Quick Clock-Out Button if not clocked out yet -->
+                <form th:if="${r.outTime == null and (r.status == 'PRESENT' or r.status == 'ON_DUTY_SITE' or r.status == 'HALF_DAY') and canManageOperations}" 
+                      th:action="@{/attendance/quick-check-out/{id}(id=${r.id})}" method="post" style="display:inline;" class="no-print">
+                  <button type="submit" class="button-link" style="background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;padding:3px 8px;font-size:11px;border-radius:4px;cursor:pointer;font-weight:700;">
+                    🏁 Clock Out
+                  </button>
+                </form>
+                <span th:if="${r.outTime == null and (r.status == 'ABSENT' or r.status == 'LEAVE' or !canManageOperations)}" style="color:#94a3b8;font-size:11px;">--</span>
+              </td>
+              <td>
+                <strong th:if="${r.hasWorkingHours()}" style="color:#003366;" th:text="${r.workingHours} + 'h'">8.5h</strong>
+                <span th:if="${r.hasOvertime()}" style="margin-left:4px;background:#dbeafe;color:#1e40af;padding:2px 5px;border-radius:8px;font-size:10px;font-weight:700;" th:text="'+' + ${r.overtimeHours} + 'h OT'">+1.0h OT</span>
+                <span th:if="${!r.hasWorkingHours()}" style="color:#94a3b8;font-size:11px;">--</span>
+              </td>
+              <td>
+                <span style="font-size:12px;color:#334155;font-weight:600;" th:text="${r.workSite != null ? r.workSite : 'Main Office'}">Valluvambram</span>
+              </td>
+              <td>
+                <div th:if="${r.hasPhoto()}">
+                  <a href="javascript:void(0)" th:data-url="${r.photoUrl}" th:data-name="${r.staffName}" th:data-site="${r.workSite}" onclick="showPhotoModal(this.getAttribute('data-url'), this.getAttribute('data-name'), this.getAttribute('data-site'))" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+                    <img th:src="${r.photoUrl}" alt="Photo" style="width:34px;height:34px;border-radius:6px;object-fit:cover;border:2px solid #16a34a;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+                    <span style="font-size:11px;font-weight:700;color:#15803d;background:#dcfce7;border:1px solid #86efac;padding:2px 6px;border-radius:4px;">
+                      🔍 Proof
+                    </span>
+                  </a>
+                </div>
+                <div th:if="${!r.hasPhoto()}">
+                  <span style="color:#94a3b8;font-size:11px;">No photo</span>
+                </div>
+              </td>
+              <td>
+                <div>
+                  <span th:if="${r.punchType == 'SELF_SITE_PUNCH'}" style="background:#dcfce7;color:#166534;border:1px solid #86efac;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;">📱 Mobile Self-Punch</span>
+                  <span th:if="${r.punchType != 'SELF_SITE_PUNCH'}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;">👤 Admin Punch</span>
+                </div>
+                <div th:if="${r.googleMapsUrl != null}" style="margin-top:2px;">
+                  <a th:href="${r.googleMapsUrl}" target="_blank" style="color:#0284c7;font-size:11px;font-weight:700;text-decoration:underline;">
+                    📍 View GPS (<span th:text="${r.locationCoordinates}">11.12, 76.12</span>)
+                  </a>
+                </div>
+              </td>
+              <td style="font-size:11px;color:#64748b;" th:text="${r.recordedBy}">admin</td>
+              <td class="no-print" style="text-align:right;">
+                <form th:action="@{/attendance/delete/{id}(id=${r.id})}" method="post" style="display:inline;" onsubmit="return confirm('Delete this attendance record?')" th:if="${canDelete}">
+                  <button class="danger" style="padding:3px 7px;font-size:11px;" type="submit">✕</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(records)}">
+              <td colspan="12" class="empty">No attendance records found for this date. Use Quick Check-In above to punch attendance.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Manual Attendance Entry Form -->
+    <section class="panel no-print" style="margin-top:24px;">
+      <h3 style="margin-bottom:14px;color:var(--navy);">📝 Manual Attendance Entry & Adjustments</h3>
+      <form class="form-grid" th:action="@{/attendance/save}" th:object="${newAttendance}" method="post">
+        <label>Staff Member *
+          <select th:field="*{staffId}" required>
+            <option value="">-- Select Staff Member --</option>
+            <option th:each="s : ${staffList}" th:value="${s.id}" th:text="${s.fullName + ' (' + s.designation + ')'}"></option>
+          </select>
+        </label>
+
+        <label>Date *
+          <input type="date" th:field="*{attendanceDate}" required>
+        </label>
+
+        <label>Status *
+          <select th:field="*{status}">
+            <option value="PRESENT">✅ Present</option>
+            <option value="ON_DUTY_SITE">⚡ On Duty Site</option>
+            <option value="HALF_DAY">🌓 Half Day</option>
+            <option value="ABSENT">❌ Absent</option>
+            <option value="LEAVE">🏖️ Approved Leave</option>
+          </select>
+        </label>
+
+        <label>In-Time (e.g. 08:30 AM)
+          <input type="text" th:field="*{inTime}" placeholder="08:30 AM">
+        </label>
+
+        <label>Out-Time (e.g. 05:30 PM)
+          <input type="text" th:field="*{outTime}" placeholder="05:30 PM">
+        </label>
+
+        <label>Total Working Hours
+          <input type="number" step="0.25" th:field="*{workingHours}" placeholder="8.5">
+        </label>
+
+        <label>Work Site / Location
+          <input type="text" th:field="*{workSite}" placeholder="e.g. Manjeri Substation or Main Office">
+        </label>
+
+        <label class="full-span">Remarks / Overtime Notes
+          <textarea th:field="*{remarks}" rows="2" placeholder="Overtime details, site notes, or leave reasons..."></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">💾 Save Attendance Record</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Photo Inspection Modal -->
+    <div id="photoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#fff;border-radius:12px;max-width:520px;width:100%;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+        <div style="padding:14px 18px;background:#003366;color:#fff;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <h4 id="modalTitle" style="margin:0;font-size:15px;font-weight:700;">📸 Site Arrival Photo Proof</h4>
+            <div id="modalSubtitle" style="font-size:11px;opacity:0.85;margin-top:2px;">Physical Presence Evidence for Management Verification</div>
+          </div>
+          <button type="button" onclick="closePhotoModal()" style="background:transparent;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+        <div style="padding:16px;text-align:center;background:#f8fafc;">
+          <img id="modalImg" src="" alt="Site Photo Proof" style="max-height:420px;max-width:100%;border-radius:8px;object-fit:contain;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        </div>
+        <div style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;background:#fff;border-top:1px solid #e2e8f0;">
+          <span style="font-size:12px;color:#166534;font-weight:700;">✅ Verified Tamper-Proof Attendance Record</span>
+          <button type="button" class="button-link" onclick="closePhotoModal()" style="padding:6px 14px;font-size:12px;">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="footer-note no-print"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+
+<script>
+  function updateLiveClock() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    const clockEl = document.getElementById('liveClock');
+    if (clockEl) clockEl.innerText = timeStr;
+  }
+  setInterval(updateLiveClock, 1000);
+  updateLiveClock();
+
+  function showPhotoModal(url, staffName, workSite) {
+    document.getElementById('modalImg').src = url;
+    document.getElementById('modalTitle').textContent = '📸 ' + staffName + ' - Site Photo Proof';
+    document.getElementById('modalSubtitle').textContent = 'Work Site: ' + (workSite || 'Assigned Site');
+    document.getElementById('photoModal').style.display = 'flex';
+  }
+
+  function closePhotoModal() {
+    document.getElementById('photoModal').style.display = 'none';
+    document.getElementById('modalImg').src = '';
+  }
+</script>
+</body>
+</html>

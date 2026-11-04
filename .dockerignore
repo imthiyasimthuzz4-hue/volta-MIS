@@ -1,0 +1,17 @@
+target/
+.git/
+.gitignore
+.idea/
+.vscode/
+*.iml
+*.log
+scratch/
+test_*.py
+scratch_*.py
+verify_*.py
+node_modules/
+.DS_Store
+Thumbs.db
+*.bat
+*.ps1
+*.vbs

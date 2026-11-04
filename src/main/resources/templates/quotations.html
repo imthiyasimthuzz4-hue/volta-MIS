@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Quotations & Invoicing | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('quotations')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ESTIMATES, PROPOSALS & BILLING</p>
+        <h1>Quotations & Invoicing</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" href="#add-quote" th:if="${canManageOperations}">＋ New Quotation</a>
+        <span th:if="${isReadOnly}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;">👁️ Auditor / Read-Only Mode</span>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <div class="alert" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing Estimates & Quotations in inspection mode. Generating estimates is managed by Site Engineers, Accountants, and System Admin.
+    </div>
+
+    <!-- Create / Edit Quotation Form -->
+    <section class="panel" id="add-quote" th:if="${canManageOperations}">
+      <h3 th:text="${editing} ? 'Edit Quotation / Invoice' : 'Create New Electrical Quotation / Estimate'">Create New Electrical Quotation / Estimate</h3>
+      <form class="form-grid" th:action="@{/quotations/save}" th:object="${quotation}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label>Quotation Ref No *
+          <input th:field="*{quotationNumber}" required placeholder="QT-2026-101">
+        </label>
+
+        <label>Customer Name *
+          <input th:field="*{customerName}" required placeholder="Client or Enterprise Name">
+        </label>
+
+        <label>Project / Site Name
+          <input th:field="*{projectName}" placeholder="e.g. HT/LT Substation Installation">
+        </label>
+
+        <label>Status
+          <select th:field="*{status}">
+            <option value="DRAFT">Draft</option>
+            <option value="SENT_TO_CLIENT">Sent to Client</option>
+            <option value="APPROVED">Approved / Accepted</option>
+            <option value="INVOICED">Tax Invoiced</option>
+            <option value="REJECTED">Declined / Closed</option>
+          </select>
+        </label>
+
+        <label>Issue Date
+          <input type="date" th:field="*{quotationDate}">
+        </label>
+
+        <label>Validity Until
+          <input type="date" th:field="*{validUntil}">
+        </label>
+
+        <label>Sub-Total Taxable Amount (₹) *
+          <input type="number" step="0.01" min="0" th:field="*{subTotal}" required placeholder="0.00" id="subTotalInput">
+        </label>
+
+        <label>GST Rate (%)
+          <select th:field="*{gstPercent}" id="gstInput">
+            <option value="0.00">0% (Nil / Exempt)</option>
+            <option value="5.00">5% GST</option>
+            <option value="12.00">12% GST</option>
+            <option value="18.00" selected>18% GST (Standard Electrical Work)</option>
+            <option value="28.00">28% GST</option>
+          </select>
+        </label>
+
+        <label class="full-span">Scope of Work & Technical Description
+          <textarea th:field="*{description}" placeholder="Detailed breakdown: supply of materials, cable terminations, panel testing, KSEB approval charges..."></textarea>
+        </label>
+
+        <label class="full-span">Commercial Terms & Payment Milestones
+          <textarea th:field="*{paymentTerms}" placeholder="e.g. 50% Advance with work order, 40% on materials delivery, 10% after inspection."></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit" th:text="${editing} ? 'Update Quotation' : 'Generate Quotation'">Generate Quotation</button>
+          <a class="button-link button-secondary" th:if="${editing}" th:href="@{/quotations}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- Quotations List Table -->
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>Issued Quotations & Invoices</h3>
+        <span class="count" th:text="${quotations.size()} + ' records'">0 records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Quote No</th>
+              <th>Customer</th>
+              <th>Project</th>
+              <th>Date</th>
+              <th>Taxable (₹)</th>
+              <th>GST (₹)</th>
+              <th>Grand Total (₹)</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="q : ${quotations}">
+              <td class="strong" th:text="${q.quotationNumber}">QT-101</td>
+              <td class="strong" th:text="${q.customerName}">Customer</td>
+              <td th:text="${q.projectName}">Project</td>
+              <td th:text="${q.quotationDate}">2026-10-15</td>
+              <td th:text="${#numbers.formatDecimal(q.subTotal, 1, 2)}">0.00</td>
+              <td th:text="${#numbers.formatDecimal(q.gstAmount, 1, 2)}">0.00</td>
+              <td class="strong" style="color:var(--blue)" th:text="${#numbers.formatDecimal(q.grandTotal, 1, 2)}">0.00</td>
+              <td>
+                <span th:class="'badge badge-' + ${#strings.toLowerCase(q.status)}" th:text="${q.status}">DRAFT</span>
+              </td>
+              <td>
+                <a class="button-link" style="padding:5px 8px;font-size:11px" th:href="@{/quotations/print/{id}(id=${q.id})}" target="_blank">🖨️ Quote</a>
+                <a class="button-link" style="padding:5px 8px;font-size:11px;background:#059669;" th:href="@{/invoices/from-quotation/{id}(id=${q.id})}" title="Generate Official GST Tax Invoice" th:if="${canManageFinancials}">🧾 Convert to GST Bill</a>
+                <a class="button-link button-secondary" style="padding:5px 8px;font-size:11px" th:href="@{/quotations/edit/{id}(id=${q.id})}" th:if="${canManageOperations}">Edit</a>
+                <form style="display:inline" th:action="@{/quotations/delete/{id}(id=${q.id})}" method="post" onsubmit="return confirm('Delete this quotation?')" th:if="${canDelete}">
+                  <button class="danger" style="padding:5px 8px;font-size:11px" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(quotations)}">
+              <td colspan="9" class="empty">No quotations recorded yet. Generate your first quotation above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>

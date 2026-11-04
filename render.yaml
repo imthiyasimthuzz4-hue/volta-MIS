@@ -1,0 +1,41 @@
+# ==============================================================================
+# VOLTA Electrical Associates - Render 100% FREE Cloud Deployment Blueprint
+# Zero Cost / Free Tier ($0.00 / month - No Credit Card Required)
+# ==============================================================================
+
+services:
+  - type: web
+    name: volta-electrical-associates
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free # 100% Free Plan ($0.00/mo)
+    region: singapore # Closest region to Kerala / India (Fastest response)
+    branch: main
+    numInstances: 1
+    healthCheckPath: /mobile
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: UPLOAD_DIR
+        value: /app/uploads
+      - key: JPA_DDL_AUTO
+        value: update
+      - key: DB_URL
+        fromDatabase:
+          name: volta-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: volta-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: volta-db
+          property: password
+
+databases:
+  - name: volta-db
+    databaseName: volta_mis
+    user: volta_admin
+    plan: free # 100% Free Managed PostgreSQL Cloud Database
+    region: singapore

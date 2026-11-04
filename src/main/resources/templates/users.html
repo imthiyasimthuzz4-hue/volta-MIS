@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>User Accounts & Role Permissions (RBAC) | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    .matrix-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13px; }
+    .matrix-table th { background: #003366; color: #fff; padding: 10px 14px; text-transform: uppercase; font-size: 11px; }
+    .matrix-table td { padding: 9px 14px; border-bottom: 1px solid var(--line); }
+    .matrix-table tr:hover td { background: #f8fafc; }
+    .role-badge-ADMIN { background: #eef5fc; color: #003366; border: 1px solid #003366; }
+    .role-badge-ENGINEER { background: #fef3c7; color: #b45309; border: 1px solid #f59e0b; }
+    .role-badge-ACCOUNTANT { background: #ecfdf5; color: #047857; border: 1px solid #10b981; }
+    .role-badge-VIEWER { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('users')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ROLE-BASED ACCESS CONTROL (RBAC) & SECURITY</p>
+        <h1>User Management & Role Permissions</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="status"><i></i> Active RBAC Security</span>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+    <div class="alert" th:if="${error}" th:text="${error}"></div>
+
+    <!-- Stats Overview -->
+    <section class="stats">
+      <article class="stat-card">
+        <span class="stat-icon">👥</span>
+        <p>Total Registered Users</p>
+        <strong th:text="${users.size()}">0</strong>
+      </article>
+      <article class="stat-card" style="border-left: 3px solid #003366;">
+        <span class="stat-icon" style="background:#eef5fc;color:#003366;">🛡️</span>
+        <p>Administrators (Full Access)</p>
+        <strong th:text="${adminCount}">0</strong>
+      </article>
+      <article class="stat-card" style="border-left: 3px solid #f59e0b;">
+        <span class="stat-icon" style="background:#fef3c7;color:#b45309;">⚡</span>
+        <p>Site Engineers (Operations)</p>
+        <strong th:text="${engCount}">0</strong>
+      </article>
+      <article class="stat-card" style="border-left: 3px solid #10b981;">
+        <span class="stat-icon" style="background:#ecfdf5;color:#047857;">🧾</span>
+        <p>Accountants (GST & Bills)</p>
+        <strong th:text="${accCount}">0</strong>
+      </article>
+    </section>
+
+    <!-- Create or Edit User Panel -->
+    <section class="panel" id="user-form">
+      <h3 th:text="${editing} ? 'Edit User Credentials & Role' : 'Create New System User Account'">Create New System User Account</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">
+        Assign appropriate role privileges (Admin, Site Engineer, Accountant, Viewer) to secure operations and confidential financial records.
+      </p>
+
+      <form class="form-grid" th:action="@{/users/save}" th:object="${newUser}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label>Full Name *
+          <input th:field="*{fullName}" required placeholder="e.g. Er. Zubair / Arun Kumar">
+        </label>
+
+        <label>Login Username *
+          <input th:field="*{username}" required th:readonly="${editing}" placeholder="e.g. engineer_vvm">
+        </label>
+
+        <label>
+          <span th:text="${editing == true} ? 'Change Password (Leave blank to keep current)' : 'Account Password *'">Password</span>
+          <input type="password" name="newRawPassword" th:required="${editing != true}" placeholder="••••••••">
+        </label>
+
+        <label>Assigned System Role (RBAC) *
+          <select th:field="*{role}" required>
+            <option value="ADMIN">🛡️ ADMIN - Full Access & Settings</option>
+            <option value="ENGINEER">⚡ ENGINEER - Work Orders, Projects, Materials & Sites</option>
+            <option value="ACCOUNTANT">🧾 ACCOUNTANT - GST Billing, Quotations, Expenses & Cash</option>
+            <option value="VIEWER">👁️ VIEWER - Read-Only Inspection</option>
+          </select>
+        </label>
+
+        <label>Contact Email Address
+          <input type="email" th:field="*{email}" placeholder="staff@voltaelectricals.in">
+        </label>
+
+        <label>Contact Phone Number
+          <input th:field="*{phone}" placeholder="+91 94474 12235">
+        </label>
+
+        <label style="display:flex;align-items:center;gap:8px;padding-top:28px;">
+          <input type="checkbox" th:field="*{enabled}" style="width:auto;margin:0;">
+          <span style="font-weight:700;">Account Active / Enabled</span>
+        </label>
+
+        <div class="form-actions" style="margin-top:10px;">
+          <button class="primary" type="submit" th:text="${editing} ? '💾 Update User' : '💾 Create User Account'">Create User Account</button>
+          <a class="button-link button-secondary" th:if="${editing}" th:href="@{/users}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- Users Directory Table -->
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>System User Accounts Directory</h3>
+        <span class="count" th:text="${users.size()} + ' users'">0 users</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Full Name</th>
+              <th>Role (RBAC)</th>
+              <th>Email & Phone</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="u : ${users}">
+              <td class="strong">
+                <span style="font-family:'JetBrains Mono',monospace;color:var(--navy);" th:text="${u.username}">admin</span>
+                <span th:if="${u.username == currentUsername}" style="font-size:10px;background:#eef5fc;color:#003366;padding:2px 6px;border-radius:4px;margin-left:4px;font-weight:700;">YOU</span>
+              </td>
+              <td th:text="${u.fullName != null and !u.fullName.isBlank() ? u.fullName : 'N/A'}">Full Name</td>
+              <td>
+                <span th:class="'pill role-badge-' + ${u.role}" th:text="${u.role}">ADMIN</span>
+              </td>
+              <td style="font-size:12.5px;">
+                <div th:text="${u.email != null ? u.email : '-'}">email</div>
+                <div style="color:var(--muted);" th:text="${u.phone != null ? u.phone : '-'}">phone</div>
+              </td>
+              <td>
+                <span th:class="'badge ' + (${u.enabled} ? 'badge-green' : 'badge-red')" th:text="${u.enabled ? 'ACTIVE' : 'DISABLED'}">ACTIVE</span>
+              </td>
+              <td style="white-space:nowrap;">
+                <a class="button-link button-secondary" style="padding:4px 8px;font-size:11px;" th:href="@{/users/edit/{id}(id=${u.id})}">Edit</a>
+
+                <!-- Toggle Active/Disable Form -->
+                <form th:if="${u.username != 'admin' and u.username != currentUsername}" style="display:inline" th:action="@{/users/toggle-status/{id}(id=${u.id})}" method="post">
+                  <button type="submit" style="padding:4px 8px;font-size:11px;background:#f8fafc;border:1px solid var(--line);cursor:pointer;border-radius:6px;" th:text="${u.enabled ? 'Disable' : 'Enable'}">Toggle</button>
+                </form>
+
+                <!-- Reset Password Button -->
+                <button type="button" style="padding:4px 8px;font-size:11px;background:#eef5fc;color:#003366;border:1px solid #cbd5e1;cursor:pointer;border-radius:6px;" th:attr="onclick='promptReset(' + ${u.id} + ', \'' + ${u.username} + '\')'">Reset Pwd</button>
+
+                <!-- Delete User Form -->
+                <form th:if="${u.username != 'admin' and u.username != currentUsername}" style="display:inline" th:action="@{/users/delete/{id}(id=${u.id})}" method="post" onsubmit="return confirm('Delete this user account?')">
+                  <button class="danger" style="padding:4px 8px;font-size:11px;" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Hidden Reset Password Form -->
+    <form id="resetPwdForm" method="post" action="" style="display:none;">
+      <input type="hidden" name="newPassword" id="hiddenNewPwd">
+    </form>
+
+    <!-- Role Permission Matrix (RBAC Specification) -->
+    <section class="panel">
+      <h3>Role Permission Matrix (RBAC Specification)</h3>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 10px 0;">
+        Detailed module access levels and functional permissions granted to each enterprise user role.
+      </p>
+
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>System Module</th>
+              <th style="text-align:center;">🛡️ ADMIN</th>
+              <th style="text-align:center;">⚡ ENGINEER</th>
+              <th style="text-align:center;">🧾 ACCOUNTANT</th>
+              <th style="text-align:center;">👁️ VIEWER</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>📊 Dashboard Summary</strong></td>
+              <td style="text-align:center;">✅ Full Access</td>
+              <td style="text-align:center;">✅ Full Access</td>
+              <td style="text-align:center;">✅ Full Access</td>
+              <td style="text-align:center;">👁️ Read Only</td>
+            </tr>
+            <tr>
+              <td><strong>👥 Customer Management</strong></td>
+              <td style="text-align:center;">✅ Create / Edit / Delete</td>
+              <td style="text-align:center;">✅ Create / Edit</td>
+              <td style="text-align:center;">✅ Create / Edit</td>
+              <td style="text-align:center;">👁️ Read Only</td>
+            </tr>
+            <tr>
+              <td><strong>🏗️ Electrical Projects & Sites</strong></td>
+              <td style="text-align:center;">✅ Full Control</td>
+              <td style="text-align:center;">✅ Manage Sites</td>
+              <td style="text-align:center;">✅ Manage Sites</td>
+              <td style="text-align:center;">👁️ Read Only</td>
+            </tr>
+            <tr>
+              <td><strong>⚡ Work Orders & Site Job Cards</strong></td>
+              <td style="text-align:center;">✅ Full Control</td>
+              <td style="text-align:center;">✅ Issue & Print Cards</td>
+              <td style="text-align:center;">👁️ View / Print</td>
+              <td style="text-align:center;">👁️ View Only</td>
+            </tr>
+            <tr>
+              <td><strong>📑 Quotations & Commercial Estimates</strong></td>
+              <td style="text-align:center;">✅ Create & Approve</td>
+              <td style="text-align:center;">👁️ View / Print</td>
+              <td style="text-align:center;">✅ Create & Print</td>
+              <td style="text-align:center;">👁️ View Only</td>
+            </tr>
+            <tr>
+              <td><strong>🧾 GST Tax Invoices & Billing</strong></td>
+              <td style="text-align:center;">✅ Full Invoicing & Print</td>
+              <td style="text-align:center;">❌ Restricted</td>
+              <td style="text-align:center;">✅ Create, Print, Payments</td>
+              <td style="text-align:center;">👁️ View Only</td>
+            </tr>
+            <tr>
+              <td><strong>👷 Technical Staff & Engineers</strong></td>
+              <td style="text-align:center;">✅ Full Access</td>
+              <td style="text-align:center;">✅ View Directory</td>
+              <td style="text-align:center;">✅ Salary & Staff View</td>
+              <td style="text-align:center;">👁️ Directory</td>
+            </tr>
+            <tr>
+              <td><strong>📦 Materials & Stock Inventory</strong></td>
+              <td style="text-align:center;">✅ Full Access</td>
+              <td style="text-align:center;">✅ Add & Check Stock</td>
+              <td style="text-align:center;">✅ Stock Records</td>
+              <td style="text-align:center;">👁️ View Stock</td>
+            </tr>
+            <tr>
+              <td><strong>💳 Operational Expenses Log</strong></td>
+              <td style="text-align:center;">✅ Full Access</td>
+              <td style="text-align:center;">❌ Restricted</td>
+              <td style="text-align:center;">✅ Record & Manage</td>
+              <td style="text-align:center;">❌ Restricted</td>
+            </tr>
+            <tr>
+              <td><strong>📈 Executive Management Reports</strong></td>
+              <td style="text-align:center;">✅ Full Audit & Print</td>
+              <td style="text-align:center;">👁️ Operational Reports</td>
+              <td style="text-align:center;">✅ GST & Sales Reports</td>
+              <td style="text-align:center;">👁️ Read Only</td>
+            </tr>
+            <tr>
+              <td><strong>⚙️ Company Profile & Letterhead</strong></td>
+              <td style="text-align:center;">✅ Admin Only</td>
+              <td style="text-align:center;">❌ Restricted</td>
+              <td style="text-align:center;">❌ Restricted</td>
+              <td style="text-align:center;">❌ Restricted</td>
+            </tr>
+            <tr>
+              <td><strong>🔐 User Roles & Permissions (RBAC)</strong></td>
+              <td style="text-align:center;">✅ Admin Only</td>
+              <td style="text-align:center;">❌ Restricted</td>
+              <td style="text-align:center;">❌ Restricted</td>
+              <td style="text-align:center;">❌ Restricted</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+
+<script>
+  function promptReset(userId, username) {
+    const newPwd = prompt("Enter new password for user '" + username + "':", "");
+    if (newPwd && newPwd.trim().length > 0) {
+      const form = document.getElementById('resetPwdForm');
+      form.action = '/users/reset-password/' + userId;
+      document.getElementById('hiddenNewPwd').value = newPwd.trim();
+      form.submit();
+    }
+  }
+</script>
+</body>
+</html>

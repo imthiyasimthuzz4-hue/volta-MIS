@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Projects | VOLTA ELECTRICAL ASSOCIATES MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('projects')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">CONTRACTING & ENGINEERING CONTRACTS</p>
+        <h1>Electrical Projects</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" href="#add-project" th:if="${canManageOperations}">＋ Add Project</a>
+        <span th:if="${isReadOnly}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;">👁️ Auditor / Read-Only Mode</span>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <div class="alert" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing Electrical Projects in inspection mode. Registering and editing projects is managed by Site Engineers and System Admin.
+    </div>
+
+    <section class="panel" id="add-project" th:if="${canManageOperations}">
+      <h3 th:text="${editing} ? 'Edit Project Details' : 'Register New Project'">Register New Project</h3>
+      <form class="form-grid" th:action="@{/projects/save}" th:object="${project}" method="post">
+        <input type="hidden" th:field="*{id}">
+        
+        <label>Project Title / Contract Name *
+          <input th:field="*{projectName}" required maxlength="150" placeholder="e.g. 11kV Substation Installation & Wiring">
+        </label>
+
+        <label>Customer / Client Name
+          <input th:field="*{customerName}" maxlength="120" placeholder="e.g. Malabar Gold / ABC Hospital">
+        </label>
+
+        <label>Site Location
+          <input th:field="*{location}" maxlength="180" placeholder="e.g. Kozhikode Bypass, Kerala">
+        </label>
+
+        <label>Project Status
+          <select th:field="*{status}">
+            <option value="PLANNED">Planned</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="ON_HOLD">On Hold</option>
+          </select>
+        </label>
+
+        <label>Start Date
+          <input type="date" th:field="*{startDate}">
+        </label>
+
+        <label>Expected Handover Date
+          <input type="date" th:field="*{endDate}">
+        </label>
+
+        <label class="full-span">Estimated Contract Value (₹)
+          <input type="number" min="0" step="0.01" th:field="*{amount}" placeholder="0.00">
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit" th:text="${editing} ? 'Update Project' : 'Save Project'">Save Project</button>
+          <a class="button-link button-secondary" th:if="${editing}" th:href="@{/projects}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>Projects Directory</h3>
+        <span class="count" th:text="${projects.size()} + ' records'">0 records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Customer</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Start Date</th>
+              <th>Handover</th>
+              <th>Contract Value (₹)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="p : ${projects}">
+              <td class="strong" th:text="${p.projectName}">Project</td>
+              <td th:text="${p.customerName}">Customer</td>
+              <td th:text="${p.location}">Location</td>
+              <td>
+                <span th:class="'badge badge-' + ${#strings.toLowerCase(p.status)}" th:text="${p.status}">PLANNED</span>
+              </td>
+              <td th:text="${p.startDate}">-</td>
+              <td th:text="${p.endDate}">-</td>
+              <td class="strong" th:text="'₹ ' + ${#numbers.formatDecimal(p.amount, 1, 2)}">₹ 0.00</td>
+              <td>
+                <a class="button-link button-secondary" style="padding:6px 10px;font-size:11px;" th:href="@{/projects/edit/{id}(id=${p.id})}" th:if="${canManageOperations}">Edit</a>
+                <form style="display:inline" th:action="@{/projects/delete/{id}(id=${p.id})}" method="post" onsubmit="return confirm('Delete this project?')" th:if="${canDelete}">
+                  <button class="danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(projects)}">
+              <td colspan="8" class="empty">No electrical projects registered yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>

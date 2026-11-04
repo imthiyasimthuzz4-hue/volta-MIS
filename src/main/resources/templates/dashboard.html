@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard | VOLTA ELECTRICAL ASSOCIATES MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+
+  <!-- PWA Mobile App Support -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#003366">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Volta MIS">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">GOVT LICENSED ELECTRICAL CONTRACTORS</p>
+        <h1>VOLTA Management Information System</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="background:#eef5fc;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;display:flex;align-items:center;gap:6px;">
+          <span>👤 <strong th:text="${currentUserFullName}">Admin</strong></span>
+          <span th:if="${isAdmin}" style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">👑 SYSTEM ADMIN</span>
+          <span th:if="${isEngineer}" style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">⚡ SITE ENGINEER</span>
+          <span th:if="${isAccountant}" style="background:#0284c7;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">💼 CHIEF ACCOUNTANT</span>
+          <span th:if="${isViewer}" style="background:#64748b;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">👁️ AUDITOR / VIEWER</span>
+        </span>
+        <a class="button-link button-secondary" href="https://voltaelectricalassociates.com" target="_blank" style="font-size:12px;">🌐 Official Website</a>
+        <span class="status"><i></i> System Online</span>
+      </div>
+    </header>
+
+    <div class="alert" th:if="${param.accessDenied}" style="margin-bottom:18px;">
+      ⚠️ <strong>Access Denied:</strong> You do not have permission to access that module. Please contact your system administrator if you require access.
+    </div>
+
+    <!-- Role-Tailored Welcome Banners -->
+    <section class="welcome" th:if="${isEngineer}">
+      <div>
+        <p class="eyebrow light">⚡ SITE OPERATIONS & ENGINEERING PORTAL · VOLTA ELECTRICAL</p>
+        <h2>Site Engineering & Project Execution Center</h2>
+        <p>Active Role: <strong>Site Engineer</strong>. Full operational control of commercial wiring projects, 11kV/33kV substation works, job cards, site materials inventory, and worker daily site attendance tracking.</p>
+        <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px;">
+          <a href="https://voltaelectricalassociates.com" target="_blank" style="color:#fef3c7;text-decoration:underline;">🌐 voltaelectricalassociates.com</a>
+          <a th:href="@{/attendance/self-punch}" target="_blank" style="color:#86efac;font-weight:700;text-decoration:underline;">📱 Open Mobile Site Punch Portal</a>
+          <span style="color:#e2e8f0;">📞 +91 94474 12235, +91 85903 94345</span>
+        </div>
+      </div>
+      <div class="welcome-symbol">
+        <span style="font-size:52px;">⚡</span>
+      </div>
+    </section>
+
+    <section class="welcome" th:if="${isAccountant}">
+      <div>
+        <p class="eyebrow light">💼 FINANCIALS, GST BILLING & PAYROLL PORTAL · VOLTA ELECTRICAL</p>
+        <h2>Accounts & Commercial Management Center</h2>
+        <p>Active Role: <strong>Chief Accountant</strong>. Full management of GST tax invoices (Kerala - 32), client payments, staff attendance-linked wage payroll, advances & deductions, and operational expenses.</p>
+        <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px;">
+          <a href="https://voltaelectricalassociates.com" target="_blank" style="color:#fef3c7;text-decoration:underline;">🌐 voltaelectricalassociates.com</a>
+          <a th:href="@{/payroll}" style="color:#fef3c7;text-decoration:underline;">💰 Master Payroll Register</a>
+          <span style="color:#e2e8f0;">📞 +91 94474 12235, +91 85903 94345</span>
+        </div>
+      </div>
+      <div class="welcome-symbol">
+        <span style="font-size:52px;">💼</span>
+      </div>
+    </section>
+
+    <section class="welcome" th:if="${isViewer}">
+      <div>
+        <p class="eyebrow light">👁️ AUDITOR & EXECUTIVE COMPLIANCE INSPECTION PORTAL</p>
+        <h2>Read-Only System Overview & Audit Portal</h2>
+        <p>Active Role: <strong>Auditor / Guest Viewer</strong>. Read-only inspection access across customer accounts, commercial contracts, GST invoices, work orders, material stock levels, and staff records.</p>
+        <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px;">
+          <a href="https://voltaelectricalassociates.com" target="_blank" style="color:#fef3c7;text-decoration:underline;">🌐 voltaelectricalassociates.com</a>
+          <a th:href="@{/reports}" style="color:#fef3c7;text-decoration:underline;">📈 View Analytics & Reports</a>
+          <span style="color:#e2e8f0;">🔒 Read-Only Inspection Mode</span>
+        </div>
+      </div>
+      <div class="welcome-symbol">
+        <span style="font-size:52px;">👁️</span>
+      </div>
+    </section>
+
+    <section class="welcome" th:if="${isAdmin}">
+      <div>
+        <p class="eyebrow light">👑 EXECUTIVE MANAGEMENT · VOLTA ELECTRICAL ASSOCIATES · VALLUVAMBRAM</p>
+        <h2>Master Operations & Executive Control Center</h2>
+        <p>Active Role: <strong>Managing Director (System Administrator)</strong>. Complete control of commercial wiring projects, 11kV/33kV substation works, work orders, quotations, staff payroll, materials, financials, and user security roles.</p>
+        <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px;">
+          <a href="https://voltaelectricalassociates.com" target="_blank" style="color:#fef3c7;text-decoration:underline;">🌐 voltaelectricalassociates.com</a>
+          <a href="https://www.instagram.com/volta_vvm/" target="_blank" style="color:#fef3c7;text-decoration:underline;">📸 Instagram: @volta_vvm</a>
+          <a th:href="@{/users}" style="color:#fef3c7;text-decoration:underline;">🔐 Manage System Roles (RBAC)</a>
+        </div>
+      </div>
+      <div class="welcome-symbol">
+        <img th:src="@{/images/favicon.png}" alt="Volta" style="width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));">
+      </div>
+    </section>
+
+    <!-- Key Metrics Stats Grid (Role-Tailored) -->
+    <section class="stats">
+      <!-- Site Engineering Focus: Work Orders, Projects, Attendance, Materials -->
+      <article class="stat-card" style="border-left: 3px solid #f59e0b;" th:if="${isAdmin or isEngineer or isViewer}">
+        <span class="stat-icon" style="background:#fef3c7;color:#b45309;">⚡</span>
+        <p>Site Work Orders</p>
+        <strong th:text="${workOrderCount}">0</strong>
+        <a th:href="@{/work-orders}">View job cards →</a>
+      </article>
+
+      <article class="stat-card" th:if="${isAdmin or isEngineer or isViewer}">
+        <span class="stat-icon">🏗️</span>
+        <p>Active Projects</p>
+        <strong th:text="${projectCount}">0</strong>
+        <a th:href="@{/projects}">Manage projects →</a>
+      </article>
+
+      <article class="stat-card" style="border-left: 3px solid #16a34a;" th:if="${isAdmin or isEngineer or isViewer}">
+        <span class="stat-icon" style="background:#dcfce7;color:#15803d;">🕒</span>
+        <p>Today's Site Attendance</p>
+        <strong th:text="${todayPresentCount != null ? todayPresentCount : 0} + ' / ' + ${staffCount}">0 / 0</strong>
+        <a th:href="@{/attendance}">Daily Time Tracking →</a>
+      </article>
+
+      <article class="stat-card" th:if="${isAdmin or isEngineer or isViewer}">
+        <span class="stat-icon">📦</span>
+        <p>Material Types</p>
+        <strong th:text="${materialCount}">0</strong>
+        <a th:href="@{/materials}">View inventory →</a>
+      </article>
+
+      <!-- Financial & Accounting Focus: Invoiced Value, GST, Expenses, Project Value -->
+      <article class="stat-card" style="border-left: 3px solid #003366;" th:if="${isAdmin or isAccountant or isViewer}">
+        <span class="stat-icon" style="background:#eef5fc;color:#003366;">🧾</span>
+        <p>GST Invoices (Billed)</p>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(totalInvoicedAmount != null ? totalInvoicedAmount : 0, 1, 2)}">₹ 0.00</strong>
+        <a th:href="@{/invoices}">Manage GST Bills →</a>
+      </article>
+
+      <article class="stat-card" style="border-left: 3px solid #10b981;" th:if="${isAdmin or isAccountant or isViewer}">
+        <span class="stat-icon" style="background:#ecfdf5;color:#047857;">🏛️</span>
+        <p>Total GST Collected</p>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(totalGstAmount != null ? totalGstAmount : 0, 1, 2)}">₹ 0.00</strong>
+        <a th:href="@{/invoices}">Tax details →</a>
+      </article>
+
+      <article class="stat-card" style="border-left: 3px solid #dc2626;" th:if="${isAdmin or isAccountant}">
+        <span class="stat-icon" style="background:#fee2e2;color:#dc2626;">💳</span>
+        <p>Total Expenses</p>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(totalExpenses, 1, 2)}">₹ 0.00</strong>
+        <a th:href="@{/expenses}">Expense log →</a>
+      </article>
+
+      <article class="stat-card" th:if="${isAdmin or isAccountant or isViewer}">
+        <span class="stat-icon">👥</span>
+        <p>Total Customers</p>
+        <strong th:text="${customerCount}">0</strong>
+        <a th:href="@{/customers}">Manage customers →</a>
+      </article>
+
+      <article class="stat-card" style="border-left: 3px solid #10b981;" th:if="${isAdmin or isEngineer or isAccountant or isViewer}">
+        <span class="stat-icon" style="background:#ecfdf5;color:#047857;">📑</span>
+        <p>Quotations</p>
+        <strong th:text="${quotationCount}">0</strong>
+        <a th:href="@{/quotations}">View quotations →</a>
+      </article>
+
+      <article class="stat-card" th:if="${isAdmin or isEngineer}">
+        <span class="stat-icon">👷</span>
+        <p>Technical Staff</p>
+        <strong th:text="${staffCount}">0</strong>
+        <a th:href="@{/staff}">Staff directory →</a>
+      </article>
+
+      <article class="stat-card" th:if="${isAdmin or isAccountant}">
+        <span class="stat-icon">₹</span>
+        <p>Est. Project Value</p>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(totalProjectValue, 1, 2)}">₹ 0.00</strong>
+        <a th:href="@{/reports}">Financial summary →</a>
+      </article>
+    </section>
+
+    <!-- Quick Actions Panel (Role-Tailored) -->
+    <section class="panel">
+      <div class="panel-heading">
+        <h3 th:text="${isEngineer} ? 'Site Engineering Quick Actions' : (${isAccountant} ? 'Financial & Billing Quick Actions' : (${isViewer} ? 'Inspection & Report Shortcuts' : 'Executive Quick Actions'))">Quick Actions</h3>
+        <span style="font-size:12px;color:var(--muted);" th:text="'Logged in as: ' + ${currentUserRole}">Logged in</span>
+      </div>
+
+      <!-- Site Engineer Quick Actions -->
+      <div class="quick-actions" th:if="${isEngineer}">
+        <a th:href="@{/work-orders} + '#add-order'" style="background:#0284c7;color:#fff;">⚡ New Work Order</a>
+        <a th:href="@{/attendance/self-punch}" target="_blank" style="background:#16a34a;color:#fff;">📱 Staff Mobile Self-Punch</a>
+        <a th:href="@{/attendance}">🕒 Punch Site Attendance</a>
+        <a th:href="@{/projects} + '#add-project'">🏗️ New Project</a>
+        <a th:href="@{/materials}">📦 Material Stock Balance</a>
+        <a th:href="@{/quotations} + '#add-quote'">📑 New Quotation</a>
+        <a th:href="@{/customers} + '#add-customer'">👥 Add Customer</a>
+        <a th:href="@{/reports}">🖨️ Print Site Reports</a>
+      </div>
+
+      <!-- Chief Accountant Quick Actions -->
+      <div class="quick-actions" th:if="${isAccountant}">
+        <a th:href="@{/invoices} + '#invoice-form'" style="background:var(--navy);color:#fff;">🧾 Create GST Invoice</a>
+        <a th:href="@{/payroll}" style="background:#047857;color:#fff;">💰 Payroll & Advances</a>
+        <a th:href="@{/expenses}" style="background:#dc2626;color:#fff;">💳 Record Expense</a>
+        <a th:href="@{/quotations} + '#add-quote'">📑 New Quotation</a>
+        <a th:href="@{/customers} + '#add-customer'">👥 Add Customer</a>
+        <a th:href="@{/attendance}">🕒 Check Staff Attendance</a>
+        <a th:href="@{/reports}">🖨️ Financial & Tax Reports</a>
+      </div>
+
+      <!-- Auditor / Viewer Quick Inspection Shortcuts -->
+      <div class="quick-actions" th:if="${isViewer}">
+        <a th:href="@{/reports}" style="background:#003366;color:#fff;">📈 Financial & GST Reports</a>
+        <a th:href="@{/invoices}">🧾 Inspect GST Invoices</a>
+        <a th:href="@{/work-orders}">⚡ Inspect Work Orders</a>
+        <a th:href="@{/projects}">🏗️ Inspect Projects</a>
+        <a th:href="@{/materials}">📦 Inspect Stock Levels</a>
+        <a th:href="@{/attendance}">🕒 View Attendance Logs</a>
+        <a th:href="@{/customers}">👥 Customers Directory</a>
+        <a th:href="@{/staff}">👷 Staff Directory</a>
+      </div>
+
+      <!-- Admin Executive Quick Actions -->
+      <div class="quick-actions" th:if="${isAdmin}">
+        <a th:href="@{/payroll}" style="background:#047857;color:#fff;">💰 Payroll & Advances</a>
+        <a th:href="@{/attendance/self-punch}" target="_blank" style="background:#16a34a;color:#fff;">📱 Staff Self-Punch</a>
+        <a th:href="@{/invoices} + '#invoice-form'" style="background:var(--navy);color:#fff;">🧾 Create GST Invoice</a>
+        <a th:href="@{/attendance}">🕒 Punch Attendance</a>
+        <a th:href="@{/work-orders} + '#add-order'">⚡ New Work Order</a>
+        <a th:href="@{/quotations} + '#add-quote'">📑 New Quotation</a>
+        <a th:href="@{/projects} + '#add-project'">🏗️ New Project</a>
+        <a th:href="@{/customers} + '#add-customer'">👥 Add Customer</a>
+        <a th:href="@{/staff} + '#add'">👷 Add Staff</a>
+        <a th:href="@{/materials}">📦 Add Stock</a>
+        <a th:href="@{/expenses}">💳 Record Expense</a>
+        <a th:href="@{/users}" style="background:#475569;color:#fff;">🔐 User Roles (RBAC)</a>
+        <a th:href="@{/reports}">🖨️ Print Reports</a>
+      </div>
+    </section>
+
+    <!-- Site Engineer Priority: Work Orders & Projects First -->
+    <section class="panel" th:if="${isEngineer}">
+      <div class="panel-heading">
+        <h3>⚡ Active Site Work Orders & Job Cards</h3>
+        <a th:href="@{/work-orders}" style="font-size:12px;font-weight:700">View all work orders →</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>WO Ref</th>
+              <th>Task Title</th>
+              <th>Customer</th>
+              <th>Assigned Staff</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="w : ${recentWorkOrders}">
+              <td class="strong" th:text="${w.workOrderNumber}">WO-001</td>
+              <td th:text="${w.title}">Task Title</td>
+              <td th:text="${w.customerName}">Customer</td>
+              <td th:text="${w.assignedStaff}">Staff</td>
+              <td><span th:class="'pill priority-' + ${#strings.toLowerCase(w.priority)}" th:text="${w.priority}">MEDIUM</span></td>
+              <td><span th:class="'badge badge-' + ${#strings.toLowerCase(w.status)}" th:text="${w.status}">PENDING</span></td>
+              <td>
+                <a class="button-link" style="padding:4px 8px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}" target="_blank">Print Job Card</a>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentWorkOrders)}">
+              <td colspan="7" class="empty">No work orders issued yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Site Engineer & Admin: Today's Site Attendance & Real-Time GPS Tracking -->
+    <section class="panel" th:if="${isEngineer or isAdmin}">
+      <div class="panel-heading">
+        <div>
+          <h3>🕒 Today's Site Attendance & Real-Time Photo Verification</h3>
+          <p style="margin:2px 0 0 0;font-size:12px;color:var(--muted);">Real-time site check-ins, worker selfies/photos, and GPS coordinates.</p>
+        </div>
+        <a th:href="@{/attendance}" style="font-size:12px;font-weight:700">Open Attendance Register →</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff Name</th>
+              <th>Designation</th>
+              <th>Status</th>
+              <th>Check-In</th>
+              <th>Work Site</th>
+              <th>📸 Photo Proof</th>
+              <th>GPS Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${todayAttendanceRecords}">
+              <td class="strong" th:text="${r.staffName}">Staff Name</td>
+              <td th:text="${r.designation}">Designation</td>
+              <td>
+                <span th:if="${r.status == 'PRESENT'}" class="status-badge status-present">✅ PRESENT</span>
+                <span th:if="${r.status == 'ON_DUTY_SITE'}" class="status-badge status-site">⚡ ON SITE</span>
+                <span th:if="${r.status == 'HALF_DAY'}" class="status-badge status-half">🌓 HALF DAY</span>
+                <span th:if="${r.status == 'ABSENT' or r.status == 'LEAVE'}" class="status-badge status-absent">❌ ABSENT</span>
+              </td>
+              <td><span class="time-badge" th:text="${r.inTime != null ? r.inTime : '--:--'}">08:30 AM</span></td>
+              <td><span style="font-size:12px;color:#334155;font-weight:600;" th:text="${r.workSite != null ? r.workSite : 'Main Office'}">Site</span></td>
+              <td>
+                <div th:if="${r.hasPhoto()}">
+                  <a href="javascript:void(0)" th:data-url="${r.photoUrl}" th:data-name="${r.staffName}" th:data-site="${r.workSite}" onclick="showPhotoModal(this.getAttribute('data-url'), this.getAttribute('data-name'), this.getAttribute('data-site'))" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+                    <img th:src="${r.photoUrl}" alt="Photo" style="width:30px;height:30px;border-radius:6px;object-fit:cover;border:2px solid #16a34a;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+                    <span style="font-size:11px;font-weight:700;color:#15803d;background:#dcfce7;border:1px solid #86efac;padding:1px 5px;border-radius:4px;">🔍 Proof</span>
+                  </a>
+                </div>
+                <div th:if="${!r.hasPhoto()}">
+                  <span style="color:#94a3b8;font-size:11px;">No photo</span>
+                </div>
+              </td>
+              <td>
+                <div th:if="${r.googleMapsUrl != null}">
+                  <a th:href="${r.googleMapsUrl}" target="_blank" style="color:#0284c7;font-size:11px;font-weight:700;text-decoration:underline;">
+                    📍 View GPS (<span th:text="${r.locationCoordinates}">11.12, 76.12</span>)
+                  </a>
+                </div>
+                <span th:if="${r.googleMapsUrl == null}" style="color:#94a3b8;font-size:11px;">Office Log</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(todayAttendanceRecords)}">
+              <td colspan="7" class="empty">No attendance punched yet today.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Financial Invoices Preview (Admin, Accountant, Viewer) -->
+    <section class="panel" th:if="${isAdmin or isAccountant or isViewer}">
+      <div class="panel-heading">
+        <h3>Recent GST Tax Invoices</h3>
+        <a th:href="@{/invoices}" style="font-size:12px;font-weight:700">Manage all invoices →</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice No</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Taxable (₹)</th>
+              <th>GST Tax (₹)</th>
+              <th>Grand Total (₹)</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="inv : ${recentInvoices}">
+              <td class="strong" style="font-family:'JetBrains Mono',monospace;" th:text="${inv.invoiceNumber}">INV-001</td>
+              <td th:text="${inv.invoiceDate}">2026-10-15</td>
+              <td th:text="${inv.customerName}">Customer</td>
+              <td th:text="'₹ ' + ${#numbers.formatDecimal(inv.taxableAmount, 1, 2)}">₹ 0.00</td>
+              <td style="color:#059669;font-weight:600;" th:text="'₹ ' + ${#numbers.formatDecimal(inv.totalGstAmount, 1, 2)}">₹ 0.00</td>
+              <td class="strong" style="color:var(--navy);" th:text="'₹ ' + ${#numbers.formatDecimal(inv.grandTotal, 1, 2)}">₹ 0.00</td>
+              <td><span th:class="'badge ' + (${inv.paymentStatus == 'PAID'} ? 'badge-green' : (${inv.paymentStatus == 'PARTIAL'} ? 'badge-blue' : 'badge-red'))" th:text="${inv.paymentStatus}">UNPAID</span></td>
+              <td>
+                <a class="button-link" style="padding:4px 8px;font-size:11px;" th:href="@{/invoices/print/{id}(id=${inv.id})}" target="_blank">🖨️ Print Invoice</a>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentInvoices)}">
+              <td colspan="8" class="empty">No GST invoices issued yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Active Site Work Orders Table Preview (For Admin, Accountant, Viewer) -->
+    <section class="panel" th:if="${!isEngineer}">
+      <div class="panel-heading">
+        <h3>Current Site Work Orders & Job Cards</h3>
+        <a th:href="@{/work-orders}" style="font-size:12px;font-weight:700">View all work orders →</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>WO Ref</th>
+              <th>Task Title</th>
+              <th>Customer</th>
+              <th>Assigned Staff</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="w : ${recentWorkOrders}">
+              <td class="strong" th:text="${w.workOrderNumber}">WO-001</td>
+              <td th:text="${w.title}">Task Title</td>
+              <td th:text="${w.customerName}">Customer</td>
+              <td th:text="${w.assignedStaff}">Staff</td>
+              <td><span th:class="'pill priority-' + ${#strings.toLowerCase(w.priority)}" th:text="${w.priority}">MEDIUM</span></td>
+              <td><span th:class="'badge badge-' + ${#strings.toLowerCase(w.status)}" th:text="${w.status}">PENDING</span></td>
+              <td>
+                <a class="button-link" style="padding:4px 8px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}" target="_blank">Print Job Card</a>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentWorkOrders)}">
+              <td colspan="7" class="empty">No work orders issued yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Active Projects Table Preview -->
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>Active Electrical Projects Overview</h3>
+        <a th:href="@{/projects}" style="font-size:12px;font-weight:700">Manage all projects →</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Project Name</th>
+              <th>Customer</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Est. Value (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="p : ${recentProjects}">
+              <td class="strong" th:text="${p.projectName}">Project</td>
+              <td th:text="${p.customerName}">Customer</td>
+              <td th:text="${p.location}">Location</td>
+              <td><span class="pill" th:text="${p.status}">STATUS</span></td>
+              <td th:text="'₹ ' + ${#numbers.formatDecimal(p.amount, 1, 2)}">₹ 0.00</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentProjects)}">
+              <td colspan="5" class="empty">No projects added yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Photo Inspection Modal -->
+    <div id="photoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#fff;border-radius:12px;max-width:520px;width:100%;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+        <div style="padding:14px 18px;background:#003366;color:#fff;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <h4 id="modalTitle" style="margin:0;font-size:15px;font-weight:700;">📸 Site Arrival Photo Proof</h4>
+            <div id="modalSubtitle" style="font-size:11px;opacity:0.85;margin-top:2px;">Physical Presence Evidence for Management Verification</div>
+          </div>
+          <button type="button" onclick="closePhotoModal()" style="background:transparent;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+        <div style="padding:16px;text-align:center;background:#f8fafc;">
+          <img id="modalImg" src="" alt="Site Photo Proof" style="max-height:420px;max-width:100%;border-radius:8px;object-fit:contain;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        </div>
+        <div style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;background:#fff;border-top:1px solid #e2e8f0;">
+          <span style="font-size:12px;color:#166534;font-weight:700;">✅ Verified Tamper-Proof Attendance Record</span>
+          <button type="button" class="button-link" onclick="closePhotoModal()" style="padding:6px 14px;font-size:12px;">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="footer-note">VOLTA MIS · Volta Electrical Associates · Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642 · <a href="https://voltaelectricalassociates.com" target="_blank" style="color:var(--navy);font-weight:600;">voltaelectricalassociates.com</a></p>
+  </main>
+</div>
+
+<script>
+  function showPhotoModal(url, staffName, workSite) {
+    document.getElementById('modalImg').src = url;
+    document.getElementById('modalTitle').textContent = '📸 ' + staffName + ' - Site Photo Proof';
+    document.getElementById('modalSubtitle').textContent = 'Work Site: ' + (workSite || 'Assigned Site');
+    document.getElementById('photoModal').style.display = 'flex';
+  }
+
+  function closePhotoModal() {
+    document.getElementById('photoModal').style.display = 'none';
+    document.getElementById('modalImg').src = '';
+  }
+</script>
+</body>
+</html>

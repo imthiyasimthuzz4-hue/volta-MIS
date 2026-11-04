@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="'GST Tax Invoice ' + ${invoice.invoiceNumber} + ' | ' + ${company.companyName}">GST Tax Invoice</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <style>
+    body { background: #e2e8f0; padding: 24px; font-size: 13px; font-family: 'DM Sans', -apple-system, sans-serif; color: #0f172a; }
+    .invoice-box {
+      max-width: 920px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 36px 40px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .watermark-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      height: 480px;
+      background-image: url('/images/logo.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.055;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .top-accent-stripe {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #003366 0%, #003366 75%, #f59e0b 75%, #f59e0b 100%);
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    .tax-invoice-header {
+      text-align: center;
+      border-bottom: 2px solid #003366;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    .tax-badge {
+      display: inline-block;
+      background: #003366;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 4px 16px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .copy-type {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .letterhead-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+    }
+    .letterhead-brand-left {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      max-width: 580px;
+    }
+    .letterhead-logo-img {
+      height: 72px;
+      max-width: 180px;
+      object-fit: contain;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .bill-box { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; padding: 14px 16px; border-radius: 6px; line-height: 1.6; }
+    .bill-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
+    .table-inv { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12.5px; }
+    .table-inv th { background: #003366; color: #fff; padding: 9px 10px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.3px; border: 1px solid #002244; }
+    .table-inv td { padding: 9px 10px; border: 1px solid #cbd5e1; }
+    .calc-box-print { margin-left: auto; width: 380px; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; margin-top: 10px; font-size: 12.5px; background: rgba(255,255,255,0.9); }
+    .calc-row-print { display: flex; justify-content: space-between; padding: 6px 14px; border-bottom: 1px solid #f1f5f9; }
+    .calc-row-print.grand { background: #003366; color: #fff; font-size: 15px; font-weight: 800; border-bottom: none; }
+    .words-box { background: rgba(248, 250, 252, 0.85); border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; margin: 16px 0; font-size: 12.5px; }
+    .bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+    .bank-card { background: rgba(248, 250, 252, 0.85); border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 14px; font-size: 12px; line-height: 1.6; }
+    .signatures { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding-top: 10px; }
+    .sig-block { text-align: center; min-width: 200px; }
+    .sig-line { border-bottom: 1px solid #475569; height: 50px; margin-bottom: 6px; }
+    @media print {
+      body { background: #fff !important; padding: 0 !important; font-size: 11.5px; }
+      .invoice-box { border: none !important; box-shadow: none !important; padding: 8px !important; max-width: 100% !important; }
+      .no-print { display: none !important; }
+      .top-accent-stripe { display: none !important; }
+      .watermark-logo {
+        display: block !important;
+        opacity: 0.065 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="invoice-box">
+  <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
+  <div class="top-accent-stripe"></div>
+
+  <!-- Print Actions -->
+  <div class="no-print" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+    <a class="button-link button-secondary" th:href="@{/invoices}">← Back to Invoices</a>
+    <div style="display: flex; gap: 10px;">
+      <a class="button-link button-secondary" th:href="@{/company-settings}">⚙️ Company Profile</a>
+      <button class="primary" onclick="window.print()">🖨️ Print GST Tax Invoice</button>
+    </div>
+  </div>
+
+  <!-- Header: Tax Invoice Title & Copy Type -->
+  <div class="tax-invoice-header">
+    <span class="tax-badge">TAX INVOICE</span>
+    <div class="copy-type">Original for Recipient &nbsp;|&nbsp; Triplicate for Supplier</div>
+  </div>
+
+  <!-- Letterhead: Volta Electrical Associates Details -->
+  <div class="letterhead-wrap">
+    <div class="letterhead-brand-left">
+      <img class="letterhead-logo-img" th:src="@{${company.logoPath}}" alt="Volta Logo" onerror="this.onerror=null;this.src='/images/favicon.png';">
+      <div>
+        <h1 style="font-size: 20px; color: #003366; margin: 0; font-weight: 800;" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</h1>
+        <p style="font-size: 11.5px; color: #d97706; font-weight: 700; margin: 2px 0;" th:text="${company.tagline}">Govt. Licensed Electrical Contractors & Engineers</p>
+        <p style="font-size: 11px; color: #475569; margin: 1px 0;" th:text="${company.address}">Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642</p>
+        <p style="font-size: 11px; color: #475569; margin: 1px 0;">
+          <span>📞 <strong th:text="${company.phone}">+91 94474 12235, +91 85903 94345</strong></span> | 
+          <span>✉️ <span th:text="${company.email}">zubairvoltavvm@gmail.com</span></span>
+        </p>
+        <p style="font-size: 11px; color: #003366; margin: 1px 0; font-weight: 600;">
+          <span>🌐 <span th:text="${company.website}">https://voltaelectricalassociates.com</span></span> | 
+          <span>📸 Instagram: <span th:text="${company.instagram}">@volta_vvm</span></span>
+        </p>
+        <div style="font-size: 10.5px; color: #334155; margin-top: 3px; display: flex; gap: 8px;">
+          <span><strong>GSTIN:</strong> <span th:text="${company.gstin}">32AAAAA0000A1Z5</span></span>
+          <span><strong>State:</strong> Kerala (32)</span>
+          <span><strong>PAN:</strong> <span th:text="${company.panNo}">AAAAA0000A</span></span>
+          <span><strong>License:</strong> <span th:text="${company.licenseNo}">EA/KER/2026/8841</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meta Details Box -->
+    <div style="text-align: right; min-width: 220px; font-size: 12px; line-height: 1.6;">
+      <div style="font-size: 14px; font-weight: 800; color: #003366;" th:text="'Invoice No: ' + ${invoice.invoiceNumber}">INV-2026-001</div>
+      <div><strong>Invoice Date:</strong> <span th:text="${invoice.invoiceDate}">2026-10-15</span></div>
+      <div><strong>Due Date:</strong> <span th:text="${invoice.dueDate}">2026-10-30</span></div>
+      <div><strong>Place of Supply:</strong> <span th:text="${invoice.placeOfSupply}">32-Kerala</span></div>
+      <div><strong>Reverse Charge:</strong> <span th:text="${invoice.reverseCharge ? 'Yes' : 'No'}">No</span></div>
+      <div th:if="${invoice.quotationReference != null and !invoice.quotationReference.isBlank()}">
+        <strong>Quotation Ref:</strong> <span th:text="${invoice.quotationReference}">QT-101</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Billed To & Shipped/Project Site Grid -->
+  <div class="grid-2">
+    <div class="bill-box">
+      <div class="bill-title">Details of Receiver / Billed To:</div>
+      <div style="font-size: 15px; font-weight: 700; color: #003366;" th:text="${invoice.customerName}">Client Name</div>
+      <div><strong>GSTIN:</strong> <span style="font-family:'JetBrains Mono',monospace;font-weight:600;" th:text="${invoice.customerGstin}">32AAAAA0000A1Z5</span></div>
+      <div><strong>Address:</strong> <span th:text="${invoice.customerAddress != null and !invoice.customerAddress.isBlank() ? invoice.customerAddress : 'N/A'}">Address</span></div>
+      <div><strong>Phone:</strong> <span th:text="${invoice.customerPhone != null ? invoice.customerPhone : 'N/A'}">+91 94470 00000</span></div>
+    </div>
+    <div class="bill-box">
+      <div class="bill-title">Project Site / Work Details:</div>
+      <div style="font-size: 14px; font-weight: 700; color: #0b1528;" th:text="${invoice.projectName != null and !invoice.projectName.isBlank() ? invoice.projectName : 'Electrical Contract Works'}">Project Name</div>
+      <div><strong>State / Place:</strong> <span th:text="${invoice.placeOfSupply}">32-Kerala</span></div>
+      <div><strong>Supply Type:</strong> <span th:text="${invoice.supplyType == 'INTER_STATE' ? 'Inter-State (IGST)' : 'Intra-State (CGST + SGST)'}">Intra-State</span></div>
+      <div><strong>Payment Status:</strong> <span style="font-weight:700;" th:text="${invoice.paymentStatus}">UNPAID</span></div>
+    </div>
+  </div>
+
+  <!-- Itemized GST Goods & Services Table -->
+  <table class="table-inv">
+    <thead>
+      <tr>
+        <th style="width: 35px; text-align: center;">Sl</th>
+        <th>Description of Electrical Works / Materials</th>
+        <th style="width: 75px; text-align: center;">HSN/SAC</th>
+        <th style="width: 50px; text-align: right;">Qty</th>
+        <th style="width: 50px; text-align: center;">Unit</th>
+        <th style="width: 85px; text-align: right;">Rate (₹)</th>
+        <th style="width: 95px; text-align: right;">Taxable (₹)</th>
+        <th th:if="${invoice.supplyType != 'INTER_STATE'}" style="width: 90px; text-align: right;">CGST (₹)</th>
+        <th th:if="${invoice.supplyType != 'INTER_STATE'}" style="width: 90px; text-align: right;">SGST (₹)</th>
+        <th th:if="${invoice.supplyType == 'INTER_STATE'}" style="width: 100px; text-align: right;">IGST (₹)</th>
+        <th style="width: 100px; text-align: right;">Total (₹)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="it, stat : ${invoice.items}">
+        <td style="text-align: center;" th:text="${stat.index + 1}">1</td>
+        <td>
+          <strong th:text="${it.description}">Electrical Installation Works</strong>
+        </td>
+        <td style="text-align: center; font-family: 'JetBrains Mono', monospace;" th:text="${it.hsnSac}">995461</td>
+        <td style="text-align: right;" th:text="${it.quantity}">1.00</td>
+        <td style="text-align: center;" th:text="${it.unit}">Lot</td>
+        <td style="text-align: right;" th:text="${#numbers.formatDecimal(it.unitPrice, 1, 2)}">0.00</td>
+        <td style="text-align: right; font-weight: 600;" th:text="${#numbers.formatDecimal(it.taxableValue, 1, 2)}">0.00</td>
+        <!-- CGST -->
+        <td th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right;">
+          <div th:text="${#numbers.formatDecimal(it.cgstAmount, 1, 2)}">0.00</div>
+          <small style="color: #64748b;" th:text="'(' + ${it.cgstRate} + '%)'">(9%)</small>
+        </td>
+        <!-- SGST -->
+        <td th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right;">
+          <div th:text="${#numbers.formatDecimal(it.sgstAmount, 1, 2)}">0.00</div>
+          <small style="color: #64748b;" th:text="'(' + ${it.sgstRate} + '%)'">(9%)</small>
+        </td>
+        <!-- IGST -->
+        <td th:if="${invoice.supplyType == 'INTER_STATE'}" style="text-align: right;">
+          <div th:text="${#numbers.formatDecimal(it.igstAmount, 1, 2)}">0.00</div>
+          <small style="color: #64748b;" th:text="'(' + ${it.igstRate} + '%)'">(18%)</small>
+        </td>
+        <td style="text-align: right; font-weight: 700;" th:text="${#numbers.formatDecimal(it.totalAmount, 1, 2)}">0.00</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Calculation Summary Table & Amount in Words -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+    <!-- Amount in Words -->
+    <div style="flex: 1;">
+      <div class="words-box">
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 4px;">Total Invoice Amount in Words:</div>
+        <div style="font-size: 13.5px; font-weight: 700; color: #003366;" th:text="${invoice.getAmountInWords()}">One Lakh Rupees Only</div>
+      </div>
+
+      <!-- Payment Summary -->
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; font-size: 12px; line-height: 1.6;">
+        <div><strong>Paid Amount:</strong> ₹ <span th:text="${#numbers.formatDecimal(invoice.paidAmount, 1, 2)}">0.00</span> (<span th:text="${invoice.paymentMode}">BANK_TRANSFER</span>)</div>
+        <div><strong>Balance Due:</strong> <strong style="color: #dc2626;">₹ <span th:text="${#numbers.formatDecimal(invoice.balanceAmount, 1, 2)}">0.00</span></strong></div>
+      </div>
+    </div>
+
+    <!-- Calculation Totals Box -->
+    <div class="calc-box-print">
+      <div class="calc-row-print">
+        <span>Total Taxable Value:</span>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.taxableAmount, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="calc-row-print" th:if="${invoice.supplyType != 'INTER_STATE'}">
+        <span>Central Tax (CGST):</span>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.cgstAmount, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="calc-row-print" th:if="${invoice.supplyType != 'INTER_STATE'}">
+        <span>State Tax (SGST):</span>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.sgstAmount, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="calc-row-print" th:if="${invoice.supplyType == 'INTER_STATE'}">
+        <span>Integrated Tax (IGST):</span>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.igstAmount, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="calc-row-print">
+        <span>Total Tax Amount (GST):</span>
+        <strong style="color: #059669;" th:text="'₹ ' + ${#numbers.formatDecimal(invoice.totalGstAmount, 1, 2)}">₹ 0.00</strong>
+      </div>
+      <div class="calc-row-print" th:if="${invoice.roundOff != null and invoice.roundOff != 0}">
+        <span>Round Off:</span>
+        <span th:text="${#numbers.formatDecimal(invoice.roundOff, 1, 2)}">0.00</span>
+      </div>
+      <div class="calc-row-print grand">
+        <span>Net Invoice Value:</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(invoice.grandTotal, 1, 2)}">₹ 0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bank Details & Terms -->
+  <div class="bank-grid">
+    <div class="bank-card">
+      <div style="font-weight: 700; color: #003366; text-transform: uppercase; margin-bottom: 6px;">Bank Details for RTGS / NEFT / UPI:</div>
+      <div>Bank Name: <strong th:text="${company.bankName}">State Bank of India</strong></div>
+      <div>Account No: <strong th:text="${company.accountNumber}">3000123456789</strong></div>
+      <div>IFSC Code: <strong th:text="${company.ifscCode}">SBIN0000861</strong></div>
+      <div>Branch: <span th:text="${company.branch}">Valluvambram / Manjeri Branch</span></div>
+      <div>UPI ID / Contact: <span th:text="${company.phone}">+91 94474 12235</span></div>
+    </div>
+
+    <div class="bank-card">
+      <div style="font-weight: 700; color: #003366; text-transform: uppercase; margin-bottom: 6px;">Terms & Conditions:</div>
+      <div style="color: #475569; font-size: 11.5px; white-space: pre-wrap;" th:text="${invoice.notes != null and !invoice.notes.isBlank() ? invoice.notes : '1. Goods & materials supplied are subject to warranty terms.\n2. Payment strictly as per agreed payment schedule.\n3. Subject to Malappuram jurisdiction only.'}">Terms</div>
+    </div>
+  </div>
+
+  <!-- Signatures Block -->
+  <div class="signatures">
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div style="font-weight: 700; font-size: 11.5px;">Customer / Receiver's Acknowledgment</div>
+      <div style="font-size: 10.5px; color: #64748b;">Signature with Seal</div>
+    </div>
+
+    <div class="sig-block">
+      <div style="font-size: 11px; font-weight: 700; margin-bottom: 30px;" th:text="'For ' + ${company.companyName}">For VOLTA ELECTRICAL ASSOCIATES</div>
+      <div class="sig-line"></div>
+      <div style="font-weight: 700; font-size: 12px;" th:text="${company.authorizedSignatory}">Managing Partner / Chief Engineer</div>
+      <div style="font-size: 10.5px; color: #64748b;">Authorised Signatory</div>
+    </div>
+  </div>
+
+  <!-- Bottom Notice -->
+  <div style="text-align: center; margin-top: 24px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 10.5px; color: #94a3b8;">
+    This is a Computer Generated GST Tax Invoice issued by Volta Electrical Associates · Kozhikode Road, Valluvambram, Kerala
+  </div>
+</div>
+</body>
+</html>

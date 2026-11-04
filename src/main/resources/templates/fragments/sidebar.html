@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+  <aside class="sidebar" th:fragment="sidebar(activeMenu)">
+    <div class="brand">
+      <img th:src="@{/images/favicon.png}" alt="Volta Logo" style="width: 38px; height: 38px; object-fit: contain; border-radius: 8px; background: #fff; padding: 2px;">
+      <div class="brand-title">
+        <span>VOLTA</span>
+        <small>Electrical Associates</small>
+      </div>
+    </div>
+
+    <!-- Active User & Role Card -->
+    <div style="margin: 0 12px 14px 12px; padding: 10px 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;">
+      <div style="font-size: 10.5px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;">
+        <span>Signed In As</span>
+        <span style="font-size: 9px; opacity: 0.7;">RBAC ACTIVE</span>
+      </div>
+      <div style="font-size: 13px; font-weight: 700; color: #fff; margin: 3px 0 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${currentUserFullName}">User</div>
+      <div>
+        <span th:if="${isAdmin}" style="background: #dc2626; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px;">👑 SYSTEM ADMIN</span>
+        <span th:if="${isEngineer}" style="background: #16a34a; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px;">⚡ SITE ENGINEER</span>
+        <span th:if="${isAccountant}" style="background: #0284c7; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px;">💼 CHIEF ACCOUNTANT</span>
+        <span th:if="${isViewer}" style="background: #64748b; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px;">👁️ AUDITOR / VIEWER</span>
+      </div>
+    </div>
+
+    <nav>
+      <!-- Core Dashboard: Accessible to all roles -->
+      <a th:classappend="${activeMenu == 'dashboard' ? 'active' : ''}" th:href="@{/dashboard}">📊 Dashboard</a>
+
+      <!-- Operations & Project Execution -->
+      <a th:if="${canAccessCustomers}" th:classappend="${activeMenu == 'customers' ? 'active' : ''}" th:href="@{/customers}">👥 Customers</a>
+      <a th:if="${canAccessProjects}" th:classappend="${activeMenu == 'projects' ? 'active' : ''}" th:href="@{/projects}">🏗️ Projects</a>
+      <a th:if="${canAccessWorkOrders}" th:classappend="${activeMenu == 'work-orders' ? 'active' : ''}" th:href="@{/work-orders}">⚡ Work Orders</a>
+      <a th:if="${canAccessQuotations}" th:classappend="${activeMenu == 'quotations' ? 'active' : ''}" th:href="@{/quotations}">📑 Quotations</a>
+
+      <!-- Financials & GST Billing: Admin, Accountant, Viewer -->
+      <a th:if="${canAccessInvoices}" th:classappend="${activeMenu == 'invoices' ? 'active' : ''}" th:href="@{/invoices}">🧾 GST Invoices</a>
+
+      <!-- Human Resources & Attendance -->
+      <a th:if="${canAccessStaff}" th:classappend="${activeMenu == 'staff' ? 'active' : ''}" th:href="@{/staff}">👷 Staff & Engineers</a>
+      <a th:if="${canAccessAttendance}" th:classappend="${activeMenu == 'attendance' ? 'active' : ''}" th:href="@{/attendance}">🕒 Staff Attendance</a>
+
+      <!-- Payroll & Wages: Admin & Accountant (and Viewer for audit) -->
+      <a th:if="${canAccessPayroll}" th:classappend="${activeMenu == 'payroll' ? 'active' : ''}" th:href="@{/payroll}">💰 Payroll & Wages</a>
+
+      <!-- Materials Inventory: Admin, Engineer, Viewer -->
+      <a th:if="${canAccessMaterials}" th:classappend="${activeMenu == 'materials' ? 'active' : ''}" th:href="@{/materials}">📦 Materials & Stock</a>
+
+      <!-- Expenses: Admin & Accountant -->
+      <a th:if="${canAccessExpenses}" th:classappend="${activeMenu == 'expenses' ? 'active' : ''}" th:href="@{/expenses}">💳 Expenses</a>
+
+      <!-- Reports & Analytics: All roles -->
+      <a th:if="${canAccessReports}" th:classappend="${activeMenu == 'reports' ? 'active' : ''}" th:href="@{/reports}">📈 Reports</a>
+
+      <!-- Worker Self-Punch Shortcut -->
+      <a th:href="@{/attendance/self-punch}" target="_blank" style="color: #86efac; border-left: 2px solid #22c55e;">📱 Mobile Site Punch ↗</a>
+
+      <!-- Admin Control Section: Only visible to ADMIN -->
+      <div th:if="${isAdmin}" style="margin: 14px 14px 4px; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Admin Control</div>
+      <a th:if="${canAccessCompanySettings}" th:classappend="${activeMenu == 'company-settings' ? 'active' : ''}" th:href="@{/company-settings}">⚙️ Company Profile</a>
+      <a th:if="${canAccessUsers}" th:classappend="${activeMenu == 'users' ? 'active' : ''}" th:href="@{/users}">🔐 User Roles (RBAC)</a>
+    </nav>
+
+    <form th:action="@{/logout}" method="post">
+      <button class="logout" type="submit">Sign out</button>
+    </form>
+  </aside>
+</body>
+</html>

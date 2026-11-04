@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Materials & Stock Inventory | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('materials')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">SITE INVENTORY & ELECTRICAL GODOWN</p>
+        <h1>Materials & Godown Stock Inventory</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" href="#add-material" th:if="${canManageOperations}">＋ Add Material</a>
+        <span th:if="${isReadOnly}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;">👁️ Auditor / Read-Only Mode</span>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <div class="alert" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing Godown Stock Inventory in inspection mode. Material inward, outward issues, and catalog updates are managed by Site Engineers and System Admin.
+    </div>
+
+    <!-- Inventory Stats Cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;margin-bottom:20px;">
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #003366;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Items</span>
+        <div style="font-size:24px;font-weight:800;color:#0f172a;margin-top:4px;" th:text="${materials.size()}">0</div>
+      </div>
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #16a34a;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Stock Valuation</span>
+        <div style="font-size:24px;font-weight:800;color:#16a34a;margin-top:4px;" th:text="'₹ ' + ${totalStockValuation != null ? #numbers.formatDecimal(totalStockValuation, 1, 2) : '0.00'}">₹ 0.00</div>
+      </div>
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #dc2626;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Low Stock Alerts</span>
+        <div style="font-size:24px;font-weight:800;color:#dc2626;margin-top:4px;" th:text="${lowStockCount}">0</div>
+      </div>
+    </div>
+
+    <!-- Quick Manual Stock Deduct / Add Modal Bar -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;margin-bottom:24px;" th:if="${canManageOperations}">
+      <h4 style="margin:0 0 10px 0;color:var(--navy);">⚡ Quick Stock Adjustment (Site Issue & Inward)</h4>
+      <p style="margin:0 0 12px 0;font-size:12px;color:#64748b;">Directly issue stock for project sites or receive incoming electrical shipments to the central godown.</p>
+      
+      <form th:action="@{/materials/adjust-stock/0}" id="quickAdjustForm" method="post" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+        <label style="flex:1;min-width:240px;margin:0;">Select Material *
+          <select id="adjustMaterialSelect" required onchange="updateAdjustFormAction(this)" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #cbd5e1;">
+            <option value="">-- Choose Material --</option>
+            <option th:each="m : ${materials}" th:value="${m.id}" th:text="${m.name + ' (Available: ' + m.quantity + ' ' + m.unit + ')'}"></option>
+          </select>
+        </label>
+
+        <label style="min-width:140px;margin:0;">Action *
+          <select name="action" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #cbd5e1;">
+            <option value="DEDUCT">⚡ Deduct / Issue to Site</option>
+            <option value="ADD">＋ Add / Receive into Godown</option>
+          </select>
+        </label>
+
+        <label style="min-width:110px;margin:0;">Quantity *
+          <input type="number" step="0.01" name="qty" required placeholder="10" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #cbd5e1;">
+        </label>
+
+        <label style="flex:1;min-width:180px;margin:0;">Reason / Site Assignment
+          <input type="text" name="reason" placeholder="e.g. Manjeri Substation Work" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #cbd5e1;">
+        </label>
+
+        <button type="submit" class="button-link" style="background:#003366;color:#fff;border:none;padding:9px 16px;border-radius:6px;font-weight:700;cursor:pointer;">
+          💾 Update Stock
+        </button>
+      </form>
+    </div>
+
+    <section class="panel" id="add-material" th:if="${canManageOperations}">
+      <h3 th:text="${editing} ? 'Edit Material Item' : 'Add New Electrical Material / Stock Item'">Add Electrical Material / Stock Item</h3>
+      <form class="form-grid" th:action="@{/materials/save}" th:object="${material}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label>Material Name & Specification *
+          <input th:field="*{name}" required maxlength="150" placeholder="e.g. Polycab 2.5 sqmm 3 Core Armoured Cable">
+        </label>
+
+        <label>Category
+          <input th:field="*{category}" maxlength="100" placeholder="Cables, Switchgear, Lighting, Earthing, Conduits">
+        </label>
+
+        <label>HSN / SAC Code (For GST Billing)
+          <input th:field="*{hsnSac}" maxlength="20" placeholder="8544">
+        </label>
+
+        <label>Unit of Measure
+          <input th:field="*{unit}" maxlength="30" placeholder="Meters / Rolls / Nos / Sets">
+        </label>
+
+        <label>Current Godown Stock Quantity
+          <input type="number" min="0" step="0.001" th:field="*{quantity}" placeholder="0">
+        </label>
+
+        <label>Unit Purchase Price (₹)
+          <input type="number" min="0" step="0.01" th:field="*{unitPrice}" placeholder="0.00">
+        </label>
+
+        <label>Minimum Alert Level (Low Stock Threshold)
+          <input type="number" min="0" step="1" th:field="*{minAlertQty}" placeholder="5">
+        </label>
+
+        <label>Godown Location
+          <input th:field="*{godownLocation}" maxlength="150" placeholder="Valluvambram Main Godown">
+        </label>
+
+        <label class="full-span">Supplier / Vendor Details
+          <input th:field="*{supplier}" maxlength="150" placeholder="Wholesale Supplier / Distributor Name & Contact">
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit" th:text="${editing} ? 'Update Material' : 'Save Material'">Save Material</button>
+          <a class="button-link button-secondary" th:if="${editing}" th:href="@{/materials}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Godown Stock & Inventory Directory</h3>
+          <p style="margin:2px 0 0 0;font-size:12px;color:var(--muted);">Billing materials on GST Invoices automatically deducts available stock in real time.</p>
+        </div>
+        <span class="count" th:text="${materials.size()} + ' records'">0 records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Material Name & Specification</th>
+              <th>Category</th>
+              <th>HSN</th>
+              <th>Unit</th>
+              <th>Available Qty</th>
+              <th>Unit Price (₹)</th>
+              <th>Stock Value (₹)</th>
+              <th>Godown Location</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="m : ${materials}">
+              <td>
+                <strong th:text="${m.name}">Name</strong>
+                <span th:if="${m.isLowStock()}" style="margin-left:6px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;">⚠️ Low Stock</span>
+              </td>
+              <td><span class="pill" th:text="${m.category}">Category</span></td>
+              <td style="font-family:monospace;font-size:11.5px;" th:text="${m.hsnSac != null ? m.hsnSac : '8544'}">8544</td>
+              <td th:text="${m.unit}"></td>
+              <td>
+                <strong th:style="${m.isLowStock()} ? 'color:#dc2626;font-size:14px;' : 'color:#16a34a;font-size:14px;'" th:text="${m.quantity}">10</strong>
+              </td>
+              <td th:text="'₹ ' + ${#numbers.formatDecimal(m.unitPrice, 1, 2)}"></td>
+              <td class="strong" style="color:var(--blue)" th:text="'₹ ' + ${m.quantity != null and m.unitPrice != null ? #numbers.formatDecimal(m.quantity.multiply(m.unitPrice), 1, 2) : '0.00'}"></td>
+              <td style="font-size:11.5px;color:#64748b;" th:text="${m.godownLocation}">Valluvambram</td>
+              <td>
+                <a class="button-link button-secondary" style="padding:4px 8px;font-size:11px;" th:href="@{/materials/edit/{id}(id=${m.id})}" th:if="${canManageOperations}">Edit</a>
+                <form style="display:inline" th:action="@{/materials/delete/{id}(id=${m.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete this material?')" th:if="${canDelete}">
+                  <button class="danger" style="padding:4px 8px;font-size:11px;" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(materials)}">
+              <td colspan="9" class="empty">No inventory items recorded yet. Use the form above to add materials.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <script>
+      function updateAdjustFormAction(selectEl) {
+        const id = selectEl.value;
+        const form = document.getElementById('quickAdjustForm');
+        if (id) {
+          form.action = '/materials/adjust-stock/' + id;
+        } else {
+          form.action = '/materials/adjust-stock/0';
+        }
+      }
+    </script>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title th:text="${staff.fullName} + ' - Financial Ledger | VOLTA MIS'">Worker Financial Ledger</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('payroll')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">INDIVIDUAL WORKER FINANCIAL STATEMENT & ATTENDANCE AUDIT</p>
+        <h1 th:text="${staff.fullName} + ' - Wage & Advance Ledger'">Worker Ledger</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" th:href="@{/payroll/payslip/{id}(id=${staff.id}, month=${selectedMonth})}" target="_blank">🖨️ Print Payslip</a>
+        <a class="button-link button-secondary" th:href="@{/payroll(month=${selectedMonth})}">← Back to Payroll Register</a>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <!-- Worker Profile & Banking Header Card -->
+    <div style="background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <h2 style="margin:0;font-size:22px;color:#003366;" th:text="${staff.fullName}">Arun Kumar</h2>
+          <span class="pill" th:text="${staff.designation}">Site Supervisor</span>
+          <span style="background:#ecfdf5;color:#059669;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;" th:text="${staff.status}">ACTIVE</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;color:#475569;margin-top:6px;">
+          <span>📞 Phone: <strong th:text="${staff.phone}">+91 94474 12235</strong></span>
+          <span>💼 Rate: <strong th:text="${staff.effectiveWageDisplay}">₹ 950 / Day</strong></span>
+          <span th:if="${staff.bankName}">🏦 Bank: <strong th:text="${staff.bankName + ' (A/C: ' + staff.bankAccountNumber + ')'}">Bank</strong></span>
+          <span th:if="${staff.upiId}">📱 UPI: <strong th:text="${staff.upiId}">upi@okaxis</strong></span>
+        </div>
+      </div>
+
+      <!-- Month Selector Form -->
+      <form th:action="@{/payroll/staff/{id}(id=${staff.id})}" method="get" style="display:flex;align-items:center;gap:8px;">
+        <input type="month" name="month" th:value="${selectedMonth}" style="padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;">
+        <button type="submit" class="button-link" style="padding:7px 12px;font-size:12px;">Change Month</button>
+      </form>
+    </div>
+
+    <!-- Worker Specific Month Financial Metric Cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:14px;margin-bottom:24px;">
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #003366;border-radius:10px;padding:16px;">
+        <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Attendance</span>
+        <div style="font-size:22px;font-weight:800;color:#003366;margin-top:4px;" th:text="${summary.effectiveWorkingDays} + ' Days'">0 Days</div>
+        <small style="font-size:10.5px;color:#64748b;" th:text="'Present: ' + ${summary.daysPresent} + ', Site: ' + ${summary.onSiteDays}">Present: 0</small>
+      </div>
+
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #0284c7;border-radius:10px;padding:16px;">
+        <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Gross Earned</span>
+        <div style="font-size:22px;font-weight:800;color:#0284c7;margin-top:4px;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.grossEarnedWages, 1, 2)}">₹ 0.00</div>
+        <small style="font-size:11px;color:#0284c7;font-weight:700;" th:text="${summary.totalWorkingHours} + ' hrs @ ₹' + ${summary.hourlyRate} + '/hr'">0 hrs @ ₹0/hr</small>
+      </div>
+
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #f59e0b;border-radius:10px;padding:16px;">
+        <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Advances Taken</span>
+        <div style="font-size:22px;font-weight:800;color:#b45309;margin-top:4px;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalAdvances, 1, 2)}">₹ 0.00</div>
+        <small style="font-size:10.5px;color:#64748b;">Subtracted from salary</small>
+      </div>
+
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #16a34a;border-radius:10px;padding:16px;">
+        <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Paid</span>
+        <div style="font-size:22px;font-weight:800;color:#16a34a;margin-top:4px;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.totalPaidSalary, 1, 2)}">₹ 0.00</div>
+        <small style="font-size:10.5px;color:#64748b;">Disbursed salary payments</small>
+      </div>
+
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #dc2626;border-radius:10px;padding:16px;">
+        <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Pending Balance</span>
+        <div style="font-size:22px;font-weight:800;color:#dc2626;margin-top:4px;" th:text="'₹ ' + ${#numbers.formatDecimal(summary.pendingBalance, 1, 2)}">₹ 0.00</div>
+        <small style="font-size:10.5px;color:#64748b;" th:text="${summary.isFullySettled()} ? '✅ Fully Paid' : '⏳ Remaining Due'">Remaining Due</small>
+      </div>
+    </div>
+
+    <!-- Quick Payment / Advance Entry Form for this Worker -->
+    <section class="panel" style="margin-bottom:24px;" th:if="${canManageFinancials}">
+      <h3 th:text="'Record Payment or Advance for ' + ${staff.fullName}">Record Transaction</h3>
+      <form class="form-grid" th:action="@{/payroll/save-transaction}" th:object="${newTransaction}" method="post">
+        <input type="hidden" th:field="*{staffId}">
+        <input type="hidden" th:field="*{salaryMonth}">
+
+        <label>Transaction Type *
+          <select th:field="*{transactionType}" required>
+            <option value="ADVANCE_PAYMENT">⚡ Salary Advance (Given before payday)</option>
+            <option value="SALARY_PAYMENT" selected>✅ Salary Payout (Wage disbursement)</option>
+            <option value="BONUS_ALLOWANCE">🎁 Site Allowance / Bonus</option>
+            <option value="DEDUCTION">⚠️ Deduction / Recovery</option>
+          </select>
+        </label>
+
+        <label>Amount (₹) *
+          <input type="number" step="0.01" min="1" th:field="*{amount}" required placeholder="2500.00">
+        </label>
+
+        <label>Payment Mode *
+          <select th:field="*{paymentMode}" required>
+            <option value="UPI_GPAY" selected>📱 Google Pay / UPI</option>
+            <option value="CASH">💵 Cash</option>
+            <option value="BANK_TRANSFER">🏦 Bank Transfer</option>
+            <option value="CHEQUE">📝 Cheque</option>
+          </select>
+        </label>
+
+        <label>Date *
+          <input type="date" th:field="*{transactionDate}" required>
+        </label>
+
+        <label class="full-span">Reference / Notes
+          <input th:field="*{notes}" placeholder="e.g. Travel advance for Manjeri site installation">
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">💾 Save Transaction & Update Balance</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Detailed Financial Transactions Table -->
+    <section class="panel" style="margin-bottom:24px;">
+      <div class="panel-heading">
+        <div>
+          <h3 th:text="'Payment & Advance Ledger for ' + ${monthDisplay}">Transaction Ledger</h3>
+          <p style="margin:2px 0 0 0;font-size:12px;color:var(--muted);">Complete itemized history of all advances, wage disbursements, and deductions for this payroll period.</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Transaction Type</th>
+              <th>Amount (₹)</th>
+              <th>Payment Mode</th>
+              <th>Reference #</th>
+              <th>Notes</th>
+              <th>Recorded By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="tx : ${monthTransactions}">
+              <td th:text="${tx.transactionDate}">2026-10-19</td>
+              <td>
+                <span th:style="${tx.typeBadgeStyle} + 'padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;'" th:text="${tx.typeLabel}">Advance</span>
+              </td>
+              <td class="strong" th:text="'₹ ' + ${#numbers.formatDecimal(tx.amount, 1, 2)}">₹ 0.00</td>
+              <td th:text="${tx.paymentMode}">UPI</td>
+              <td style="font-family:monospace;font-size:11.5px;" th:text="${tx.referenceNo != null ? tx.referenceNo : '-'}">-</td>
+              <td style="font-size:12px;color:#475569;" th:text="${tx.notes}">Notes</td>
+              <td style="font-size:11.5px;color:#64748b;" th:text="${tx.recordedBy}">Admin</td>
+              <td>
+                <form th:action="@{/payroll/delete-transaction/{id}(id=${tx.id})}" method="post" onsubmit="return confirm('Delete this transaction?');" style="display:inline;" th:if="${canDelete}">
+                  <button class="danger" style="padding:2px 6px;font-size:11px;" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(monthTransactions)}">
+              <td colspan="8" class="empty">No payments or advances recorded for this worker in this month.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Monthly Attendance Breakdown Table -->
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3 th:text="'Daily Attendance Breakdown (' + ${monthDisplay} + ')'">Attendance Register</h3>
+          <p style="margin:2px 0 0 0;font-size:12px;color:var(--muted);">Each present day and overtime hour directly contributes to the computed gross wages above.</p>
+        </div>
+        <span class="count" th:text="${attendances.size()} + ' days recorded'">0 days</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Status</th>
+              <th>In-Time</th>
+              <th>Out-Time</th>
+              <th>Hours</th>
+              <th>Overtime</th>
+              <th>Assigned Work Site</th>
+              <th>📸 Photo Proof</th>
+              <th>GPS Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="att : ${attendances}">
+              <td th:text="${att.attendanceDate}">2026-10-19</td>
+              <td>
+                <span th:if="${att.status == 'PRESENT'}" class="badge-present">PRESENT</span>
+                <span th:if="${att.status == 'ON_DUTY_SITE'}" class="badge-site">ON DUTY SITE</span>
+                <span th:if="${att.status == 'HALF_DAY'}" class="badge-half">HALF DAY</span>
+                <span th:if="${att.status == 'ABSENT'}" class="badge-absent">ABSENT</span>
+              </td>
+              <td th:text="${att.inTime != null ? att.inTime : '-'}">08:30 AM</td>
+              <td th:text="${att.outTime != null ? att.outTime : '-'}">-</td>
+              <td th:text="${att.workingHours != null ? att.workingHours + ' hrs' : '-'}">8.0 hrs</td>
+              <td style="color:#0284c7;font-weight:700;" th:text="${att.hasOvertime() ? att.overtimeHours + ' hrs' : '-'}">-</td>
+              <td th:text="${att.workSite}">Main Office</td>
+              <td>
+                <div th:if="${att.hasPhoto()}">
+                  <a href="javascript:void(0)" th:data-url="${att.photoUrl}" th:data-name="${staff.fullName}" th:data-site="${att.workSite}" onclick="showPhotoModal(this.getAttribute('data-url'), this.getAttribute('data-name'), this.getAttribute('data-site'))" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+                    <img th:src="${att.photoUrl}" alt="Photo" style="width:28px;height:28px;border-radius:4px;object-fit:cover;border:1.5px solid #16a34a;box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+                    <span style="font-size:11px;font-weight:700;color:#15803d;background:#dcfce7;border:1px solid #86efac;padding:1px 5px;border-radius:4px;">🔍 Proof</span>
+                  </a>
+                </div>
+                <span th:if="${!att.hasPhoto()}" style="color:#94a3b8;font-size:11px;">-</span>
+              </td>
+              <td>
+                <a th:if="${att.googleMapsUrl != null}" th:href="${att.googleMapsUrl}" target="_blank" style="color:#0284c7;font-size:11.5px;font-weight:700;">
+                  📍 Map Pin (<span th:text="${att.locationCoordinates}">Coords</span>)
+                </a>
+                <span th:if="${att.googleMapsUrl == null}" style="color:#94a3b8;font-size:11.5px;">-</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(attendances)}">
+              <td colspan="9" class="empty">No attendance records logged for this employee in this month.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Photo Inspection Modal -->
+    <div id="photoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#fff;border-radius:12px;max-width:520px;width:100%;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+        <div style="padding:14px 18px;background:#003366;color:#fff;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <h4 id="modalTitle" style="margin:0;font-size:15px;font-weight:700;">📸 Site Arrival Photo Proof</h4>
+            <div id="modalSubtitle" style="font-size:11px;opacity:0.85;margin-top:2px;">Physical Presence Evidence for Management Verification</div>
+          </div>
+          <button type="button" onclick="closePhotoModal()" style="background:transparent;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+        <div style="padding:16px;text-align:center;background:#f8fafc;">
+          <img id="modalImg" src="" alt="Site Photo Proof" style="max-height:420px;max-width:100%;border-radius:8px;object-fit:contain;box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+        </div>
+        <div style="padding:12px 18px;display:flex;justify-content:space-between;align-items:center;background:#fff;border-top:1px solid #e2e8f0;">
+          <span style="font-size:12px;color:#166534;font-weight:700;">✅ Verified Tamper-Proof Attendance Record</span>
+          <button type="button" class="button-link" onclick="closePhotoModal()" style="padding:6px 14px;font-size:12px;">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="footer-note"><a th:href="@{/payroll}">← Back to Payroll Overview</a></p>
+  </main>
+</div>
+
+<script>
+  function showPhotoModal(url, staffName, workSite) {
+    document.getElementById('modalImg').src = url;
+    document.getElementById('modalTitle').textContent = '📸 ' + staffName + ' - Site Photo Proof';
+    document.getElementById('modalSubtitle').textContent = 'Work Site: ' + (workSite || 'Assigned Site');
+    document.getElementById('photoModal').style.display = 'flex';
+  }
+
+  function closePhotoModal() {
+    document.getElementById('photoModal').style.display = 'none';
+    document.getElementById('modalImg').src = '';
+  }
+</script>
+</body>
+</html>

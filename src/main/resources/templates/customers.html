@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Customers | VOLTA ELECTRICAL ASSOCIATES MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('customers')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">CLIENT & ENTERPRISE MANAGEMENT</p>
+        <h1>Customers & Clients</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" href="#add-customer" th:if="${canManageOperations}">＋ Add Customer</a>
+        <span th:if="${isReadOnly}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;">👁️ Auditor / Read-Only Mode</span>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <div class="alert" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing Customer Accounts in inspection mode. Client registration and modifications are managed by authorized operations and admin staff.
+    </div>
+
+    <section class="panel" id="add-customer" th:if="${canManageOperations}">
+      <h3 th:text="${editing} ? 'Edit Customer Details' : 'Register New Customer'">Register New Customer</h3>
+      <form class="form-grid" th:action="@{/customers/save}" th:object="${customer}" method="post">
+        <input type="hidden" th:field="*{id}">
+        <label>Customer / Enterprise Name *
+          <input th:field="*{name}" required maxlength="120" placeholder="e.g. Malabar Mall / ABC Commercial Complex">
+        </label>
+        <label>Primary Phone
+          <input th:field="*{phone}" maxlength="30" placeholder="+91 98470 12345">
+        </label>
+        <label>Email Address
+          <input type="email" th:field="*{email}" maxlength="150" placeholder="client@example.com">
+        </label>
+        <label>Site Address / Location
+          <input th:field="*{address}" maxlength="250" placeholder="Street / Town / City, Kerala">
+        </label>
+        <label>GSTIN Number (Optional)
+          <input th:field="*{gstin}" maxlength="20" placeholder="e.g. 32AAAAA0000A1Z5">
+        </label>
+        <div class="form-actions">
+          <button class="primary" type="submit" th:text="${editing} ? 'Update Customer' : 'Save Customer'">Save Customer</button>
+          <a class="button-link button-secondary" th:if="${editing}" th:href="@{/customers}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>Customer Directory</h3>
+        <span class="count" th:text="${customers.size()} + ' records'">0 records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer Name</th>
+              <th>GSTIN</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Address</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="c : ${customers}">
+              <td class="strong" th:text="${c.name}">Name</td>
+              <td><span th:if="${c.gstin != null and !c.gstin.isBlank()}" style="font-family:'JetBrains Mono',monospace;font-size:11px;background:#f1f5f9;padding:2px 6px;border-radius:4px;" th:text="${c.gstin}">GSTIN</span><span th:if="${c.gstin == null or c.gstin.isBlank()}" style="color:var(--muted);font-size:11px;">URP</span></td>
+              <td th:text="${c.phone}">Phone</td>
+              <td th:text="${c.email}">Email</td>
+              <td th:text="${c.address}">Address</td>
+              <td>
+                <a class="button-link button-secondary" style="padding:6px 10px;font-size:11px;" th:href="@{/customers/edit/{id}(id=${c.id})}" th:if="${canManageOperations}">Edit</a>
+                <form style="display:inline" th:action="@{/customers/delete/{id}(id=${c.id})}" method="post" onsubmit="return confirm('Delete this customer?')" th:if="${canDelete}">
+                  <button class="danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(customers)}">
+              <td colspan="5" class="empty">No customers registered yet. Add your first customer above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>

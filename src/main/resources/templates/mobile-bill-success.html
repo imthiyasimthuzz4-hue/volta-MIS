@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Bill Generated | VOLTA Electrical Associates</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#003366">
+
+  <style>
+    :root {
+      --primary: #003366;
+      --success: #16a34a;
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 28px 20px;
+      width: min(100%, 460px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 60px;
+      height: 60px;
+      background: #dcfce7;
+      color: #16a34a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 16px;
+    }
+
+    h2 { color: var(--primary); font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    p.sub { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+    .bill-box {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .bill-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .bill-row.grand { font-size: 17px; font-weight: 800; color: var(--primary); border-top: 1px dashed #cbd5e1; padding-top: 8px; margin-top: 8px; }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      margin-bottom: 10px;
+      text-align: center;
+      border: none;
+      box-sizing: border-box;
+    }
+    .btn-whatsapp { background: #25D366; color: #fff; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
+    .btn-print { background: var(--primary); color: #fff; }
+    .btn-outline { background: #f8fafc; color: #334155; border: 1.5px solid var(--border); }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="success-icon">✓</div>
+    <h2>Bill Generated!</h2>
+    <p class="sub">Invoice registered & Godown stock auto-deducted</p>
+
+    <div class="bill-box">
+      <div class="bill-row">
+        <span style="color:#64748b;">Invoice No:</span>
+        <strong th:text="${invoice.invoiceNumber}">VOLTA-SITE-001</strong>
+      </div>
+      <div class="bill-row">
+        <span style="color:#64748b;">Date:</span>
+        <span th:text="${#temporals.format(invoice.invoiceDate, 'dd-MMM-yyyy')}">04-Nov-2026</span>
+      </div>
+      <div class="bill-row" th:if="${invoice.customer}">
+        <span style="color:#64748b;">Client:</span>
+        <strong th:text="${invoice.customer.name}">Customer Name</strong>
+      </div>
+      <div class="bill-row grand">
+        <span>Grand Total (Incl. GST):</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(invoice.grandTotal, 1, 2)}">₹ 0.00</span>
+      </div>
+    </div>
+
+    <!-- WhatsApp Share Button (Direct to customer if phone available, or generic share) -->
+    <a th:if="${waDirectCustomerUrl}" th:href="${waDirectCustomerUrl}" target="_blank" class="btn btn-whatsapp">
+      📱 Send Bill to Client on WhatsApp
+    </a>
+    <a th:unless="${waDirectCustomerUrl}" th:href="${waShareUrl}" target="_blank" class="btn btn-whatsapp">
+      📱 Share Bill via WhatsApp
+    </a>
+
+    <!-- Print / PDF View -->
+    <a th:href="@{'/invoices/print/' + ${invoice.id}}" class="btn btn-print">
+      🖨️ View & Print Official GST Invoice
+    </a>
+
+    <!-- New Bill -->
+    <a th:href="@{/mobile/quick-bill}" class="btn btn-outline">
+      ＋ Create Another Site Bill
+    </a>
+
+    <!-- Back to Hub -->
+    <a th:href="@{/mobile}" style="font-size:12px; color:#64748b; text-decoration:none; display:inline-block; margin-top:8px;">
+      ← Back to Mobile App Hub
+    </a>
+  </div>
+
+</body>
+</html>

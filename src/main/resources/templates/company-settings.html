@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Company Profile & Settings | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('company-settings')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ENTERPRISE DETAILS & LICENSING</p>
+        <h1>Company Profile & Settings</h1>
+      </div>
+      <span class="status"><i></i> Official Verified Profile</span>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <section class="panel">
+      <h3>Official Volta Associates Registration Details</h3>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+        These official company details (address, electrical license number, GSTIN, bank accounts) are automatically formatted onto all generated quotations, GST tax invoices, and work order letterheads.
+      </p>
+
+      <form class="form-grid" th:action="@{/company-settings/save}" th:object="${company}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label>Company / Firm Legal Name *
+          <input th:field="*{companyName}" required>
+        </label>
+
+        <label>Tagline / Business Nature
+          <input th:field="*{tagline}">
+        </label>
+
+        <label>Electrical Contractor License No (KSEB / Govt) *
+          <input th:field="*{licenseNo}" required placeholder="e.g. EA/KER/2026/8841 (Class A)">
+        </label>
+
+        <label>GSTIN Number
+          <input th:field="*{gstin}" placeholder="32AAAAA0000A1Z5">
+        </label>
+
+        <label>PAN Number
+          <input th:field="*{panNo}">
+        </label>
+
+        <label>Official Email Address
+          <input type="email" th:field="*{email}">
+        </label>
+
+        <label>Contact Phone Numbers
+          <input th:field="*{phone}">
+        </label>
+
+        <label>Authorized Signatory Title
+          <input th:field="*{authorizedSignatory}" placeholder="Managing Partner / Chief Engineer">
+        </label>
+
+        <label class="full-span">Official Registered Office Address
+          <textarea th:field="*{address}"></textarea>
+        </label>
+
+        <!-- Digital Presence & Social Media -->
+        <div class="full-span" style="border-top:1px solid var(--line);margin:10px 0;padding-top:16px;">
+          <h4 style="margin-bottom:14px;color:var(--navy);">🌐 Online Presence & Social Media Profiles</h4>
+        </div>
+
+        <label>Official Website URL
+          <input type="url" th:field="*{website}" placeholder="https://voltaelectricalassociates.com">
+        </label>
+
+        <label>Instagram Profile / Handle
+          <input th:field="*{instagram}" placeholder="https://www.instagram.com/volta_vvm/">
+        </label>
+
+        <label>WhatsApp Number
+          <input th:field="*{whatsapp}" placeholder="+91 94474 12235">
+        </label>
+
+        <label>Facebook Page URL
+          <input type="url" th:field="*{facebook}" placeholder="https://www.facebook.com/voltaassociates">
+        </label>
+
+        <label>LinkedIn Page URL
+          <input type="url" th:field="*{linkedin}" placeholder="https://www.linkedin.com/company/volta-electrical-associates">
+        </label>
+
+        <label>Company Logo Asset Path
+          <input th:field="*{logoPath}" placeholder="/images/logo.png">
+        </label>
+
+        <div class="full-span" style="border-top:1px solid var(--line);margin:10px 0;padding-top:16px;">
+          <h4 style="margin-bottom:14px;color:var(--navy);">Official Bank Details (For Client Transfers / Invoices)</h4>
+        </div>
+
+        <label>Bank Name
+          <input th:field="*{bankName}" placeholder="e.g. State Bank of India">
+        </label>
+
+        <label>Bank Account Number
+          <input th:field="*{accountNumber}">
+        </label>
+
+        <label>IFSC Code
+          <input th:field="*{ifscCode}">
+        </label>
+
+        <label>Branch Name
+          <input th:field="*{branch}">
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit">💾 Save Company Profile</button>
+          <a class="button-link button-secondary" th:href="@{/dashboard}">Back to Dashboard</a>
+        </div>
+      </form>
+    </section>
+
+    <!-- Official Letterhead Live Preview Section -->
+    <section class="panel" style="margin-top:24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <h3>Official Letterhead Preview</h3>
+          <p style="color:var(--muted);font-size:13px;margin:0;">Live layout of header branding and logo watermark on quotations, work orders, and GST invoices.</p>
+        </div>
+        <a class="button-link button-secondary" th:href="@{/quotations/1/print}" target="_blank">📄 View Sample Quotation Print</a>
+      </div>
+
+      <div style="background:#fff;border:2px solid #003366;border-radius:10px;padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.06);position:relative;overflow:hidden;">
+        <div th:style="'position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:260px;height:260px;background-image:url(' + @{${company.logoPath}} + ');background-repeat:no-repeat;background-position:center;background-size:contain;opacity:0.06;pointer-events:none;z-index:0;'"></div>
+        <!-- Top Dual Brand Color Accent Bar -->
+        <div style="height:4px;background:linear-gradient(90deg, #003366 0%, #003366 70%, #f59e0b 70%, #f59e0b 100%);margin:-24px -24px 20px -24px;border-top-left-radius:8px;border-top-right-radius:8px;position:relative;z-index:1;"></div>
+
+        <div style="display:flex;gap:20px;align-items:center;border-bottom:2px solid #e2e8f0;padding-bottom:18px;">
+          <img th:src="@{${company.logoPath}}" alt="Volta Logo" style="height:64px;max-width:180px;object-fit:contain;border-radius:6px;border:1px solid #e2e8f0;padding:4px;background:#fff;" onerror="this.onerror=null;this.src='/images/favicon.png';">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <h2 style="font-size:22px;color:#003366;margin:0;font-weight:800;letter-spacing:0.5px;" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</h2>
+              <span style="background:#ecfdf5;color:#059669;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;border:1px solid #a7f3d0;">Govt. Licensed</span>
+            </div>
+            <p style="font-size:12.5px;color:#f59e0b;font-weight:700;margin:3px 0;" th:text="${company.tagline}">Govt. Licensed Electrical Contractors & Engineers</p>
+            <p style="font-size:11.5px;color:#475569;margin:2px 0;">
+              📍 <span th:text="${company.address}">Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642</span>
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:#475569;margin-top:4px;">
+              <span>📞 <strong th:text="${company.phone}">+91 94474 12235</strong></span>
+              <span>✉️ <span th:text="${company.email}">zubairvoltavvm@gmail.com</span></span>
+              <span>🌐 <a th:href="${company.website}" target="_blank" style="color:#003366;font-weight:600;" th:text="${company.website}">voltaelectricalassociates.com</a></span>
+              <span>📸 <a th:href="${company.instagram}" target="_blank" style="color:#e1306c;font-weight:600;">@volta_vvm</a></span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;font-size:11.5px;color:#64748b;">
+          <span>License: <strong style="color:#0b1528;" th:text="${company.licenseNo}">EA/KER/2026/8841 (Class A)</strong></span>
+          <span>GSTIN: <strong style="color:#0b1528;" th:text="${company.gstin}">32AAAAA0000A1Z5</strong></span>
+          <span>PAN: <strong style="color:#0b1528;" th:text="${company.panNo}">AAAAA0000A</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>

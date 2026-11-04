@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Staff & Engineers | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('staff')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ENGINEERING & FIELD WORKFORCE</p>
+        <h1>Technical Staff & Engineers</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" href="#add" th:if="${canManageOperations}">＋ Register Staff</a>
+        <span th:if="${isReadOnly}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;">👁️ Auditor / Read-Only Mode</span>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <div class="alert" th:if="${isReadOnly}" style="margin-bottom:18px;">
+      👁️ <strong>Auditor / Read-Only Mode:</strong> You are viewing Staff & Engineering Directory in inspection mode. Staff registration and wage structures are managed by System Admin and Operations.
+    </div>
+
+    <section class="panel" id="add" th:if="${canManageOperations}">
+      <h3 th:text="${editing} ? 'Edit Staff Member' : 'Register Technical Staff Member'">Register Technical Staff Member</h3>
+      <form class="form-grid" th:action="@{/staff/save}" th:object="${staff}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label>Full Name *
+          <input th:field="*{fullName}" required maxlength="150" placeholder="e.g. Arun Kumar / Site Engineer">
+        </label>
+
+        <label>Designation / Role
+          <input th:field="*{designation}" maxlength="100" placeholder="e.g. Senior Electrical Engineer / Wireman / Foreman">
+        </label>
+
+        <label>Mobile Number
+          <input th:field="*{phone}" maxlength="30" placeholder="+91 98471 23456">
+        </label>
+
+        <label>Email Address
+          <input type="email" th:field="*{email}" maxlength="150" placeholder="engineer@voltaelectricals.in">
+        </label>
+
+        <label>Wage Compensation Type *
+          <select th:field="*{wageType}">
+            <option value="DAILY_WAGE">⚡ Daily Wage Worker (Electrician / Wireman / Helper)</option>
+            <option value="MONTHLY_SALARY">💼 Monthly Fixed Salary (Engineer / Supervisor / Office)</option>
+          </select>
+        </label>
+
+        <label>Daily Wage Rate (₹ / Day)
+          <input type="number" min="0" step="1" th:field="*{dailyWageRate}" placeholder="950.00">
+        </label>
+
+        <label>Monthly Base Salary (₹ / Month)
+          <input type="number" min="0" step="0.01" th:field="*{monthlySalary}" placeholder="25000.00">
+        </label>
+
+        <label>Overtime Hourly Rate (₹ / Hour)
+          <input type="number" min="0" step="1" th:field="*{overtimeHourlyRate}" placeholder="130.00">
+        </label>
+
+        <label>Bank Name & Branch
+          <input th:field="*{bankName}" placeholder="e.g. Federal Bank, Valluvambram">
+        </label>
+
+        <label>Bank Account Number
+          <input th:field="*{bankAccountNumber}" placeholder="e.g. 12340100987654">
+        </label>
+
+        <label>IFSC Code
+          <input th:field="*{ifscCode}" placeholder="FDRL0001234">
+        </label>
+
+        <label>UPI ID (Google Pay / PhonePe)
+          <input th:field="*{upiId}" placeholder="name@okaxis">
+        </label>
+
+        <label>Date of Joining
+          <input type="date" th:field="*{joiningDate}">
+        </label>
+
+        <label class="full-span">Employment Status
+          <select th:field="*{status}">
+            <option value="ACTIVE">Active (On Field / Office)</option>
+            <option value="INACTIVE">Inactive / On Leave</option>
+          </select>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit" th:text="${editing} ? 'Update Staff Member' : 'Save Staff Member'">Save Staff Member</button>
+          <a class="button-link button-secondary" th:if="${editing}" th:href="@{/staff}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>Staff Directory</h3>
+        <span class="count" th:text="${staffList.size()} + ' records'">0 records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Designation</th>
+              <th>Phone</th>
+              <th>Wage Compensation</th>
+              <th>Bank / UPI</th>
+              <th>Joining Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="s : ${staffList}">
+              <td>
+                <strong th:text="${s.fullName}">Arun Kumar</strong>
+              </td>
+              <td th:text="${s.designation}">Supervisor</td>
+              <td th:text="${s.phone}">+91 94474 12235</td>
+              <td>
+                <span class="pill" th:text="${s.effectiveWageDisplay}">₹ 950 / Day</span>
+                <div th:if="${s.overtimeHourlyRate != null and s.overtimeHourlyRate > 0}" style="font-size:10.5px;color:#64748b;margin-top:2px;" th:text="'OT: ₹ ' + ${s.overtimeHourlyRate} + '/hr'">OT: ₹ 130/hr</div>
+              </td>
+              <td>
+                <div th:if="${s.bankAccountNumber != null and !s.bankAccountNumber.isBlank()}" style="font-size:11.5px;color:#334155;">
+                  A/C: <span th:text="${s.bankAccountNumber}">12345678</span>
+                </div>
+                <div th:if="${s.upiId != null and !s.upiId.isBlank()}" style="font-size:11px;color:#0284c7;font-weight:600;">
+                  UPI: <span th:text="${s.upiId}">upi@okaxis</span>
+                </div>
+                <div th:if="${(s.bankAccountNumber == null or s.bankAccountNumber.isBlank()) and (s.upiId == null or s.upiId.isBlank())}" style="color:#94a3b8;font-size:11px;">
+                  Cash Disbursal
+                </div>
+              </td>
+              <td th:text="${s.joiningDate}">2026-04-01</td>
+              <td><span th:class="'badge badge-' + ${#strings.toLowerCase(s.status)}" th:text="${s.status}">ACTIVE</span></td>
+              <td>
+                <div style="display:flex;gap:4px;align-items:center;">
+                  <a class="button-link" style="padding:4px 8px;font-size:11px;background:#003366;" th:href="@{/payroll/staff/{id}(id=${s.id})}">💰 Ledger</a>
+                  <a class="button-link button-secondary" style="padding:4px 8px;font-size:11px;" th:href="@{/staff/edit/{id}(id=${s.id})}" th:if="${canManageOperations}">Edit</a>
+                  <form style="display:inline" th:action="@{/staff/delete/{id}(id=${s.id})}" method="post" onsubmit="return confirm('Delete this staff member?')" th:if="${canDelete}">
+                    <button class="danger" style="padding:4px 8px;font-size:11px;" type="submit">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(staffList)}">
+              <td colspan="8" class="empty">No staff members registered yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>

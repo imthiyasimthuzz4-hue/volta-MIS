@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Module Provision | VOLTA MIS</title>
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">VOLTA MIS · FUTURE MODULE PROVISION</p>
+        <h1 th:text="${moduleTitle} != null ? ${moduleTitle} : 'Planned Module'">Module Setup</h1>
+      </div>
+      <span class="status"><i></i> Ready for customization</span>
+    </header>
+
+    <section class="panel">
+      <div style="display:flex;align-items:flex-start;gap:20px;">
+        <span class="stat-icon" style="width:50px;height:50px;font-size:24px;">⚡</span>
+        <div>
+          <h3 th:text="${moduleTitle} != null ? ${moduleTitle} : 'Planned Module'">Planned Module</h3>
+          <p style="font-size:14px;color:#445268;line-height:1.6;margin:10px 0 20px" th:text="${moduleDescription} != null ? ${moduleDescription} : 'This module can be provisioned and customized based on operational requirements.'"></p>
+          <div style="background:#edf2ff;border-radius:10px;padding:16px 20px;margin-bottom:24px;border-left:4px solid var(--blue);">
+            <strong style="color:var(--blue);display:block;margin-bottom:6px;">System Architecture Note:</strong>
+            <span style="font-size:13px;color:#2b3a51;">
+              Core functional modules — Customers, Projects, Staff, Site Attendance, Godown Materials & Inventory, GST Invoices, Quotations, Work Orders, Expenses, and Reports — are active and fully operational.
+            </span>
+          </div>
+          <div class="quick-actions">
+            <a class="button-link" th:href="@{/dashboard}">← Back to Dashboard</a>
+            <a th:href="@{/customers}">Manage Customers</a>
+            <a th:href="@{/projects}">Manage Projects</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">VOLTA MIS · Volta & Associates Electrical Management System</p>
+  </main>
+</div>
+</body>
+</html>

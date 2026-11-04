@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Expenses | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('expenses')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">FINANCIAL TRACKING & OPERATIONAL COSTS</p>
+        <h1>Operational Expenses</h1>
+      </div>
+      <a class="button-link" href="#add-expense">＋ Record Expense</a>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <section class="panel" id="add-expense">
+      <h3 th:text="${editing} ? 'Edit Expense Record' : 'Record New Site / Office Expense'">Record New Site / Office Expense</h3>
+      <form class="form-grid" th:action="@{/expenses/save}" th:object="${expense}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label>Expense Description *
+          <input th:field="*{description}" required maxlength="200" placeholder="e.g. Generator Diesel for Substation Testing / Cable Tie Purchase">
+        </label>
+
+        <label>Expense Category
+          <input th:field="*{category}" maxlength="100" placeholder="Fuel, Site Purchase, Staff Salary, Transport, KSEB Fee">
+        </label>
+
+        <label>Amount (₹) *
+          <input type="number" min="0.01" step="0.01" th:field="*{amount}" required placeholder="0.00">
+        </label>
+
+        <label>Expense Date
+          <input type="date" th:field="*{expenseDate}">
+        </label>
+
+        <label>Paid To / Vendor
+          <input th:field="*{paidTo}" maxlength="150" placeholder="Recipient / Petrol Pump / Vendor">
+        </label>
+
+        <label>Payment Method
+          <select th:field="*{paymentMethod}">
+            <option value="">Select Payment Mode</option>
+            <option value="Cash">Cash</option>
+            <option value="UPI">UPI / GPay / PhonePe</option>
+            <option value="Bank transfer">Bank Transfer / NEFT / IMPS</option>
+            <option value="Cheque">Cheque</option>
+            <option value="Card">Debit / Credit Card</option>
+          </select>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary" type="submit" th:text="${editing} ? 'Update Expense' : 'Save Expense'">Save Expense</button>
+          <a class="button-link button-secondary" th:if="${editing}" th:href="@{/expenses}">Cancel</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h3>Expense Log</h3>
+        <span class="count" th:text="${expenses.size()} + ' records'">0 records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Paid To</th>
+              <th>Mode</th>
+              <th>Amount (₹)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="e : ${expenses}">
+              <td th:text="${e.expenseDate}"></td>
+              <td class="strong" th:text="${e.description}"></td>
+              <td><span class="pill" th:text="${e.category}">Category</span></td>
+              <td th:text="${e.paidTo}"></td>
+              <td th:text="${e.paymentMethod}"></td>
+              <td class="strong" style="color:var(--red);" th:text="'₹ ' + ${#numbers.formatDecimal(e.amount, 1, 2)}"></td>
+              <td>
+                <a class="button-link button-secondary" style="padding:6px 10px;font-size:11px;" th:href="@{/expenses/edit/{id}(id=${e.id})}">Edit</a>
+                <form style="display:inline" th:action="@{/expenses/delete/{id}(id=${e.id})}" method="post" onsubmit="return confirm('Delete this expense?')" th:if="${canDelete}">
+                  <button class="danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(expenses)}">
+              <td colspan="7" class="empty">No expenses recorded yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="footer-note"><a th:href="@{/dashboard}">← Back to dashboard</a></p>
+  </main>
+</div>
+</body>
+</html>
