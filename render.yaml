@@ -20,22 +20,4 @@ services:
         value: /app/uploads
       - key: JPA_DDL_AUTO
         value: update
-      - key: DB_URL
-        fromDatabase:
-          name: volta-db
-          property: connectionString
-      - key: DB_USERNAME
-        fromDatabase:
-          name: volta-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: volta-db
-          property: password
 
-databases:
-  - name: volta-db
-    databaseName: volta_mis
-    user: volta_admin
-    plan: free # 100% Free Managed PostgreSQL Cloud Database
-    region: singapore

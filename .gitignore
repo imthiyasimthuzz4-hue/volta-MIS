@@ -35,3 +35,6 @@ cloudflared.exe
 mingit/
 mingit.zip
 *.class
+
+.vercel
+.env*
