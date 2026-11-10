@@ -1,5 +1,10 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "framework": null
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://volta-mis-app.onrender.com/$1",
+      "permanent": false
+    }
+  ]
 }
