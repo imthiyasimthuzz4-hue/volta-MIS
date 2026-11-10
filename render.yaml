@@ -5,19 +5,19 @@
 
 services:
   - type: web
-    name: volta-electrical-associates
+    name: volta-mis-app
     runtime: docker
-    dockerfilePath: ./Dockerfile
-    plan: free # 100% Free Plan ($0.00/mo)
-    region: singapore # Closest region to Kerala / India (Fastest response)
+    plan: free
+    region: singapore
     branch: main
-    numInstances: 1
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /login
     envVars:
       - key: PORT
-        value: 8080
+        value: "8080"
       - key: UPLOAD_DIR
-        value: /app/uploads
+        value: "/app/uploads"
       - key: JPA_DDL_AUTO
-        value: update
+        value: "update"
 
