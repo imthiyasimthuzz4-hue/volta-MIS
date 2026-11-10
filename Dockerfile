@@ -55,7 +55,7 @@ USER volta
 ENV PORT=8080
 ENV UPLOAD_DIR=/app/uploads
 ENV SPRING_PROFILES_ACTIVE=default
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom"
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -Xss512k -XX:+UseSerialGC -Djava.security.egd=file:/dev/./urandom"
 
 # Expose default HTTP port
 EXPOSE 8080
@@ -65,7 +65,7 @@ VOLUME ["/app/uploads"]
 
 # Container healthcheck probe
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
-  CMD curl -f http://localhost:${PORT}/login || exit 1
+  CMD curl -f http://localhost:${PORT:-8080}/login || exit 1
 
 # Launch Spring Boot with optimized container flags
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -Dserver.port=${PORT} -jar /app/app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -Dserver.port=${PORT:-8080} -jar /app/app.jar"]

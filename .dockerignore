@@ -3,8 +3,10 @@ target/
 .gitignore
 .idea/
 .vscode/
+mingit/
 *.iml
 *.log
+*.zip
 scratch/
 test_*.py
 scratch_*.py

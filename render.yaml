@@ -12,7 +12,7 @@ services:
     region: singapore # Closest region to Kerala / India (Fastest response)
     branch: main
     numInstances: 1
-    healthCheckPath: /mobile
+    healthCheckPath: /login
     envVars:
       - key: PORT
         value: 8080

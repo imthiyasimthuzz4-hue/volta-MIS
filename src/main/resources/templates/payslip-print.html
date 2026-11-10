@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title th:text="'Salary Slip - ' + ${staff.fullName} + ' (' + ${monthDisplay} + ') | VOLTA ELECTRICAL ASSOCIATES'">Salary Slip</title>
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
   <style>
     @page {
       size: A4 portrait;

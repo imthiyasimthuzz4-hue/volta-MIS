@@ -5,8 +5,8 @@ desktop_dir = os.path.join(os.environ.get('USERPROFILE', ''), r'OneDrive\Desktop
 zip_path = os.path.join(desktop_dir, 'VOLTA_MIS_Free_Cloud_Deploy.zip')
 
 project_root = r'c:\Users\user\volta MIS\volta-mis'
-exclude_dirs = {'.git', 'target', '.idea', 'bin', 'obj', '__pycache__'}
-exclude_files = {'cloudflared.exe', 'cloudflared.log', 'cloudflared_tunnel.log', 'cloudflared_live.log'}
+exclude_dirs = {'.git', 'target', '.idea', 'bin', 'obj', '__pycache__', 'mingit', 'scratch'}
+exclude_files = {'cloudflared.exe', 'cloudflared.log', 'cloudflared_tunnel.log', 'cloudflared_live.log', 'VOLTA_MIS_Free_Cloud_Deploy.zip'}
 
 with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
     for root, dirs, files in os.walk(project_root):

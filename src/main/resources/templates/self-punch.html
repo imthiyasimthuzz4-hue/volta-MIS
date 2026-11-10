@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Staff Site Self-Punch & Attendance | VOLTA MIS</title>
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
 
   <!-- PWA Mobile App Support (Installable on Android & iOS Home Screen) -->
   <link rel="manifest" href="/manifest.json">

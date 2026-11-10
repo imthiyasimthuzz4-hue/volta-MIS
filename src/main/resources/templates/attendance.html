@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Staff Attendance & Daily Time Tracking | VOLTA MIS</title>
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
   <style>
     .att-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
     .att-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; }

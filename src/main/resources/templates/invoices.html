@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>GST Invoices & Tax Billing | VOLTA MIS</title>
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
-  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
   <style>
     .items-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
     .items-table th { background: #003366; color: #fff; padding: 10px 12px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; }
