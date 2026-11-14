@@ -82,10 +82,14 @@ public class DataSourceConfig {
             }
         }
 
-        // 2. Check if running on Render / Vercel / Cloud without external DB specified -> Graceful H2 Fallback
-        boolean isCloud = System.getenv("RENDER") != null || System.getenv("VERCEL") != null;
-        if (isCloud && (effectiveUrl == null || effectiveUrl.contains("localhost:3306"))) {
-            log.info("Running on Cloud (Render/Vercel) without external DB specified. Using persistent embedded H2 file database.");
+        // 2. Check if running on Cloud (Koyeb / Render / Vercel / Railway / Docker) without external DB -> Graceful H2 Fallback
+        boolean isCloud = System.getenv("RENDER") != null 
+                       || System.getenv("VERCEL") != null 
+                       || System.getenv("KOYEB") != null 
+                       || System.getenv("RAILWAY_ENVIRONMENT") != null 
+                       || System.getenv("PORT") != null;
+        if (isCloud && (effectiveUrl == null || effectiveUrl.isBlank() || effectiveUrl.contains("localhost:3306"))) {
+            log.info("Running on Cloud platform (Koyeb/Render/Docker) without external MySQL. Using persistent embedded H2 database.");
             ds.setJdbcUrl("jdbc:h2:file:/app/uploads/volta_db;DB_CLOSE_DELAY=-1;MODE=MySQL");
             ds.setDriverClassName("org.h2.Driver");
             ds.setUsername("sa");
