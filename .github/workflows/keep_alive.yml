@@ -2,17 +2,27 @@ name: Keep VOLTA MIS Warm 24/7 (Eliminate Render Cold Start & Promotion)
 
 on:
   schedule:
-    # Ping every 10 minutes so Render never sleeps after 15 minutes of inactivity
+    # Trigger every 10 minutes
     - cron: '*/10 * * * *'
   workflow_dispatch:
+
+concurrency:
+  group: keep-alive-render
+  cancel-in-progress: false
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Ping VOLTA MIS Cloud Service
+      - name: Keep VOLTA MIS Awake 24/7 (Continuous Warm Ping)
         run: |
-          echo "Pinging VOLTA MIS on Render..."
-          curl -s -f https://volta-mis-app.onrender.com/login > /dev/null || true
-          curl -s -f https://voltamis.vercel.app > /dev/null || true
-          echo "Keep-alive ping successful. App is active and warm!"
+          echo "Starting 12-minute continuous warm cycle for VOLTA MIS..."
+          # Ping every 45 seconds for 15 iterations (~11-12 minutes of active traffic)
+          for i in {1..15}; do
+            echo "Ping $i/15 at $(date -u)"
+            curl -s -m 15 -f https://volta-mis-app.onrender.com/login > /dev/null || true
+            curl -s -m 15 -f https://voltamis.vercel.app > /dev/null || true
+            sleep 45
+          done
+          echo "Continuous warm cycle completed successfully. Render stays awake 24/7!"
