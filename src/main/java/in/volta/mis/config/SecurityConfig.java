@@ -24,7 +24,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/attendance/**", "/mobile/**", "/attendance/self-punch/**"))
             .authorizeHttpRequests(auth -> auth
                 // Public assets, login, uploads, worker site self-punch, mobile hub & public print previews
-                .requestMatchers("/login", "/attendance/self-punch", "/attendance/self-punch/**", "/mobile", "/mobile/hub", "/uploads/**", "/css/**", "/images/**", "/favicon.ico", "/manifest.json", "/sw.js", "/error", "/invoices/print/**", "/quotations/print/**", "/payroll/payslip/**", "/work-orders/print/**").permitAll()
+                .requestMatchers("/login", "/attendance/self-punch", "/attendance/self-punch/**", "/mobile", "/mobile/hub", "/uploads/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/manifest.json", "/sw.js", "/error", "/invoices/print/**", "/invoices/*/print", "/quotations/print/**", "/quotations/*/print", "/payroll/payslip/**", "/work-orders/print/**", "/work-orders/*/print").permitAll()
 
                 // Admin Only: User Management & Company Profile Settings
                 .requestMatchers("/users/**", "/company-settings/**").hasRole("ADMIN")

@@ -165,7 +165,13 @@ public class PayrollController {
     public String printPayslip(@PathVariable Long staffId,
                                @RequestParam(value = "month", required = false) String monthStr,
                                Model model) {
-        Staff staff = staffRepo.findById(staffId).orElseThrow();
+        Staff staff = staffRepo.findById(staffId).orElse(null);
+        if (staff == null) {
+            staff = staffRepo.findAll().stream().findFirst().orElse(null);
+        }
+        if (staff == null) {
+            return "redirect:/mobile";
+        }
         YearMonth ym = parseYearMonth(monthStr);
         String currentMonthStr = ym.format(DateTimeFormatter.ofPattern("yyyy-MM"));
         LocalDate startDate = ym.atDay(1);

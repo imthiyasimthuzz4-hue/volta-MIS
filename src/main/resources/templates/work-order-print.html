@@ -354,7 +354,7 @@
 </head>
 <body>
 <div class="jobcard-container"
-     th:attr="data-order-number=${workOrder.orderNumber}, data-title=${workOrder.title}, data-client-name=${workOrder.customer != null ? workOrder.customer.name : 'Client'}, data-phone=${workOrder.customer != null && workOrder.customer.phone != null ? workOrder.customer.phone : ''}">
+     th:attr="data-order-number=${workOrder.workOrderNumber}, data-title=${workOrder.title}, data-client-name=${workOrder.customerName != null ? workOrder.customerName : 'Client'}, data-phone=''">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 

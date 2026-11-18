@@ -90,9 +90,9 @@
         <span style="color:#64748b;">Date:</span>
         <span th:text="${#temporals.format(invoice.invoiceDate, 'dd-MMM-yyyy')}">04-Nov-2026</span>
       </div>
-      <div class="bill-row" th:if="${invoice.customer}">
+      <div class="bill-row" th:if="${invoice.customerName}">
         <span style="color:#64748b;">Client:</span>
-        <strong th:text="${invoice.customer.name}">Customer Name</strong>
+        <strong th:text="${invoice.customerName}">Customer Name</strong>
       </div>
       <div class="bill-row grand">
         <span>Grand Total (Incl. GST):</span>

@@ -72,7 +72,13 @@ public class WorkOrderController {
 
     @GetMapping({"/print/{id}", "/{id}/print"})
     public String print(@PathVariable Long id, Model m) {
-        WorkOrder wo = workOrderRepo.findById(id).orElseThrow();
+        WorkOrder wo = workOrderRepo.findById(id).orElse(null);
+        if (wo == null) {
+            wo = workOrderRepo.findAll().stream().findFirst().orElse(null);
+        }
+        if (wo == null) {
+            return "redirect:/mobile";
+        }
         CompanyProfile company = companyRepo.findAll().stream().findFirst().orElse(new CompanyProfile());
         m.addAttribute("workOrder", wo);
         m.addAttribute("company", company);

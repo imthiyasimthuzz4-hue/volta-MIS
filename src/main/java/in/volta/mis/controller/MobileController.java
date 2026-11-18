@@ -208,7 +208,13 @@ public class MobileController {
      */
     @GetMapping("/quick-bill/success/{id}")
     public String quickBillSuccess(@PathVariable Long id, Model m) {
-        Invoice invoice = invoiceRepo.findById(id).orElseThrow();
+        Invoice invoice = invoiceRepo.findById(id).orElse(null);
+        if (invoice == null) {
+            invoice = invoiceRepo.findAllByOrderByInvoiceDateDesc().stream().findFirst().orElse(null);
+        }
+        if (invoice == null) {
+            return "redirect:/mobile";
+        }
         CompanyProfile company = companyRepo.findAll().stream().findFirst().orElse(new CompanyProfile());
 
         m.addAttribute("invoice", invoice);

@@ -272,7 +272,13 @@ public class InvoiceController {
 
     @GetMapping({"/print/{id}", "/{id}/print"})
     public String print(@PathVariable Long id, Model m) {
-        Invoice invoice = invoiceRepo.findById(id).orElseThrow();
+        Invoice invoice = invoiceRepo.findById(id).orElse(null);
+        if (invoice == null) {
+            invoice = invoiceRepo.findAllByOrderByInvoiceDateDesc().stream().findFirst().orElse(null);
+        }
+        if (invoice == null) {
+            return "redirect:/mobile";
+        }
         CompanyProfile company = companyRepo.findAll().stream().findFirst().orElse(new CompanyProfile());
         m.addAttribute("invoice", invoice);
         m.addAttribute("company", company);

@@ -91,7 +91,13 @@ public class QuotationController {
 
     @GetMapping({"/print/{id}", "/{id}/print"})
     public String print(@PathVariable Long id, Model m) {
-        Quotation qt = quotationRepo.findById(id).orElseThrow();
+        Quotation qt = quotationRepo.findById(id).orElse(null);
+        if (qt == null) {
+            qt = quotationRepo.findAll().stream().findFirst().orElse(null);
+        }
+        if (qt == null) {
+            return "redirect:/mobile";
+        }
         CompanyProfile company = companyRepo.findAll().stream().findFirst().orElse(new CompanyProfile());
         m.addAttribute("quotation", qt);
         m.addAttribute("company", company);

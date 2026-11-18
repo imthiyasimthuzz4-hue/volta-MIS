@@ -455,7 +455,7 @@
 </head>
 <body>
 <div class="quote-box"
-     th:attr="data-quotation-number=${quotation.quotationNumber}, data-grand-total=${#numbers.formatDecimal(quotation.grandTotal, 1, 2)}, data-customer-name=${quotation.customer != null ? quotation.customer.name : 'Valued Client'}, data-customer-phone=${quotation.customer != null && quotation.customer.phone != null ? quotation.customer.phone : ''}">
+     th:attr="data-quotation-number=${quotation.quotationNumber}, data-grand-total=${#numbers.formatDecimal(quotation.grandTotal, 1, 2)}, data-customer-name=${quotation.customerName != null ? quotation.customerName : 'Valued Client'}, data-customer-phone=''">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 
