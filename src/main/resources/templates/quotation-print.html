@@ -454,7 +454,8 @@
   </style>
 </head>
 <body>
-<div class="quote-box">
+<div class="quote-box"
+     th:attr="data-quotation-number=${quotation.quotationNumber}, data-grand-total=${#numbers.formatDecimal(quotation.grandTotal, 1, 2)}, data-customer-name=${quotation.customer != null ? quotation.customer.name : 'Valued Client'}, data-customer-phone=${quotation.customer != null && quotation.customer.phone != null ? quotation.customer.phone : ''}">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 
@@ -472,7 +473,7 @@
       <button type="button" class="btn-whatsapp-share" onclick="shareQuoteWhatsApp()">
         💬 Share on WhatsApp
       </button>
-      <button type="button" class="btn-print-action" onclick="triggerQuotePrint()">
+      <button type="button" class="btn-print-action" onclick="window.print()">
         🖨️ Print Quotation
       </button>
     </div>
@@ -605,18 +606,6 @@
     document.head.appendChild(fallbackScript);
   }
 
-  function triggerQuotePrint() {
-    try {
-      if (typeof window.print === 'function') {
-        window.print();
-      } else {
-        downloadQuotePDF();
-      }
-    } catch (e) {
-      downloadQuotePDF();
-    }
-  }
-
   function downloadQuotePDF() {
     var quoteBox = document.querySelector('.quote-box');
     var btn = document.getElementById('btn-download-pdf');
@@ -628,7 +617,7 @@
 
     quoteBox.classList.add('generating-pdf');
 
-    var refNum = '[[${quotation.quotationNumber}]]' || 'QUOTATION';
+    var refNum = (quoteBox && quoteBox.getAttribute('data-quotation-number')) || 'QUOTATION';
     var cleanNum = refNum.replace(/[^a-zA-Z0-9_-]/g, '_');
     var fileName = 'VOLTA_Quotation_' + cleanNum + '.pdf';
 
@@ -651,34 +640,34 @@
       }
     }
 
-    if (typeof html2pdf !== 'undefined') {
-      html2pdf().set(opt).from(quoteBox).save().then(restoreUI).catch(function(err) {
-        quoteBox.classList.remove('generating-pdf');
-        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
-        window.print();
-      });
-    } else {
-      setTimeout(function() {
-        if (typeof html2pdf !== 'undefined') {
-          html2pdf().set(opt).from(quoteBox).save().then(restoreUI).catch(function() {
-            quoteBox.classList.remove('generating-pdf');
-            if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
-            window.print();
-          });
-        } else {
+    function runGeneration() {
+      if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(quoteBox).save().then(restoreUI).catch(function(err) {
+          console.error('PDF error:', err);
           quoteBox.classList.remove('generating-pdf');
           if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
           window.print();
-        }
-      }, 500);
+        });
+      } else {
+        quoteBox.classList.remove('generating-pdf');
+        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+        window.print();
+      }
+    }
+
+    if (typeof html2pdf !== 'undefined') {
+      runGeneration();
+    } else {
+      setTimeout(runGeneration, 600);
     }
   }
 
   function shareQuoteWhatsApp() {
-    var refNum = '[[${quotation.quotationNumber}]]' || 'Quotation';
-    var grandTotal = '[[${#numbers.formatDecimal(quotation.grandTotal, 1, 2)}]]' || '0.00';
-    var customerName = '[[${quotation.customer != null ? quotation.customer.name : ""}]]' || 'Valued Client';
-    var phone = '[[${quotation.customer != null && quotation.customer.phone != null ? quotation.customer.phone : ""}]]';
+    var quoteBox = document.querySelector('.quote-box');
+    var refNum = (quoteBox && quoteBox.getAttribute('data-quotation-number')) || 'Quotation';
+    var grandTotal = (quoteBox && quoteBox.getAttribute('data-grand-total')) || '0.00';
+    var customerName = (quoteBox && quoteBox.getAttribute('data-customer-name')) || 'Valued Client';
+    var phone = (quoteBox && quoteBox.getAttribute('data-customer-phone')) || '';
     var currentUrl = window.location.href;
 
     var text = "⚡ *VOLTA ELECTRICAL ASSOCIATES* - OFFICIAL QUOTATION / ESTIMATE\n\n" +

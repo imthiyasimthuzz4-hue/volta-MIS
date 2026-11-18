@@ -642,7 +642,8 @@
   </style>
 </head>
 <body>
-<div class="invoice-box">
+<div class="invoice-box"
+     th:attr="data-invoice-number=${invoice.invoiceNumber}, data-grand-total=${#numbers.formatDecimal(invoice.grandTotal, 1, 2)}, data-customer-name=${invoice.customer != null ? invoice.customer.name : 'Valued Client'}, data-customer-phone=${invoice.customer != null && invoice.customer.phone != null ? invoice.customer.phone : ''}">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 
@@ -660,7 +661,7 @@
       <button type="button" class="btn-whatsapp-share" onclick="shareInvoiceWhatsApp()">
         💬 Share on WhatsApp
       </button>
-      <button type="button" class="btn-print-action" onclick="triggerMobilePrint()">
+      <button type="button" class="btn-print-action" onclick="window.print()">
         🖨️ Print Invoice
       </button>
     </div>
@@ -931,19 +932,6 @@
     document.head.appendChild(fallbackScript);
   }
 
-  function triggerMobilePrint() {
-    try {
-      if (typeof window.print === 'function') {
-        window.print();
-      } else {
-        downloadInvoicePDF();
-      }
-    } catch (e) {
-      console.warn("Print error, generating PDF instead:", e);
-      downloadInvoicePDF();
-    }
-  }
-
   function downloadInvoicePDF() {
     var invoiceBox = document.querySelector('.invoice-box');
     var btn = document.getElementById('btn-download-pdf');
@@ -956,7 +944,7 @@
     // Force A4 desktop styling during PDF snapshot
     invoiceBox.classList.add('generating-pdf');
 
-    var invoiceNum = '[[${invoice.invoiceNumber}]]' || 'INV';
+    var invoiceNum = (invoiceBox && invoiceBox.getAttribute('data-invoice-number')) || 'INV';
     var cleanNum = invoiceNum.replace(/[^a-zA-Z0-9_-]/g, '_');
     var fileName = 'VOLTA_Invoice_' + cleanNum + '.pdf';
 
@@ -979,35 +967,34 @@
       }
     }
 
-    if (typeof html2pdf !== 'undefined') {
-      html2pdf().set(opt).from(invoiceBox).save().then(restoreUI).catch(function(err) {
-        console.error('PDF error:', err);
-        invoiceBox.classList.remove('generating-pdf');
-        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
-        window.print();
-      });
-    } else {
-      setTimeout(function() {
-        if (typeof html2pdf !== 'undefined') {
-          html2pdf().set(opt).from(invoiceBox).save().then(restoreUI).catch(function() {
-            invoiceBox.classList.remove('generating-pdf');
-            if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
-            window.print();
-          });
-        } else {
+    function runGeneration() {
+      if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(invoiceBox).save().then(restoreUI).catch(function(err) {
+          console.error('PDF error:', err);
           invoiceBox.classList.remove('generating-pdf');
           if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
           window.print();
-        }
-      }, 500);
+        });
+      } else {
+        invoiceBox.classList.remove('generating-pdf');
+        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+        window.print();
+      }
+    }
+
+    if (typeof html2pdf !== 'undefined') {
+      runGeneration();
+    } else {
+      setTimeout(runGeneration, 600);
     }
   }
 
   function shareInvoiceWhatsApp() {
-    var invoiceNum = '[[${invoice.invoiceNumber}]]' || 'Invoice';
-    var grandTotal = '[[${#numbers.formatDecimal(invoice.grandTotal, 1, 2)}]]' || '0.00';
-    var customerName = '[[${invoice.customer != null ? invoice.customer.name : ""}]]' || 'Valued Client';
-    var phone = '[[${invoice.customer != null && invoice.customer.phone != null ? invoice.customer.phone : ""}]]';
+    var invoiceBox = document.querySelector('.invoice-box');
+    var invoiceNum = (invoiceBox && invoiceBox.getAttribute('data-invoice-number')) || 'Invoice';
+    var grandTotal = (invoiceBox && invoiceBox.getAttribute('data-grand-total')) || '0.00';
+    var customerName = (invoiceBox && invoiceBox.getAttribute('data-customer-name')) || 'Valued Client';
+    var phone = (invoiceBox && invoiceBox.getAttribute('data-customer-phone')) || '';
     var currentUrl = window.location.href;
 
     var text = "⚡ *VOLTA ELECTRICAL ASSOCIATES* - GST TAX INVOICE\n\n" +

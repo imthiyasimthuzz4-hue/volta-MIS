@@ -353,7 +353,8 @@
   </style>
 </head>
 <body>
-<div class="jobcard-container">
+<div class="jobcard-container"
+     th:attr="data-order-number=${workOrder.orderNumber}, data-title=${workOrder.title}, data-client-name=${workOrder.customer != null ? workOrder.customer.name : 'Client'}, data-phone=${workOrder.customer != null && workOrder.customer.phone != null ? workOrder.customer.phone : ''}">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 
@@ -371,7 +372,7 @@
       <button type="button" class="btn-whatsapp-share" onclick="shareWorkOrderWhatsApp()">
         💬 Share on WhatsApp
       </button>
-      <button type="button" class="btn-print-action" onclick="triggerWorkOrderPrint()">
+      <button type="button" class="btn-print-action" onclick="window.print()">
         🖨️ Print Work Order
       </button>
     </div>
@@ -454,18 +455,6 @@
     document.head.appendChild(fallbackScript);
   }
 
-  function triggerWorkOrderPrint() {
-    try {
-      if (typeof window.print === 'function') {
-        window.print();
-      } else {
-        downloadWorkOrderPDF();
-      }
-    } catch (e) {
-      downloadWorkOrderPDF();
-    }
-  }
-
   function downloadWorkOrderPDF() {
     var container = document.querySelector('.jobcard-container');
     var btn = document.getElementById('btn-download-pdf');
@@ -477,7 +466,7 @@
 
     container.classList.add('generating-pdf');
 
-    var orderNum = '[[${workOrder.orderNumber}]]' || 'WORK_ORDER';
+    var orderNum = (container && container.getAttribute('data-order-number')) || 'WORK_ORDER';
     var cleanNum = orderNum.replace(/[^a-zA-Z0-9_-]/g, '_');
     var fileName = 'VOLTA_WorkOrder_' + cleanNum + '.pdf';
 
@@ -500,34 +489,34 @@
       }
     }
 
-    if (typeof html2pdf !== 'undefined') {
-      html2pdf().set(opt).from(container).save().then(restoreUI).catch(function(err) {
-        container.classList.remove('generating-pdf');
-        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
-        window.print();
-      });
-    } else {
-      setTimeout(function() {
-        if (typeof html2pdf !== 'undefined') {
-          html2pdf().set(opt).from(container).save().then(restoreUI).catch(function() {
-            container.classList.remove('generating-pdf');
-            if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
-            window.print();
-          });
-        } else {
+    function runGeneration() {
+      if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(container).save().then(restoreUI).catch(function(err) {
+          console.error('PDF error:', err);
           container.classList.remove('generating-pdf');
           if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
           window.print();
-        }
-      }, 500);
+        });
+      } else {
+        container.classList.remove('generating-pdf');
+        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+        window.print();
+      }
+    }
+
+    if (typeof html2pdf !== 'undefined') {
+      runGeneration();
+    } else {
+      setTimeout(runGeneration, 600);
     }
   }
 
   function shareWorkOrderWhatsApp() {
-    var orderNum = '[[${workOrder.orderNumber}]]' || 'Work Order';
-    var title = '[[${workOrder.title}]]' || 'Electrical Works';
-    var clientName = '[[${workOrder.customer != null ? workOrder.customer.name : ""}]]' || 'Client';
-    var phone = '[[${workOrder.customer != null && workOrder.customer.phone != null ? workOrder.customer.phone : ""}]]';
+    var container = document.querySelector('.jobcard-container');
+    var orderNum = (container && container.getAttribute('data-order-number')) || 'Work Order';
+    var title = (container && container.getAttribute('data-title')) || 'Electrical Works';
+    var clientName = (container && container.getAttribute('data-client-name')) || 'Client';
+    var phone = (container && container.getAttribute('data-phone')) || '';
     var currentUrl = window.location.href;
 
     var text = "⚡ *VOLTA ELECTRICAL ASSOCIATES* - WORK ORDER\n\n" +

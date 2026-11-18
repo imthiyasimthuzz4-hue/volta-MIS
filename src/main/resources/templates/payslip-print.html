@@ -373,7 +373,8 @@
 </head>
 <body>
 
-<div class="payslip-box">
+<div class="payslip-box"
+     th:attr="data-staff-name=${staff.fullName}, data-month=${selectedMonth}, data-net-pay=${#numbers.formatDecimal(netPayable, 1, 2)}, data-phone=${staff.phone != null ? staff.phone : ''}">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 
@@ -391,7 +392,7 @@
       <button type="button" class="btn-whatsapp-share" onclick="sharePayslipWhatsApp()">
         💬 Share on WhatsApp
       </button>
-      <button type="button" class="btn-print-action" onclick="triggerPayslipPrint()">
+      <button type="button" class="btn-print-action" onclick="window.print()">
         🖨️ Print Payslip
       </button>
     </div>
@@ -589,18 +590,6 @@
     document.head.appendChild(fallbackScript);
   }
 
-  function triggerPayslipPrint() {
-    try {
-      if (typeof window.print === 'function') {
-        window.print();
-      } else {
-        downloadPayslipPDF();
-      }
-    } catch (e) {
-      downloadPayslipPDF();
-    }
-  }
-
   function downloadPayslipPDF() {
     var slipBox = document.querySelector('.payslip-box');
     var btn = document.getElementById('btn-download-pdf');
@@ -612,8 +601,8 @@
 
     slipBox.classList.add('generating-pdf');
 
-    var staffName = '[[${staff.fullName}]]' || 'Staff';
-    var month = '[[${selectedMonth}]]' || 'Month';
+    var staffName = (slipBox && slipBox.getAttribute('data-staff-name')) || 'Staff';
+    var month = (slipBox && slipBox.getAttribute('data-month')) || 'Month';
     var cleanName = staffName.replace(/[^a-zA-Z0-9_-]/g, '_');
     var fileName = 'VOLTA_Payslip_' + cleanName + '_' + month + '.pdf';
 
@@ -636,34 +625,34 @@
       }
     }
 
-    if (typeof html2pdf !== 'undefined') {
-      html2pdf().set(opt).from(slipBox).save().then(restoreUI).catch(function(err) {
-        slipBox.classList.remove('generating-pdf');
-        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
-        window.print();
-      });
-    } else {
-      setTimeout(function() {
-        if (typeof html2pdf !== 'undefined') {
-          html2pdf().set(opt).from(slipBox).save().then(restoreUI).catch(function() {
-            slipBox.classList.remove('generating-pdf');
-            if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
-            window.print();
-          });
-        } else {
+    function runGeneration() {
+      if (typeof html2pdf !== 'undefined') {
+        html2pdf().set(opt).from(slipBox).save().then(restoreUI).catch(function(err) {
+          console.error('PDF error:', err);
           slipBox.classList.remove('generating-pdf');
           if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
           window.print();
-        }
-      }, 500);
+        });
+      } else {
+        slipBox.classList.remove('generating-pdf');
+        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+        window.print();
+      }
+    }
+
+    if (typeof html2pdf !== 'undefined') {
+      runGeneration();
+    } else {
+      setTimeout(runGeneration, 600);
     }
   }
 
   function sharePayslipWhatsApp() {
-    var staffName = '[[${staff.fullName}]]' || 'Staff Member';
-    var month = '[[${selectedMonth}]]' || 'Current Month';
-    var netPay = '[[${#numbers.formatDecimal(netPayable, 1, 2)}]]' || '0.00';
-    var phone = '[[${staff.phone != null ? staff.phone : ""}]]';
+    var slipBox = document.querySelector('.payslip-box');
+    var staffName = (slipBox && slipBox.getAttribute('data-staff-name')) || 'Staff Member';
+    var month = (slipBox && slipBox.getAttribute('data-month')) || 'Current Month';
+    var netPay = (slipBox && slipBox.getAttribute('data-net-pay')) || '0.00';
+    var phone = (slipBox && slipBox.getAttribute('data-phone')) || '';
     var currentUrl = window.location.href;
 
     var text = "⚡ *VOLTA ELECTRICAL ASSOCIATES* - SALARY PAYSLIP\n\n" +
