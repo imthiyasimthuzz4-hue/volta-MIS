@@ -374,7 +374,7 @@
 <body>
 
 <div class="payslip-box"
-     th:attr="data-staff-name=${staff.fullName}, data-month=${selectedMonth}, data-net-pay=${#numbers.formatDecimal(netPayable, 1, 2)}, data-phone=${staff.phone != null ? staff.phone : ''}">
+     th:attr="data-staff-name=${staff.fullName}, data-month=${selectedMonth}, data-net-pay=${#numbers.formatDecimal(summary.netPayable, 1, 2)}, data-phone=${staff.phone != null ? staff.phone : ''}">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 

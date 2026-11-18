@@ -189,6 +189,7 @@ public class PayrollController {
 
         model.addAttribute("staff", staff);
         model.addAttribute("summary", summary);
+        model.addAttribute("netPayable", summary.getNetPayable());
         model.addAttribute("company", company);
         model.addAttribute("monthDisplay", ym.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
         model.addAttribute("selectedMonth", currentMonthStr);
