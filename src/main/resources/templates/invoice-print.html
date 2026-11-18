@@ -529,20 +529,115 @@
         margin-top: 18px !important;
       }
     }
-        font-size: 8pt !important;
-      }
-      .bank-grid {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important;
-        margin: 8px 0 !important;
-      }
-      .signatures {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        margin-top: 18px !important;
-      }
+
+    /* PDF Generation Mode (Forces desktop A4 layout when generating PDF on mobile) */
+    .invoice-box.generating-pdf {
+      width: 800px !important;
+      max-width: 800px !important;
+      padding: 24px !important;
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: none !important;
+    }
+    .invoice-box.generating-pdf .desktop-print-table-wrap {
+      display: block !important;
+    }
+    .invoice-box.generating-pdf .mobile-items-list {
+      display: none !important;
+    }
+    .invoice-box.generating-pdf .no-print {
+      display: none !important;
+    }
+    .invoice-box.generating-pdf .top-accent-stripe {
+      display: none !important;
+    }
+    .invoice-box.generating-pdf .letterhead-wrap {
+      flex-direction: row !important;
+      justify-content: space-between !important;
+    }
+    .invoice-box.generating-pdf .letterhead-brand-left {
+      flex-direction: row !important;
+      align-items: center !important;
+    }
+    .invoice-box.generating-pdf .meta-details-box {
+      text-align: right !important;
+      border-top: none !important;
+      padding-top: 0 !important;
+      width: auto !important;
+    }
+    .invoice-box.generating-pdf .grid-2 {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    .invoice-box.generating-pdf .calc-summary-wrap {
+      flex-direction: row !important;
+    }
+    .invoice-box.generating-pdf .words-box {
+      width: 54% !important;
+    }
+    .invoice-box.generating-pdf .calc-box-print {
+      width: 44% !important;
+      margin-left: auto !important;
+    }
+    .invoice-box.generating-pdf .bank-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    .invoice-box.generating-pdf .signatures {
+      flex-direction: row !important;
+    }
+
+    /* Toolbar Action Buttons Styling */
+    .btn-pdf-download {
+      background: #dc2626 !important;
+      color: #ffffff !important;
+      border: none !important;
+      padding: 8px 14px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25) !important;
+      transition: background 0.2s !important;
+    }
+    .btn-pdf-download:hover {
+      background: #b91c1c !important;
+    }
+    .btn-whatsapp-share {
+      background: #16a34a !important;
+      color: #ffffff !important;
+      border: none !important;
+      padding: 8px 14px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25) !important;
+      transition: background 0.2s !important;
+    }
+    .btn-whatsapp-share:hover {
+      background: #15803d !important;
+    }
+    .btn-print-action {
+      background: #003366 !important;
+      color: #ffffff !important;
+      border: none !important;
+      padding: 8px 14px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      box-shadow: 0 2px 6px rgba(0, 51, 102, 0.25) !important;
+    }
+    .btn-print-action:hover {
+      background: #002244 !important;
     }
   </style>
 </head>
@@ -553,10 +648,21 @@
 
   <!-- Print Actions Toolbar -->
   <div class="no-print no-print-toolbar">
-    <a class="button-link button-secondary" th:href="@{/invoices}">← Back to Invoices</a>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <a class="button-link button-secondary" href="javascript:history.back()">← Back</a>
+      <a class="button-link button-secondary" th:href="@{/mobile}" style="font-size:12px;">📱 Mobile Hub</a>
+      <a class="button-link button-secondary" th:href="@{/invoices}" style="font-size:12px;">📑 Invoices</a>
+    </div>
     <div class="btn-group">
-      <a class="button-link button-secondary" th:href="@{/company-settings}">⚙️ Company Profile</a>
-      <button class="primary" onclick="window.print()">🖨️ Print GST Tax Invoice</button>
+      <button type="button" id="btn-download-pdf" class="btn-pdf-download" onclick="downloadInvoicePDF()">
+        📥 Download PDF
+      </button>
+      <button type="button" class="btn-whatsapp-share" onclick="shareInvoiceWhatsApp()">
+        💬 Share on WhatsApp
+      </button>
+      <button type="button" class="btn-print-action" onclick="triggerMobilePrint()">
+        🖨️ Print Invoice
+      </button>
     </div>
   </div>
 
@@ -816,5 +922,113 @@
     This is a Computer Generated GST Tax Invoice issued by Volta Electrical Associates · Kozhikode Road, Valluvambram, Kerala
   </div>
 </div>
+
+<script th:src="@{/js/html2pdf.bundle.min.js}"></script>
+<script>
+  if (typeof html2pdf === 'undefined') {
+    var fallbackScript = document.createElement('script');
+    fallbackScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    document.head.appendChild(fallbackScript);
+  }
+
+  function triggerMobilePrint() {
+    try {
+      if (typeof window.print === 'function') {
+        window.print();
+      } else {
+        downloadInvoicePDF();
+      }
+    } catch (e) {
+      console.warn("Print error, generating PDF instead:", e);
+      downloadInvoicePDF();
+    }
+  }
+
+  function downloadInvoicePDF() {
+    var invoiceBox = document.querySelector('.invoice-box');
+    var btn = document.getElementById('btn-download-pdf');
+    var oldText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.innerHTML = '⏳ Generating PDF...';
+      btn.disabled = true;
+    }
+
+    // Force A4 desktop styling during PDF snapshot
+    invoiceBox.classList.add('generating-pdf');
+
+    var invoiceNum = '[[${invoice.invoiceNumber}]]' || 'INV';
+    var cleanNum = invoiceNum.replace(/[^a-zA-Z0-9_-]/g, '_');
+    var fileName = 'VOLTA_Invoice_' + cleanNum + '.pdf';
+
+    var opt = {
+      margin:       [6, 6, 6, 6],
+      filename:     fileName,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    function restoreUI() {
+      invoiceBox.classList.remove('generating-pdf');
+      if (btn) {
+        btn.innerHTML = '✓ PDF Downloaded!';
+        setTimeout(function() {
+          btn.innerHTML = oldText;
+          btn.disabled = false;
+        }, 2500);
+      }
+    }
+
+    if (typeof html2pdf !== 'undefined') {
+      html2pdf().set(opt).from(invoiceBox).save().then(restoreUI).catch(function(err) {
+        console.error('PDF error:', err);
+        invoiceBox.classList.remove('generating-pdf');
+        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+        window.print();
+      });
+    } else {
+      setTimeout(function() {
+        if (typeof html2pdf !== 'undefined') {
+          html2pdf().set(opt).from(invoiceBox).save().then(restoreUI).catch(function() {
+            invoiceBox.classList.remove('generating-pdf');
+            if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+            window.print();
+          });
+        } else {
+          invoiceBox.classList.remove('generating-pdf');
+          if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+          window.print();
+        }
+      }, 500);
+    }
+  }
+
+  function shareInvoiceWhatsApp() {
+    var invoiceNum = '[[${invoice.invoiceNumber}]]' || 'Invoice';
+    var grandTotal = '[[${#numbers.formatDecimal(invoice.grandTotal, 1, 2)}]]' || '0.00';
+    var customerName = '[[${invoice.customer != null ? invoice.customer.name : ""}]]' || 'Valued Client';
+    var phone = '[[${invoice.customer != null && invoice.customer.phone != null ? invoice.customer.phone : ""}]]';
+    var currentUrl = window.location.href;
+
+    var text = "⚡ *VOLTA ELECTRICAL ASSOCIATES* - GST TAX INVOICE\n\n" +
+               "📄 *Invoice No:* " + invoiceNum + "\n" +
+               "👤 *Client:* " + customerName + "\n" +
+               "💰 *Grand Total:* ₹ " + grandTotal + "\n\n" +
+               "🔗 *View & Download Official GST Invoice:*\n" + currentUrl + "\n\n" +
+               "Govt. Licensed Electrical Contractors & Engineers\n" +
+               "Valluvambram, Malappuram, Kerala | 📞 +91 94474 12235";
+
+    var cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length === 10) {
+      cleanPhone = '91' + cleanPhone;
+    }
+
+    var waUrl = cleanPhone ? 
+      ('https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(text)) : 
+      ('https://api.whatsapp.com/send?text=' + encodeURIComponent(text));
+
+    window.open(waUrl, '_blank');
+  }
+</script>
 </body>
 </html>

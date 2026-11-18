@@ -309,6 +309,66 @@
         margin-top: 24px !important;
       }
     }
+
+    /* PDF Snapshot styling */
+    .payslip-box.generating-pdf {
+      width: 800px !important;
+      max-width: 800px !important;
+      padding: 24px !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+    }
+    .payslip-box.generating-pdf .desktop-print-table-wrap { display: block !important; }
+    .payslip-box.generating-pdf .mobile-items-list { display: none !important; }
+    .payslip-box.generating-pdf .no-print { display: none !important; }
+    .payslip-box.generating-pdf .top-accent-stripe { display: none !important; }
+    .payslip-box.generating-pdf .letterhead-wrap { flex-direction: row !important; }
+    .payslip-box.generating-pdf .letterhead-brand-left { flex-direction: row !important; }
+    .payslip-box.generating-pdf .meta-slip-box { text-align: right !important; }
+    .payslip-box.generating-pdf .signatures { flex-direction: row !important; }
+
+    .btn-pdf-download {
+      background: #dc2626 !important;
+      color: #ffffff !important;
+      border: none !important;
+      padding: 8px 14px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25) !important;
+    }
+    .btn-whatsapp-share {
+      background: #16a34a !important;
+      color: #ffffff !important;
+      border: none !important;
+      padding: 8px 14px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25) !important;
+    }
+    .btn-print-action {
+      background: #003366 !important;
+      color: #ffffff !important;
+      border: none !important;
+      padding: 8px 14px !important;
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      border-radius: 6px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      box-shadow: 0 2px 6px rgba(0, 51, 102, 0.25) !important;
+    }
   </style>
 </head>
 <body>
@@ -319,8 +379,22 @@
 
   <!-- Print Action Toolbar -->
   <div class="no-print no-print-toolbar">
-    <a class="button-link button-secondary" th:href="@{/payroll/staff/{id}(id=${staff.id}, month=${selectedMonth})}">← Back to Worker Ledger</a>
-    <button class="primary" onclick="window.print()">🖨️ Print Official Payslip</button>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <a class="button-link button-secondary" href="javascript:history.back()">← Back</a>
+      <a class="button-link button-secondary" th:href="@{/mobile}" style="font-size:12px;">📱 Mobile Hub</a>
+      <a class="button-link button-secondary" th:href="@{/payroll}" style="font-size:12px;">💼 Payroll</a>
+    </div>
+    <div class="btn-group">
+      <button type="button" id="btn-download-pdf" class="btn-pdf-download" onclick="downloadPayslipPDF()">
+        📥 Download PDF
+      </button>
+      <button type="button" class="btn-whatsapp-share" onclick="sharePayslipWhatsApp()">
+        💬 Share on WhatsApp
+      </button>
+      <button type="button" class="btn-print-action" onclick="triggerPayslipPrint()">
+        🖨️ Print Payslip
+      </button>
+    </div>
   </div>
 
   <!-- Letterhead Header (Compact) -->
@@ -507,5 +581,110 @@
   </div>
 </div>
 
+<script th:src="@{/js/html2pdf.bundle.min.js}"></script>
+<script>
+  if (typeof html2pdf === 'undefined') {
+    var fallbackScript = document.createElement('script');
+    fallbackScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    document.head.appendChild(fallbackScript);
+  }
+
+  function triggerPayslipPrint() {
+    try {
+      if (typeof window.print === 'function') {
+        window.print();
+      } else {
+        downloadPayslipPDF();
+      }
+    } catch (e) {
+      downloadPayslipPDF();
+    }
+  }
+
+  function downloadPayslipPDF() {
+    var slipBox = document.querySelector('.payslip-box');
+    var btn = document.getElementById('btn-download-pdf');
+    var oldText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.innerHTML = '⏳ Generating PDF...';
+      btn.disabled = true;
+    }
+
+    slipBox.classList.add('generating-pdf');
+
+    var staffName = '[[${staff.fullName}]]' || 'Staff';
+    var month = '[[${selectedMonth}]]' || 'Month';
+    var cleanName = staffName.replace(/[^a-zA-Z0-9_-]/g, '_');
+    var fileName = 'VOLTA_Payslip_' + cleanName + '_' + month + '.pdf';
+
+    var opt = {
+      margin:       [6, 6, 6, 6],
+      filename:     fileName,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    function restoreUI() {
+      slipBox.classList.remove('generating-pdf');
+      if (btn) {
+        btn.innerHTML = '✓ PDF Downloaded!';
+        setTimeout(function() {
+          btn.innerHTML = oldText;
+          btn.disabled = false;
+        }, 2500);
+      }
+    }
+
+    if (typeof html2pdf !== 'undefined') {
+      html2pdf().set(opt).from(slipBox).save().then(restoreUI).catch(function(err) {
+        slipBox.classList.remove('generating-pdf');
+        if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+        window.print();
+      });
+    } else {
+      setTimeout(function() {
+        if (typeof html2pdf !== 'undefined') {
+          html2pdf().set(opt).from(slipBox).save().then(restoreUI).catch(function() {
+            slipBox.classList.remove('generating-pdf');
+            if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+            window.print();
+          });
+        } else {
+          slipBox.classList.remove('generating-pdf');
+          if (btn) { btn.innerHTML = oldText; btn.disabled = false; }
+          window.print();
+        }
+      }, 500);
+    }
+  }
+
+  function sharePayslipWhatsApp() {
+    var staffName = '[[${staff.fullName}]]' || 'Staff Member';
+    var month = '[[${selectedMonth}]]' || 'Current Month';
+    var netPay = '[[${#numbers.formatDecimal(netPayable, 1, 2)}]]' || '0.00';
+    var phone = '[[${staff.phone != null ? staff.phone : ""}]]';
+    var currentUrl = window.location.href;
+
+    var text = "⚡ *VOLTA ELECTRICAL ASSOCIATES* - SALARY PAYSLIP\n\n" +
+               "👤 *Staff:* " + staffName + "\n" +
+               "📅 *Period:* " + month + "\n" +
+               "💵 *Net Payable:* ₹ " + netPay + "\n\n" +
+               "🔗 *View & Download Official Payslip:*\n" + currentUrl + "\n\n" +
+               "Govt. Licensed Electrical Contractors & Engineers\n" +
+               "Valluvambram, Malappuram, Kerala | 📞 +91 94474 12235";
+
+    var cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length === 10) {
+      cleanPhone = '91' + cleanPhone;
+    }
+
+    var waUrl = cleanPhone ? 
+      ('https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(text)) : 
+      ('https://api.whatsapp.com/send?text=' + encodeURIComponent(text));
+
+    window.open(waUrl, '_blank');
+  }
+</script>
 </body>
 </html>
