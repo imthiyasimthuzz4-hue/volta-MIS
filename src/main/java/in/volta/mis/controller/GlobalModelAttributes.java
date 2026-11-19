@@ -45,7 +45,7 @@ public class GlobalModelAttributes {
             model.addAttribute("canAccessExpenses", isAdmin || isAccountant);
             model.addAttribute("canAccessInvoices", isAdmin || isAccountant || isViewer);
             model.addAttribute("canAccessPayroll", isAdmin || isAccountant || isViewer);
-            model.addAttribute("canAccessMaterials", isAdmin || isEngineer || isViewer);
+            model.addAttribute("canAccessMaterials", isAdmin || isEngineer || isAccountant || isViewer);
             model.addAttribute("canAccessProjects", true);
             model.addAttribute("canAccessWorkOrders", true);
             model.addAttribute("canAccessQuotations", true);

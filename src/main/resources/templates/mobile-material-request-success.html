@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Request Submitted | VOLTA Electrical Associates</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#003366">
+
+  <style>
+    :root {
+      --primary: #003366;
+      --success: #16a34a;
+      --bg: #f8fafc;
+      --text: #0f172a;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 90vh; }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 28px 20px;
+      width: min(100%, 460px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 60px;
+      height: 60px;
+      background: #dcfce7;
+      color: #16a34a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 16px;
+    }
+
+    h2 { color: var(--primary); font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    p.sub { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+    .summary-box {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+    .summary-row strong { color: #1e293b; }
+
+    .items-list {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #cbd5e1;
+    }
+    .item-entry {
+      font-size: 12.5px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      color: #334155;
+    }
+
+    .badge-urgent {
+      background: #fee2e2;
+      color: #dc2626;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+    .badge-normal {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      margin-bottom: 10px;
+      text-align: center;
+      border: none;
+      box-sizing: border-box;
+    }
+    .btn-whatsapp { background: #25D366; color: #fff; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-outline { background: #f8fafc; color: #334155; border: 1.5px solid var(--border); }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="success-icon">✓</div>
+    <h2>Request Submitted!</h2>
+    <p class="sub">Material requisition saved in VOLTA System. Now send to office:</p>
+
+    <div class="summary-box">
+      <div class="summary-row">
+        <span style="color:#64748b;">Indent No:</span>
+        <strong th:text="${siteRequest.indentNumber}">IND-001</strong>
+      </div>
+      <div class="summary-row">
+        <span style="color:#64748b;">Site / Project:</span>
+        <strong th:text="${siteRequest.projectName}">Calicut Mall Site</strong>
+      </div>
+      <div class="summary-row">
+        <span style="color:#64748b;">Needed For:</span>
+        <strong th:text="${#temporals.format(siteRequest.requiredForDate, 'dd-MMM-yyyy (Tomorrow)')}">20-Nov-2026</strong>
+      </div>
+      <div class="summary-row">
+        <span style="color:#64748b;">Requested By:</span>
+        <span th:text="${siteRequest.requestedBy}">Arun Kumar</span>
+      </div>
+      <div class="summary-row">
+        <span style="color:#64748b;">Priority:</span>
+        <span th:if="${siteRequest.priority == 'URGENT'}" class="badge-urgent">🚨 URGENT</span>
+        <span th:unless="${siteRequest.priority == 'URGENT'}" class="badge-normal">⚡ Normal</span>
+      </div>
+
+      <!-- Items List -->
+      <div class="items-list">
+        <div style="font-size:11px; font-weight:700; color:#64748b; margin-bottom:6px; text-transform:uppercase;">
+          Requested Materials (<span th:text="${siteRequest.items.size()}">0</span>):
+        </div>
+        <div class="item-entry" th:each="itm : ${siteRequest.items}">
+          <span th:text="'• ' + ${itm.materialName}">• 2.5 sqmm Wire</span>
+          <strong th:text="${itm.quantity} + ' ' + ${itm.unit}">2 Coils</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp Share CTA -->
+    <a th:href="${waShareUrl}" target="_blank" class="btn btn-whatsapp">
+      📱 Send to Office / WhatsApp Group
+    </a>
+
+    <!-- New Indent -->
+    <a th:href="@{/mobile/indent}" class="btn btn-outline">
+      ＋ Create Another Site Request
+    </a>
+
+    <!-- View List -->
+    <a th:href="@{/mobile/indent/list}" class="btn btn-outline" style="border:none; color:var(--primary); font-size:13px; margin-bottom:4px;">
+      📋 View All Indent Requests →
+    </a>
+
+    <!-- Back to Hub -->
+    <a th:href="@{/mobile}" style="font-size:12px; color:#64748b; text-decoration:none; display:inline-block; margin-top:8px;">
+      ← Back to Mobile App Hub
+    </a>
+  </div>
+
+</body>
+</html>

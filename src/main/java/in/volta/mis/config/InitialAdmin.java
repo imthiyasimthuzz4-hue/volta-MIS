@@ -25,7 +25,8 @@ public class InitialAdmin {
             QuotationRepository quotationRepo,
             InvoiceRepository invoiceRepo,
             AttendanceRepository attendanceRepo,
-            SalaryTransactionRepository salaryTxRepo
+            SalaryTransactionRepository salaryTxRepo,
+            SiteMaterialRequestRepository siteRequestRepo
     ) {
         return args -> {
             // Seed RBAC Users (Admin, Engineer, Accountant, Viewer)
@@ -328,6 +329,33 @@ public class InitialAdmin {
             s2.setUpiId("9745098765@okaxis");
             s2.setStatus("ACTIVE");
             staffRepo.save(s2);
+
+            // Seed Sample Site Material Requisition (Indent)
+            if (siteRequestRepo.count() == 0) {
+                SiteMaterialRequest smr = new SiteMaterialRequest();
+                smr.setIndentNumber("IND-2026-001");
+                smr.setProjectName("Commercial Complex, Calicut Beach");
+                smr.setSiteLocation("2nd Floor Distribution Boards");
+                smr.setRequestedBy("Arun Kumar K");
+                smr.setRequestedByPhone("+91 98471 23456");
+                smr.setRequestDate(LocalDate.now());
+                smr.setRequiredForDate(LocalDate.now().plusDays(1));
+                smr.setPriority("URGENT");
+                smr.setStatus("PENDING");
+                smr.setNotes("Please pack into the morning dispatch van before 8:30 AM.");
+
+                SiteMaterialRequestItem it1 = new SiteMaterialRequestItem("Finolex / Polycab 2.5 sqmm Red Wire", new BigDecimal("2"), "Coils");
+                it1.setNotes("Red & Black color");
+                smr.addItem(it1);
+
+                SiteMaterialRequestItem it2 = new SiteMaterialRequestItem("16A Single Pole MCB C-Curve", new BigDecimal("8"), "Nos");
+                smr.addItem(it2);
+
+                SiteMaterialRequestItem it3 = new SiteMaterialRequestItem("25mm Heavy Duty PVC Conduit Pipes", new BigDecimal("20"), "Lengths");
+                smr.addItem(it3);
+
+                siteRequestRepo.save(smr);
+            }
         };
     }
 }

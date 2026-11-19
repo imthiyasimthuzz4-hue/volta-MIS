@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Site Material Requisitions & Indents | VOLTA MIS</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
+</head>
+<body>
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('material-requests')}"></aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">FIELD LOGISTICS & SITE DISPATCH</p>
+        <h1>Site Material Requests & Indents</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link" th:href="@{/mobile/indent}" target="_blank">＋ New Site Indent</a>
+        <a class="button-link button-secondary" th:href="@{/materials}">📦 Godown Inventory</a>
+      </div>
+    </header>
+
+    <div class="success" th:if="${message}" th:text="${message}"></div>
+
+    <!-- Summary Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:14px;margin-bottom:20px;">
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #003366;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Total Requisitions</span>
+        <div style="font-size:24px;font-weight:800;color:#0f172a;margin-top:4px;" th:text="${totalRequests}">0</div>
+      </div>
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #f59e0b;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Pending Dispatch</span>
+        <div style="font-size:24px;font-weight:800;color:#d97706;margin-top:4px;" th:text="${pendingCount}">0</div>
+      </div>
+      <div style="background:#fff;border:1px solid #cbd5e1;border-left:5px solid #16a34a;border-radius:10px;padding:16px 20px;">
+        <span style="font-size:11.5px;font-weight:700;color:#64748b;text-transform:uppercase;">Dispatched & Fulfilled</span>
+        <div style="font-size:24px;font-weight:800;color:#16a34a;margin-top:4px;" th:text="${dispatchedCount}">0</div>
+      </div>
+    </div>
+
+    <!-- Filter Pills -->
+    <div style="display:flex; gap:8px; margin-bottom:16px; align-items:center;">
+      <span style="font-size:12px; font-weight:700; color:#64748b;">Filter Status:</span>
+      <a th:href="@{/material-requests(status='ALL')}"
+         class="button-link"
+         th:style="${statusFilter == 'ALL' ? 'background:#003366; color:#fff;' : 'background:#f1f5f9; color:#334155;'}"
+         style="padding:5px 12px; font-size:12px;">All</a>
+      <a th:href="@{/material-requests(status='PENDING')}"
+         class="button-link"
+         th:style="${statusFilter == 'PENDING' ? 'background:#d97706; color:#fff;' : 'background:#fef3c7; color:#92400e;'}"
+         style="padding:5px 12px; font-size:12px;">⏳ Pending Only</a>
+      <a th:href="@{/material-requests(status='DISPATCHED')}"
+         class="button-link"
+         th:style="${statusFilter == 'DISPATCHED' ? 'background:#16a34a; color:#fff;' : 'background:#dcfce7; color:#166534;'}"
+         style="padding:5px 12px; font-size:12px;">✓ Dispatched</a>
+    </div>
+
+    <!-- Requests Table Panel -->
+    <section class="panel">
+      <h3>Active Site Material Requisitions</h3>
+
+      <div th:if="${#lists.isEmpty(requests)}" style="text-align:center; padding:30px 10px; color:#64748b;">
+        <p>No site material requests found for this filter.</p>
+      </div>
+
+      <div class="table-wrap" th:unless="${#lists.isEmpty(requests)}">
+        <table>
+          <thead>
+            <tr>
+              <th>Indent No</th>
+              <th>Site / Project</th>
+              <th>Needed For</th>
+              <th>Requested By</th>
+              <th>Materials Requested</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${requests}">
+              <td>
+                <strong style="color:var(--navy);" th:text="${r.indentNumber}">IND-001</strong>
+                <div style="font-size:10.5px; color:#94a3b8;" th:text="${#temporals.format(r.requestDate, 'dd-MMM-yyyy')}">19-Nov-2026</div>
+              </td>
+              <td>
+                <strong th:text="${r.projectName}">Project Name</strong>
+                <div style="font-size:11px; color:#64748b;" th:if="${r.siteLocation}" th:text="${r.siteLocation}">Location</div>
+              </td>
+              <td>
+                <strong style="color:#0f172a;" th:text="${#temporals.format(r.requiredForDate, 'dd-MMM-yyyy')}">20-Nov-2026</strong>
+              </td>
+              <td>
+                <span th:text="${r.requestedBy}">Arun Kumar</span>
+                <div style="font-size:10.5px; color:#64748b;" th:if="${r.requestedByPhone}" th:text="${r.requestedByPhone}"></div>
+              </td>
+              <td style="max-width:300px;">
+                <ul style="margin:0; padding-left:14px; font-size:11.5px; line-height:1.4;">
+                  <li th:each="itm : ${r.items}">
+                    <strong th:text="${itm.materialName}">Wire</strong>:
+                    <span th:text="${itm.quantity + ' ' + itm.unit}">2 Coils</span>
+                    <small style="color:#64748b;" th:if="${itm.notes}" th:text="'(' + ${itm.notes} + ')'"></small>
+                  </li>
+                </ul>
+                <div th:if="${r.notes}" style="margin-top:4px; font-size:10.5px; color:#d97706; background:#fffbeb; padding:2px 6px; border-radius:4px;" th:text="'Note: ' + ${r.notes}"></div>
+              </td>
+              <td>
+                <span th:if="${r.priority == 'URGENT'}" style="background:#fee2e2; color:#dc2626; font-size:10.5px; font-weight:800; padding:2px 6px; border-radius:4px;">🚨 URGENT</span>
+                <span th:unless="${r.priority == 'URGENT'}" style="background:#f1f5f9; color:#475569; font-size:10.5px; font-weight:600; padding:2px 6px; border-radius:4px;">Normal</span>
+              </td>
+              <td>
+                <span th:if="${r.status == 'DISPATCHED'}" style="background:#dcfce7; color:#15803d; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:12px;">✓ DISPATCHED</span>
+                <span th:unless="${r.status == 'DISPATCHED'}" style="background:#fef3c7; color:#b45309; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:12px;">⏳ PENDING</span>
+              </td>
+              <td style="text-align:right; white-space:nowrap;">
+                <div style="display:inline-flex; gap:6px;">
+                  <!-- Dispatch & Auto Deduct Stock Button -->
+                  <form th:if="${r.status != 'DISPATCHED'}" th:action="@{/material-requests/dispatch/{id}(id=${r.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="button-link" style="padding:4px 8px; font-size:11px; background:#16a34a; color:#fff; border:none; cursor:pointer;" onclick="return confirm('Dispatch these materials and auto-deduct stock from Godown inventory?')">
+                      🚚 Dispatch
+                    </button>
+                  </form>
+
+                  <!-- Print Packing Slip -->
+                  <a th:href="@{/material-requests/print/{id}(id=${r.id})}" target="_blank" class="button-link button-secondary" style="padding:4px 8px; font-size:11px;">
+                    🖨️ Slip
+                  </a>
+
+                  <!-- Delete -->
+                  <form th:action="@{/material-requests/delete/{id}(id=${r.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="button-link" style="padding:4px 8px; font-size:11px; background:#fee2e2; color:#dc2626; border:none; cursor:pointer;" onclick="return confirm('Delete this site indent?')">
+                      🗑️
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+</body>
+</html>

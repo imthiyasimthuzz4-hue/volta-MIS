@@ -35,6 +35,9 @@ public class GlobalExceptionHandler {
         if (uri.startsWith("/payroll")) {
             return "redirect:/payroll";
         }
+        if (uri.startsWith("/material-requests")) {
+            return "redirect:/material-requests";
+        }
         return "redirect:/dashboard";
     }
 

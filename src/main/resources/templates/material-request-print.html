@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'Material Packing Slip ' + ${request.indentNumber} + ' | ' + ${company.companyName}">Material Packing Slip</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <style>
+    @page { size: A4 portrait; margin: 10mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: #e2e8f0; padding: 20px 10px; font-size: 13px; color: #0f172a; }
+    .slip-box {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 28px 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .no-print-toolbar {
+      max-width: 800px;
+      margin: 0 auto 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-print { background: #003366; color: #fff; }
+    .btn-back { background: #e2e8f0; color: #334155; }
+
+    .header-bar {
+      border-bottom: 2px solid #003366;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .company-title { font-size: 18px; font-weight: 800; color: #003366; text-transform: uppercase; }
+    .company-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    .slip-badge {
+      background: #003366;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 12.5px;
+    }
+    .meta-row { margin-bottom: 4px; }
+    .meta-row span { color: #64748b; font-weight: 600; }
+    .meta-row strong { color: #0f172a; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12.5px; }
+    th { background: #003366; color: #fff; text-align: left; padding: 8px 10px; font-size: 12px; }
+    td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
+    tr:nth-child(even) td { background: #f8fafc; }
+
+    .signatures {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+    }
+    .sig-line { border-top: 1px solid #000; margin-bottom: 6px; }
+    .sig-title { font-weight: 700; font-size: 11px; color: #1e293b; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .slip-box { border: none; box-shadow: none; padding: 0; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print no-print-toolbar">
+    <a href="javascript:history.back()" class="btn btn-back">← Back</a>
+    <button type="button" class="btn btn-print" onclick="window.print()">🖨️ Print Packing Slip</button>
+  </div>
+
+  <div class="slip-box">
+    <!-- Header -->
+    <div class="header-bar">
+      <div>
+        <div class="company-title" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</div>
+        <div class="company-sub" th:text="${company.address}">Valluvambram, Malappuram, Kerala</div>
+        <div class="company-sub" th:text="'Govt. Lic: ' + ${company.licenseNumber} + ' | GSTIN: ' + ${company.gstin}">Govt Licensed Electrical Contractors</div>
+      </div>
+      <div style="text-align:right;">
+        <span class="slip-badge">MATERIAL PACKING & DISPATCH SLIP</span>
+        <div style="font-size:12px; font-weight:800; color:#003366;" th:text="${request.indentNumber}">IND-2026-001</div>
+        <div style="font-size:11px; color:#64748b;" th:text="'Issued: ' + ${#temporals.format(request.requestDate, 'dd-MMM-yyyy')}">19-Nov-2026</div>
+      </div>
+    </div>
+
+    <!-- Metadata Grid -->
+    <div class="meta-grid">
+      <div>
+        <div class="meta-row"><span>Site / Project:</span> <strong th:text="${request.projectName}">Project Name</strong></div>
+        <div class="meta-row" th:if="${request.siteLocation}"><span>Location:</span> <strong th:text="${request.siteLocation}">Location</strong></div>
+        <div class="meta-row"><span>Priority:</span> <strong th:text="${request.priority}" th:style="${request.priority == 'URGENT' ? 'color:#dc2626;' : ''}">NORMAL</strong></div>
+      </div>
+      <div>
+        <div class="meta-row"><span>Required For Date:</span> <strong th:text="${#temporals.format(request.requiredForDate, 'dd-MMM-yyyy')}">20-Nov-2026</strong></div>
+        <div class="meta-row"><span>Requested By:</span> <strong th:text="${request.requestedBy}">Engineer</strong></div>
+        <div class="meta-row"><span>Dispatch Status:</span> <strong th:text="${request.status}">PENDING</strong></div>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40px; text-align:center;">#</th>
+          <th>Material Description & Specification</th>
+          <th style="width:100px; text-align:center;">Qty Needed</th>
+          <th style="width:70px; text-align:center;">Unit</th>
+          <th style="width:120px; text-align:center;">Packed / Checked</th>
+          <th>Item Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="itm, iter : ${request.items}">
+          <td style="text-align:center;" th:text="${iter.count}">1</td>
+          <td><strong th:text="${itm.materialName}">Material Name</strong></td>
+          <td style="text-align:center;"><strong th:text="${itm.quantity}">1.0</strong></td>
+          <td style="text-align:center;" th:text="${itm.unit}">Nos</td>
+          <td style="text-align:center;">
+            <div style="width:18px; height:18px; border:1.5px solid #000; margin:0 auto;"></div>
+          </td>
+          <td style="color:#64748b; font-size:11.5px;" th:text="${itm.notes}"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div th:if="${request.notes}" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:10px 14px; margin-bottom:20px; font-size:12px;">
+      <strong>Site Instructions / Remarks:</strong>
+      <p style="margin-top:2px; color:#334155;" th:text="${request.notes}"></p>
+    </div>
+
+    <!-- Signatures -->
+    <div class="signatures">
+      <div>
+        <div class="sig-line"></div>
+        <div class="sig-title">Requested By</div>
+        <div style="font-size:10px; color:#64748b;" th:text="${request.requestedBy}">Site Engineer</div>
+      </div>
+      <div>
+        <div class="sig-line"></div>
+        <div class="sig-title">Storekeeper / Godown In-Charge</div>
+        <div style="font-size:10px; color:#64748b;">Dispatched from Godown</div>
+      </div>
+      <div>
+        <div class="sig-line"></div>
+        <div class="sig-title">Site Receiver / Electrician</div>
+        <div style="font-size:10px; color:#64748b;">Materials Received at Site</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

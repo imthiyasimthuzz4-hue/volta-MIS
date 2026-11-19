@@ -1,18 +1,7 @@
 package in.volta.mis.controller;
 
-import in.volta.mis.model.CompanyProfile;
-import in.volta.mis.model.Customer;
-import in.volta.mis.model.Invoice;
-import in.volta.mis.model.InvoiceItem;
-import in.volta.mis.model.Material;
-import in.volta.mis.model.Project;
-import in.volta.mis.repository.CompanyProfileRepository;
-import in.volta.mis.repository.CustomerRepository;
-import in.volta.mis.repository.InvoiceRepository;
-import in.volta.mis.repository.MaterialRepository;
-import in.volta.mis.repository.ProjectRepository;
-import in.volta.mis.repository.StaffRepository;
-import in.volta.mis.repository.WorkOrderRepository;
+import in.volta.mis.model.*;
+import in.volta.mis.repository.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,6 +25,7 @@ public class MobileController {
     private final StaffRepository staffRepo;
     private final WorkOrderRepository workOrderRepo;
     private final CompanyProfileRepository companyRepo;
+    private final SiteMaterialRequestRepository siteRequestRepo;
 
     public MobileController(CustomerRepository customerRepo,
                             ProjectRepository projectRepo,
@@ -43,7 +33,8 @@ public class MobileController {
                             InvoiceRepository invoiceRepo,
                             StaffRepository staffRepo,
                             WorkOrderRepository workOrderRepo,
-                            CompanyProfileRepository companyRepo) {
+                            CompanyProfileRepository companyRepo,
+                            SiteMaterialRequestRepository siteRequestRepo) {
         this.customerRepo = customerRepo;
         this.projectRepo = projectRepo;
         this.materialRepo = materialRepo;
@@ -51,6 +42,7 @@ public class MobileController {
         this.staffRepo = staffRepo;
         this.workOrderRepo = workOrderRepo;
         this.companyRepo = companyRepo;
+        this.siteRequestRepo = siteRequestRepo;
     }
 
     /**
@@ -73,6 +65,7 @@ public class MobileController {
 
         m.addAttribute("totalMaterials", materialRepo.count());
         m.addAttribute("activeProjects", projectRepo.count());
+        m.addAttribute("pendingIndentCount", siteRequestRepo.countByStatus("PENDING"));
         m.addAttribute("recentInvoices", invoiceRepo.findAllByOrderByInvoiceDateDesc().stream().limit(5).toList());
         return "mobile-hub";
     }
@@ -256,5 +249,168 @@ public class MobileController {
     public String mobileMaterials(Model m) {
         m.addAttribute("materials", materialRepo.findAll());
         return "mobile-materials";
+    }
+
+    /**
+     * Site Material Request / Indent Screen (Order materials for tomorrow's site work)
+     */
+    @GetMapping(value = {"/indent", "/materials/request"})
+    public String siteMaterialRequestForm(Model m, Authentication auth) {
+        SiteMaterialRequest req = new SiteMaterialRequest();
+        req.setRequestDate(LocalDate.now());
+        req.setRequiredForDate(LocalDate.now().plusDays(1)); // Default: Tomorrow
+        req.setIndentNumber("IND-" + LocalDate.now().getYear() + "-" + String.format("%03d", siteRequestRepo.count() + 1));
+        req.setPriority("NORMAL");
+        req.setStatus("PENDING");
+
+        if (auth != null && auth.isAuthenticated() && !auth.getName().equalsIgnoreCase("anonymousUser")) {
+            staffRepo.findAll().stream()
+                    .filter(s -> s.getFullName() != null && s.getFullName().toLowerCase().contains(auth.getName().toLowerCase()))
+                    .findFirst()
+                    .ifPresent(s -> {
+                        req.setRequestedBy(s.getFullName());
+                        req.setRequestedByPhone(s.getPhone());
+                    });
+            if (req.getRequestedBy() == null || req.getRequestedBy().isBlank()) {
+                req.setRequestedBy(auth.getName());
+            }
+        }
+
+        m.addAttribute("siteRequest", req);
+        m.addAttribute("materials", materialRepo.findAll());
+        m.addAttribute("projects", projectRepo.findAll());
+        m.addAttribute("staffList", staffRepo.findAll());
+        return "mobile-material-request";
+    }
+
+    /**
+     * Save Site Material Request
+     */
+    @PostMapping(value = {"/indent", "/indent/save", "/materials/request/save"})
+    public String saveSiteMaterialRequest(@ModelAttribute SiteMaterialRequest siteRequest,
+                                          @RequestParam(name = "itemMaterialId", required = false) List<Long> materialIds,
+                                          @RequestParam(name = "itemDescription", required = false) List<String> descriptions,
+                                          @RequestParam(name = "itemQty", required = false) List<BigDecimal> quantities,
+                                          @RequestParam(name = "itemUnit", required = false) List<String> units,
+                                          @RequestParam(name = "itemNotes", required = false) List<String> itemNotes,
+                                          RedirectAttributes ra) {
+
+        if (siteRequest.getIndentNumber() == null || siteRequest.getIndentNumber().isBlank()) {
+            siteRequest.setIndentNumber("IND-" + LocalDate.now().getYear() + "-" + String.format("%03d", siteRequestRepo.count() + 1));
+        }
+        if (siteRequest.getRequestDate() == null) {
+            siteRequest.setRequestDate(LocalDate.now());
+        }
+        if (siteRequest.getRequiredForDate() == null) {
+            siteRequest.setRequiredForDate(LocalDate.now().plusDays(1));
+        }
+        if (siteRequest.getProjectName() == null || siteRequest.getProjectName().isBlank()) {
+            siteRequest.setProjectName("General Site Work");
+        }
+        if (siteRequest.getRequestedBy() == null || siteRequest.getRequestedBy().isBlank()) {
+            siteRequest.setRequestedBy("Site Electrician / Supervisor");
+        }
+
+        // Reconstruct items
+        siteRequest.clearItems();
+        if (descriptions != null && !descriptions.isEmpty()) {
+            for (int i = 0; i < descriptions.size(); i++) {
+                String desc = descriptions.get(i);
+                if (desc != null && !desc.trim().isEmpty()) {
+                    BigDecimal qty = (quantities != null && i < quantities.size() && quantities.get(i) != null) ? quantities.get(i) : BigDecimal.ONE;
+                    String unit = (units != null && i < units.size() && units.get(i) != null && !units.get(i).isBlank()) ? units.get(i) : "Nos";
+                    Long matId = (materialIds != null && i < materialIds.size()) ? materialIds.get(i) : null;
+                    String note = (itemNotes != null && i < itemNotes.size()) ? itemNotes.get(i) : null;
+
+                    SiteMaterialRequestItem item = new SiteMaterialRequestItem(desc.trim(), qty, unit);
+                    item.setMaterialId(matId);
+                    item.setNotes(note);
+                    siteRequest.addItem(item);
+                }
+            }
+        }
+
+        // Fallback default item if none provided
+        if (siteRequest.getItems().isEmpty()) {
+            SiteMaterialRequestItem fallback = new SiteMaterialRequestItem("Standard Site Electrical Materials", BigDecimal.ONE, "Lot");
+            siteRequest.addItem(fallback);
+        }
+
+        siteRequest.setStatus("PENDING");
+        SiteMaterialRequest saved = siteRequestRepo.save(siteRequest);
+
+        return "redirect:/mobile/indent/success/" + saved.getId();
+    }
+
+    /**
+     * Success Screen with 1-Tap WhatsApp Share to Office/Godown
+     */
+    @GetMapping(value = {"/indent/success/{id}", "/materials/request/success/{id}"})
+    public String siteMaterialRequestSuccess(@PathVariable Long id, Model m) {
+        SiteMaterialRequest req = siteRequestRepo.findById(id).orElse(null);
+        if (req == null) {
+            req = siteRequestRepo.findAllByOrderByRequestDateDescIdDesc().stream().findFirst().orElse(null);
+        }
+        if (req == null) {
+            return "redirect:/mobile";
+        }
+
+        CompanyProfile company = companyRepo.findAll().stream().findFirst().orElse(new CompanyProfile());
+
+        // Format pre-filled WhatsApp message
+        StringBuilder wa = new StringBuilder();
+        wa.append("⚡ *VOLTA ELECTRICAL ASSOCIATES*\n");
+        wa.append("📋 *SITE MATERIAL REQUISITION / INDENT*\n\n");
+        wa.append("🔖 *Indent No:* ").append(req.getIndentNumber()).append("\n");
+        wa.append("📍 *Site / Project:* ").append(req.getProjectName()).append("\n");
+        if (req.getSiteLocation() != null && !req.getSiteLocation().isBlank()) {
+            wa.append("📌 *Location:* ").append(req.getSiteLocation()).append("\n");
+        }
+        wa.append("📅 *Needed For:* ").append(req.getRequiredForDate()).append(" (Tomorrow)\n");
+        wa.append("👤 *Requested By:* ").append(req.getRequestedBy()).append("\n");
+        if ("URGENT".equalsIgnoreCase(req.getPriority())) {
+            wa.append("🚨 *Priority:* ⚠️ URGENT / HIGH PRIORITY\n");
+        }
+
+        wa.append("\n📦 *REQUIRED MATERIALS / സാധനങ്ങൾ:*\n");
+        int idx = 1;
+        for (SiteMaterialRequestItem itm : req.getItems()) {
+            wa.append(idx++).append(". ").append(itm.getMaterialName())
+              .append(" — *").append(itm.getQuantity()).append(" ").append(itm.getUnit()).append("*");
+            if (itm.getNotes() != null && !itm.getNotes().isBlank()) {
+                wa.append(" (").append(itm.getNotes()).append(")");
+            }
+            wa.append("\n");
+        }
+
+        if (req.getNotes() != null && !req.getNotes().isBlank()) {
+            wa.append("\n📝 *Notes / Remarks:*\n").append(req.getNotes()).append("\n");
+        }
+
+        wa.append("\n_Sent from VOLTA Mobile App Portal_");
+
+        String encodedWa = URLEncoder.encode(wa.toString(), StandardCharsets.UTF_8);
+        m.addAttribute("waShareUrl", "https://api.whatsapp.com/send?text=" + encodedWa);
+
+        if (company.getPhone() != null && !company.getPhone().isBlank()) {
+            String officeClean = company.getPhone().replaceAll("[^0-9]", "");
+            if (officeClean.length() == 10) officeClean = "91" + officeClean;
+            m.addAttribute("waOfficeUrl", "https://wa.me/" + officeClean + "?text=" + encodedWa);
+        } else {
+            m.addAttribute("waOfficeUrl", "https://api.whatsapp.com/send?text=" + encodedWa);
+        }
+
+        m.addAttribute("siteRequest", req);
+        m.addAttribute("company", company);
+        return "mobile-material-request-success";
+    }
+
+    /**
+     * Mobile List of Recent Site Material Requests
+     */
+    @GetMapping(value = {"/indent/list", "/materials/requests"})
+    public String siteMaterialRequestList(Model m) {
+        m.addAttribute("requests", siteRequestRepo.findAllByOrderByRequestDateDescIdDesc());
+        return "mobile-material-requests";
     }
 }

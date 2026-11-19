@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Site Material Requests | VOLTA Electrical Associates</title>
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#003366">
+
+  <style>
+    :root {
+      --primary: #003366;
+      --bg: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 80px; }
+
+    .top-bar {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .back-btn { color: #fff; text-decoration: none; font-size: 14px; font-weight: 700; }
+    .top-title { font-size: 16px; font-weight: 800; }
+
+    .container { padding: 14px 16px; max-width: 600px; margin: 0 auto; }
+
+    .request-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .indent-num { font-size: 12px; font-weight: 800; color: var(--primary); }
+    .badge-status {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+    }
+    .status-pending { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .status-dispatched { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+
+    .site-title { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+    .site-meta { font-size: 12px; color: #64748b; margin-bottom: 10px; }
+
+    .item-pill {
+      display: inline-block;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin: 2px 4px 2px 0;
+      color: #334155;
+    }
+
+    .btn-create {
+      display: block;
+      background: var(--primary);
+      color: #fff;
+      text-align: center;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 14px;
+      text-decoration: none;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 51, 102, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top-bar">
+    <a th:href="@{/mobile}" class="back-btn">← Home</a>
+    <h2 class="top-title">📋 Site Indents</h2>
+    <a th:href="@{/mobile/indent}" style="color:#ffcc00; font-size:13px; font-weight:800; text-decoration:none;">＋ New</a>
+  </header>
+
+  <div class="container">
+    <a th:href="@{/mobile/indent}" class="btn-create">
+      ＋ Request Materials for Tomorrow's Site
+    </a>
+
+    <div th:if="${#lists.isEmpty(requests)}" style="text-align:center; padding:40px 16px; color:#64748b;">
+      <div style="font-size:36px; margin-bottom:10px;">📦</div>
+      <p style="font-size:14px; font-weight:700;">No site requests submitted yet.</p>
+      <p style="font-size:12px; margin-top:4px;">Tap above to create your first site material request.</p>
+    </div>
+
+    <div class="request-card" th:each="r : ${requests}">
+      <div class="card-head">
+        <span class="indent-num" th:text="${r.indentNumber}">IND-2026-001</span>
+        <span class="badge-status"
+              th:classappend="${r.status == 'DISPATCHED'} ? 'status-dispatched' : 'status-pending'"
+              th:text="${r.status == 'DISPATCHED' ? '✓ DISPATCHED' : '⏳ PENDING'}">PENDING</span>
+      </div>
+
+      <div class="site-title" th:text="${r.projectName}">Site Name</div>
+      <div class="site-meta">
+        Needed For: <strong th:text="${#temporals.format(r.requiredForDate, 'dd-MMM-yyyy')}">20-Nov-2026</strong> •
+        By: <span th:text="${r.requestedBy}">Arun Kumar</span>
+        <span th:if="${r.priority == 'URGENT'}" style="color:#dc2626; font-weight:800; margin-left:4px;">[URGENT]</span>
+      </div>
+
+      <div>
+        <span class="item-pill" th:each="itm : ${r.items}"
+              th:text="${itm.materialName + ' (' + itm.quantity + ' ' + itm.unit + ')'}">Wire 2 Coils</span>
+      </div>
+
+      <div style="margin-top:12px; padding-top:8px; border-top:1px dashed #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:#94a3b8;" th:text="${#temporals.format(r.requestDate, 'dd-MMM-yyyy')}">19-Nov-2026</span>
+        <a th:href="@{'/mobile/indent/success/' + ${r.id}}" style="font-size:12px; font-weight:700; color:#16a34a; text-decoration:none;">
+          📲 Share on WhatsApp →
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

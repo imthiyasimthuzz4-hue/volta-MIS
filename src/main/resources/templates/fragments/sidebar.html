@@ -288,6 +288,7 @@
 
         <!-- Materials Inventory: Admin, Engineer, Viewer -->
         <a th:if="${canAccessMaterials}" th:classappend="${activeMenu == 'materials' ? 'active' : ''}" th:href="@{/materials}">📦 Materials & Stock</a>
+        <a th:if="${canAccessMaterials}" th:classappend="${activeMenu == 'material-requests' ? 'active' : ''}" th:href="@{/material-requests}">📋 Site Indents & Requests</a>
 
         <!-- Expenses: Admin & Accountant -->
         <a th:if="${canAccessExpenses}" th:classappend="${activeMenu == 'expenses' ? 'active' : ''}" th:href="@{/expenses}">💳 Expenses</a>

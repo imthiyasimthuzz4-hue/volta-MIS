@@ -18,6 +18,7 @@
         <h1>Materials & Godown Stock Inventory</h1>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
+        <a class="button-link button-secondary" th:href="@{/material-requests}">📋 Site Material Requests</a>
         <a class="button-link" href="#add-material" th:if="${canManageOperations}">＋ Add Material</a>
         <span th:if="${isReadOnly}" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;">👁️ Auditor / Read-Only Mode</span>
       </div>
