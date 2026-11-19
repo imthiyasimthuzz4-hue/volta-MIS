@@ -292,6 +292,7 @@ public class MobileController {
                                           @RequestParam(name = "itemDescription", required = false) List<String> descriptions,
                                           @RequestParam(name = "itemQty", required = false) List<BigDecimal> quantities,
                                           @RequestParam(name = "itemUnit", required = false) List<String> units,
+                                          @RequestParam(name = "itemSource", required = false) List<String> itemSources,
                                           @RequestParam(name = "itemNotes", required = false) List<String> itemNotes,
                                           RedirectAttributes ra) {
 
@@ -321,8 +322,11 @@ public class MobileController {
                     String unit = (units != null && i < units.size() && units.get(i) != null && !units.get(i).isBlank()) ? units.get(i) : "Nos";
                     Long matId = (materialIds != null && i < materialIds.size()) ? materialIds.get(i) : null;
                     String note = (itemNotes != null && i < itemNotes.size()) ? itemNotes.get(i) : null;
+                    String src = (itemSources != null && i < itemSources.size() && itemSources.get(i) != null && !itemSources.get(i).isBlank())
+                            ? itemSources.get(i)
+                            : (matId != null ? "GODOWN" : "OUTSIDE_PURCHASE");
 
-                    SiteMaterialRequestItem item = new SiteMaterialRequestItem(desc.trim(), qty, unit);
+                    SiteMaterialRequestItem item = new SiteMaterialRequestItem(desc.trim(), qty, unit, src);
                     item.setMaterialId(matId);
                     item.setNotes(note);
                     siteRequest.addItem(item);
@@ -377,6 +381,11 @@ public class MobileController {
         for (SiteMaterialRequestItem itm : req.getItems()) {
             wa.append(idx++).append(". ").append(itm.getMaterialName())
               .append(" — *").append(itm.getQuantity()).append(" ").append(itm.getUnit()).append("*");
+            if (itm.isOutsidePurchase()) {
+                wa.append(" _[🛒 Shop Purchase / കടയിൽ നിന്ന് വാങ്ങണം]_");
+            } else {
+                wa.append(" _[🏢 Godown Stock]_");
+            }
             if (itm.getNotes() != null && !itm.getNotes().isBlank()) {
                 wa.append(" (").append(itm.getNotes()).append(")");
             }

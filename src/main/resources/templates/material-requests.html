@@ -102,6 +102,8 @@
                   <li th:each="itm : ${r.items}">
                     <strong th:text="${itm.materialName}">Wire</strong>:
                     <span th:text="${itm.quantity + ' ' + itm.unit}">2 Coils</span>
+                    <span th:if="${itm.outsidePurchase}" style="background:#fee2e2; color:#b91c1c; font-size:9.5px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:4px;">🛒 Shop Purchase</span>
+                    <span th:unless="${itm.outsidePurchase}" style="background:#eff6ff; color:#1d4ed8; font-size:9.5px; font-weight:600; padding:1px 5px; border-radius:3px; margin-left:4px;">🏢 Godown</span>
                     <small style="color:#64748b;" th:if="${itm.notes}" th:text="'(' + ${itm.notes} + ')'"></small>
                   </li>
                 </ul>

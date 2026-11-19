@@ -25,6 +25,8 @@ public class SiteMaterialRequestItem {
 
     private String unit = "Nos";
 
+    private String itemSource = "GODOWN"; // GODOWN or OUTSIDE_PURCHASE
+
     private String notes;
 
     public SiteMaterialRequestItem() {}
@@ -33,6 +35,14 @@ public class SiteMaterialRequestItem {
         this.materialName = materialName;
         this.quantity = quantity;
         this.unit = unit;
+        this.itemSource = "GODOWN";
+    }
+
+    public SiteMaterialRequestItem(String materialName, BigDecimal quantity, String unit, String itemSource) {
+        this.materialName = materialName;
+        this.quantity = quantity;
+        this.unit = unit;
+        this.itemSource = itemSource != null ? itemSource : "GODOWN";
     }
 
     public Long getId() { return id; }
@@ -52,6 +62,13 @@ public class SiteMaterialRequestItem {
 
     public String getUnit() { return unit; }
     public void setUnit(String unit) { this.unit = unit; }
+
+    public String getItemSource() { return itemSource; }
+    public void setItemSource(String itemSource) { this.itemSource = itemSource; }
+
+    public boolean isOutsidePurchase() {
+        return "OUTSIDE_PURCHASE".equalsIgnoreCase(itemSource);
+    }
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }

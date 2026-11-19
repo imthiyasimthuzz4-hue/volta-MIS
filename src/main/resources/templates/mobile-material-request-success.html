@@ -142,7 +142,11 @@
           Requested Materials (<span th:text="${siteRequest.items.size()}">0</span>):
         </div>
         <div class="item-entry" th:each="itm : ${siteRequest.items}">
-          <span th:text="'• ' + ${itm.materialName}">• 2.5 sqmm Wire</span>
+          <div>
+            <span th:text="'• ' + ${itm.materialName}">• 2.5 sqmm Wire</span>
+            <span th:if="${itm.outsidePurchase}" style="background:#fee2e2; color:#b91c1c; font-size:9.5px; font-weight:700; padding:1px 5px; border-radius:3px; margin-left:4px;">🛒 Shop</span>
+            <span th:unless="${itm.outsidePurchase}" style="background:#eff6ff; color:#1d4ed8; font-size:9.5px; font-weight:600; padding:1px 5px; border-radius:3px; margin-left:4px;">🏢 Godown</span>
+          </div>
           <strong th:text="${itm.quantity} + ' ' + ${itm.unit}">2 Coils</strong>
         </div>
       </div>

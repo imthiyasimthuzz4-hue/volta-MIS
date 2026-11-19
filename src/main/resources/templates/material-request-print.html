@@ -154,7 +154,11 @@
       <tbody>
         <tr th:each="itm, iter : ${request.items}">
           <td style="text-align:center;" th:text="${iter.count}">1</td>
-          <td><strong th:text="${itm.materialName}">Material Name</strong></td>
+          <td>
+            <strong th:text="${itm.materialName}">Material Name</strong>
+            <span th:if="${itm.outsidePurchase}" style="font-size:10px; font-weight:700; color:#dc2626; margin-left:6px;">[🛒 Market Purchase / പുറത്തുനിന്ന് വാങ്ങണം]</span>
+            <span th:unless="${itm.outsidePurchase}" style="font-size:10px; font-weight:600; color:#1d4ed8; margin-left:6px;">[🏢 Godown Stock]</span>
+          </td>
           <td style="text-align:center;"><strong th:text="${itm.quantity}">1.0</strong></td>
           <td style="text-align:center;" th:text="${itm.unit}">Nos</td>
           <td style="text-align:center;">

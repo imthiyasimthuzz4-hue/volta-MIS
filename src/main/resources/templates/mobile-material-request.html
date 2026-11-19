@@ -303,11 +303,56 @@
           <span style="font-size:11px; font-weight:700; color:#16a34a;" id="itemCountBadge">0 Items</span>
         </div>
 
-        <p style="font-size:11.5px; color:#64748b; margin-bottom:8px;">
-          Tap any godown material below to add quickly:
-        </p>
+        <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:10px 12px; margin-bottom:12px; font-size:12px; color:#1e40af;">
+          💡 <strong>സ്റ്റോക്കില്ലാത്ത സാധനങ്ങളും ഓർഡർ ചെയ്യാം:</strong><br>
+          ഗോഡൗണിലുള്ളവ താഴെയുള്ള ചിപ്പുകളിൽ നിന്ന് തൊട്ട് ചേർക്കാം. ഗോഡൗണിൽ ഇല്ലാത്തതോ പുതിയതോ ആയ സാധനങ്ങൾ നേരിട്ട് ടൈപ്പ് ചെയ്ത് ചേർക്കാം.
+        </div>
 
-        <!-- Material Quick Chips -->
+        <!-- Fast Quick Add Bar for Custom / Out-of-Stock Items -->
+        <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; margin-bottom:14px;">
+          <label style="font-size:12px; font-weight:800; color:#003366; display:block; margin-bottom:4px;">
+            🛒 ഏത് സാധനവും നേരിട്ട് ടൈപ്പ് ചെയ്ത് ചേർക്കുക:
+          </label>
+          <input type="text" id="quickCustomInput" placeholder="ഉദാ: Legrand 16A Socket, AC Stand, M-Seal..." class="input-text" style="margin-bottom:8px;">
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom:8px;">
+            <div>
+              <label style="font-size:11px; color:#64748b; font-weight:700; display:block; margin-bottom:2px;">Quantity</label>
+              <input type="number" step="0.5" id="quickCustomQty" value="1" class="input-text" style="padding:8px 10px;">
+            </div>
+            <div>
+              <label style="font-size:11px; color:#64748b; font-weight:700; display:block; margin-bottom:2px;">Unit</label>
+              <select id="quickCustomUnit" style="padding:8px 6px; font-size:13px; font-weight:700;">
+                <option value="Nos">Nos</option>
+                <option value="Coils">Coils</option>
+                <option value="Meters">Meters</option>
+                <option value="Lengths">Lengths</option>
+                <option value="Pkt">Pkt</option>
+                <option value="Box">Box</option>
+                <option value="Sets">Sets</option>
+                <option value="Rolls">Rolls</option>
+                <option value="Lot">Lot</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom:8px;">
+            <label style="font-size:11px; color:#64748b; font-weight:700; display:block; margin-bottom:2px;">സാധനം എവിടെനിന്ന് എടുക്കണം?</label>
+            <select id="quickCustomSource" style="padding:8px 10px; font-size:13px; font-weight:700; background:#fff;">
+              <option value="OUTSIDE_PURCHASE">🛒 Direct Shop Purchase (കടയിൽ നിന്ന് വാങ്ങണം)</option>
+              <option value="GODOWN">🏢 From Central Godown (ഗോഡൗണിൽ നിന്ന് എടുക്കുക)</option>
+            </select>
+          </div>
+
+          <button type="button" onclick="addFromQuickBar()" class="btn-submit" style="padding:10px; font-size:13px; background:#003366; box-shadow:none;">
+            ＋ ലിസ്റ്റിലേക്ക് ചേർക്കുക (Add Item)
+          </button>
+        </div>
+
+        <!-- Material Quick Chips for Existing Godown Stock -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:12px; font-weight:700; color:#475569;">അല്ലെങ്കിൽ ഗോഡൗൺ സ്റ്റോക്കിൽ നിന്ന് തിരഞ്ഞെടുക്കാം:</span>
+        </div>
         <div class="material-chips">
           <div class="chip" th:each="m : ${materials}"
                th:data-id="${m.id}"
@@ -321,12 +366,15 @@
         </div>
 
         <!-- Selected Items Container -->
+        <div style="margin-top:14px; font-size:12px; font-weight:800; color:#003366; margin-bottom:6px;">
+          📋 നിങ്ങൾ തിരഞ്ഞെടുത്ത സാധനങ്ങളുടെ ലിസ്റ്റ്:
+        </div>
         <div id="itemsContainer">
           <!-- Dynamically populated rows -->
         </div>
 
         <button type="button" class="btn-add-custom" onclick="addEmptyCustomRow()">
-          ＋ Type Custom Material / സാധനം ടൈപ്പ് ചെയ്യുക
+          ＋ Add Another Item Row / മറ്റൊരു വരി ചേർക്കുക
         </button>
       </section>
 
@@ -365,21 +413,39 @@
       }
     }
 
+    function addFromQuickBar() {
+      const input = document.getElementById('quickCustomInput');
+      const name = input ? input.value.trim() : '';
+      if (!name) {
+        alert('ദയവായി സാധനത്തിന്റെ പേര് ടൈപ്പ് ചെയ്യുക (Please enter material name)');
+        if (input) input.focus();
+        return;
+      }
+      const qty = parseFloat(document.getElementById('quickCustomQty').value) || 1;
+      const unit = document.getElementById('quickCustomUnit').value || 'Nos';
+      const source = document.getElementById('quickCustomSource').value || 'OUTSIDE_PURCHASE';
+
+      createItemRow('', name, qty, unit, '', source);
+      input.value = '';
+      input.focus();
+    }
+
     function addChipItem(el) {
       const id = el.getAttribute('data-id');
       const name = el.getAttribute('data-name');
       const unit = el.getAttribute('data-unit') || 'Nos';
-      createItemRow(id, name, 1, unit, '');
+      createItemRow(id, name, 1, unit, '', 'GODOWN');
     }
 
     function addEmptyCustomRow() {
-      createItemRow('', '', 1, 'Nos', '');
+      createItemRow('', '', 1, 'Nos', '', 'OUTSIDE_PURCHASE');
     }
 
-    function createItemRow(materialId, name, qty, unit, note) {
+    function createItemRow(materialId, name, qty, unit, note, source) {
       itemCount++;
       const container = document.getElementById('itemsContainer');
       const rowId = 'row_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      const isShop = (source === 'OUTSIDE_PURCHASE' || !materialId);
 
       const div = document.createElement('div');
       div.className = 'item-card';
@@ -389,7 +455,7 @@
         <div class="item-header">
           <div class="item-desc">
             <input type="hidden" name="itemMaterialId" value="${materialId || ''}">
-            <input type="text" name="itemDescription" value="${name || ''}" placeholder="Material Name (e.g. 2.5 sqmm Wire)" class="input-text" style="padding:8px 10px; font-weight:700; font-size:13px;" required>
+            <input type="text" name="itemDescription" value="${name || ''}" placeholder="Material Name (e.g. 25mm Casing pipe, AC Stand...)" class="input-text" style="padding:8px 10px; font-weight:700; font-size:13px;" required>
           </div>
           <button type="button" class="btn-remove" onclick="removeRow('${rowId}')">✕ Remove</button>
         </div>
@@ -411,13 +477,24 @@
               <option value="Lengths" ${unit === 'Lengths' ? 'selected' : ''}>Lengths</option>
               <option value="Pkt" ${unit === 'Pkt' ? 'selected' : ''}>Pkt</option>
               <option value="Box" ${unit === 'Box' ? 'selected' : ''}>Box</option>
+              <option value="Sets" ${unit === 'Sets' ? 'selected' : ''}>Sets</option>
               <option value="Rolls" ${unit === 'Rolls' ? 'selected' : ''}>Rolls</option>
               <option value="Lot" ${unit === 'Lot' ? 'selected' : ''}>Lot</option>
             </select>
           </div>
         </div>
-        <div style="margin-top:6px;">
-          <input type="text" name="itemNotes" value="${note || ''}" placeholder="Item note (e.g. Red colour, 16 Amp, urgent)" class="input-text" style="padding:6px 10px; font-size:11px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:6px;">
+          <div>
+            <label style="font-size:10px; color:#64748b; font-weight:700; display:block; margin-bottom:2px;">Material Source</label>
+            <select name="itemSource" style="padding:6px 6px; font-size:11px; font-weight:700;">
+              <option value="OUTSIDE_PURCHASE" ${isShop ? 'selected' : ''}>🛒 Shop Purchase (പുറത്തുനിന്ന്)</option>
+              <option value="GODOWN" ${!isShop ? 'selected' : ''}>🏢 Godown Stock (ഗോഡൗണിൽ നിന്ന്)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px; color:#64748b; font-weight:700; display:block; margin-bottom:2px;">Specification / Notes</label>
+            <input type="text" name="itemNotes" value="${note || ''}" placeholder="Color, size, brand..." class="input-text" style="padding:6px 8px; font-size:11px;">
+          </div>
         </div>
       `;
 

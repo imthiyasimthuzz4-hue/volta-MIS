@@ -18,6 +18,7 @@ public class PageController {
     private final InvoiceRepository invoices;
     private final AppUserRepository appUsers;
     private final AttendanceRepository attendanceRepo;
+    private final SiteMaterialRequestRepository siteRequests;
 
     public PageController(
             CustomerRepository c,
@@ -29,7 +30,8 @@ public class PageController {
             QuotationRepository q,
             InvoiceRepository i,
             AppUserRepository u,
-            AttendanceRepository a
+            AttendanceRepository a,
+            SiteMaterialRequestRepository smr
     ) {
         this.customers = c;
         this.projects = p;
@@ -41,6 +43,7 @@ public class PageController {
         this.invoices = i;
         this.appUsers = u;
         this.attendanceRepo = a;
+        this.siteRequests = smr;
     }
 
     @GetMapping("/")
@@ -92,6 +95,9 @@ public class PageController {
         m.addAttribute("recentWorkOrders", workOrders.findAll());
         m.addAttribute("recentQuotations", quotations.findAll());
         m.addAttribute("recentInvoices", invoices.findAllByOrderByInvoiceDateDesc());
+        m.addAttribute("pendingIndentCount", siteRequests.countByStatus("PENDING"));
+        m.addAttribute("pendingSiteRequests", siteRequests.findByStatusOrderByRequestDateDescIdDesc("PENDING"));
+        m.addAttribute("recentSiteRequests", siteRequests.findAllByOrderByRequestDateDescIdDesc().stream().limit(8).toList());
         return "dashboard";
     }
 
