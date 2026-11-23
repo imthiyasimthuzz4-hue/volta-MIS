@@ -36,6 +36,8 @@ public class CompanyProfile {
     public void setTagline(String tagline) { this.tagline = tagline; }
     public String getLicenseNo() { return licenseNo; }
     public void setLicenseNo(String licenseNo) { this.licenseNo = licenseNo; }
+    public String getLicenseNumber() { return licenseNo; }
+    public void setLicenseNumber(String licenseNumber) { this.licenseNo = licenseNumber; }
     public String getGstin() { return gstin; }
     public void setGstin(String gstin) { this.gstin = gstin; }
     public String getPanNo() { return panNo; }

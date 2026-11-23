@@ -161,11 +161,14 @@ public class PayrollController {
         return "redirect:/payroll?month=" + month;
     }
 
-    @GetMapping("/payslip/{staffId}")
-    public String printPayslip(@PathVariable Long staffId,
+    @GetMapping({"/payslip", "/payslip/{staffId}"})
+    public String printPayslip(@PathVariable(required = false) Long staffId,
                                @RequestParam(value = "month", required = false) String monthStr,
                                Model model) {
-        Staff staff = staffRepo.findById(staffId).orElse(null);
+        Staff staff = null;
+        if (staffId != null) {
+            staff = staffRepo.findById(staffId).orElse(null);
+        }
         if (staff == null) {
             staff = staffRepo.findAll().stream().findFirst().orElse(null);
         }

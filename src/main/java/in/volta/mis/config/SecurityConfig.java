@@ -24,7 +24,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.ignoringRequestMatchers("/attendance/**", "/mobile/**", "/attendance/self-punch/**"))
             .authorizeHttpRequests(auth -> auth
                 // Public assets, login, uploads, worker site self-punch, mobile hub & site indents, public print previews
-                .requestMatchers("/login", "/error", "/attendance/self-punch", "/attendance/self-punch/**", "/mobile", "/mobile/**", "/uploads/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/manifest.json", "/sw.js", "/invoices/print/**", "/invoices/*/print", "/quotations/print/**", "/quotations/*/print", "/payroll/payslip/**", "/work-orders/print/**", "/work-orders/*/print", "/material-requests/print/**", "/material-requests/*/print").permitAll()
+                .requestMatchers("/login", "/error", "/attendance/self-punch", "/attendance/self-punch/**", "/mobile", "/mobile/**", "/uploads/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/manifest.json", "/sw.js",
+                        "/invoices/print", "/invoices/print/**", "/invoices/*/print",
+                        "/quotations/print", "/quotations/print/**", "/quotations/*/print",
+                        "/payroll/payslip", "/payroll/payslip/**",
+                        "/work-orders/print", "/work-orders/print/**", "/work-orders/*/print",
+                        "/material-requests/print", "/material-requests/print/**", "/material-requests/*/print").permitAll()
 
                 // Admin Only: User Management & Company Profile Settings
                 .requestMatchers("/users/**", "/company-settings/**").hasRole("ADMIN")

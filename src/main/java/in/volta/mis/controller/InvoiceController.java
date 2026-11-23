@@ -270,9 +270,12 @@ public class InvoiceController {
         return "redirect:/invoices";
     }
 
-    @GetMapping({"/print/{id}", "/{id}/print"})
-    public String print(@PathVariable Long id, Model m) {
-        Invoice invoice = invoiceRepo.findById(id).orElse(null);
+    @GetMapping({"/print", "/print/{id}", "/{id}/print"})
+    public String print(@PathVariable(required = false) Long id, Model m) {
+        Invoice invoice = null;
+        if (id != null) {
+            invoice = invoiceRepo.findById(id).orElse(null);
+        }
         if (invoice == null) {
             invoice = invoiceRepo.findAllByOrderByInvoiceDateDesc().stream().findFirst().orElse(null);
         }

@@ -89,9 +89,12 @@ public class QuotationController {
         return "redirect:/quotations";
     }
 
-    @GetMapping({"/print/{id}", "/{id}/print"})
-    public String print(@PathVariable Long id, Model m) {
-        Quotation qt = quotationRepo.findById(id).orElse(null);
+    @GetMapping({"/print", "/print/{id}", "/{id}/print"})
+    public String print(@PathVariable(required = false) Long id, Model m) {
+        Quotation qt = null;
+        if (id != null) {
+            qt = quotationRepo.findById(id).orElse(null);
+        }
         if (qt == null) {
             qt = quotationRepo.findAll().stream().findFirst().orElse(null);
         }

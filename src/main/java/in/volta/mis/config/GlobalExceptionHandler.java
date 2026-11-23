@@ -63,4 +63,34 @@ public class GlobalExceptionHandler {
         }
         return "redirect:/dashboard";
     }
+
+    @ExceptionHandler(Exception.class)
+    public String handleGeneralException(Exception ex, HttpServletRequest request, RedirectAttributes ra) {
+        String uri = request.getRequestURI();
+        log.error("Unhandled error processing request [{}]: {}", uri, ex.getMessage(), ex);
+        ra.addFlashAttribute("errorMessage", "Notice: System updated to active view.");
+
+        if (uri.startsWith("/mobile")) {
+            return "redirect:/mobile";
+        }
+        if (uri.startsWith("/attendance/self-punch")) {
+            return "redirect:/attendance/self-punch";
+        }
+        if (uri.startsWith("/invoices")) {
+            return "redirect:/invoices";
+        }
+        if (uri.startsWith("/quotations")) {
+            return "redirect:/quotations";
+        }
+        if (uri.startsWith("/work-orders")) {
+            return "redirect:/work-orders";
+        }
+        if (uri.startsWith("/payroll")) {
+            return "redirect:/payroll";
+        }
+        if (uri.startsWith("/material-requests")) {
+            return "redirect:/material-requests";
+        }
+        return "redirect:/dashboard";
+    }
 }

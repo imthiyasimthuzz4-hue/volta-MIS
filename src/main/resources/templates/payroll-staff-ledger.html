@@ -18,7 +18,7 @@
         <h1 th:text="${staff.fullName} + ' - Wage & Advance Ledger'">Worker Ledger</h1>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <a class="button-link" th:href="@{/payroll/payslip/{id}(id=${staff.id}, month=${selectedMonth})}" target="_blank">🖨️ Print Payslip</a>
+        <a class="button-link" th:href="@{/payroll/payslip/{id}(id=${staff.id}, month=${selectedMonth})}">🖨️ Print Payslip</a>
         <a class="button-link button-secondary" th:href="@{/payroll(month=${selectedMonth})}">← Back to Payroll Register</a>
       </div>
     </header>

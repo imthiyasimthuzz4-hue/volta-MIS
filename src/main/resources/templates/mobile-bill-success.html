@@ -96,15 +96,15 @@
       </div>
       <div class="bill-row grand">
         <span>Grand Total (Incl. GST):</span>
-        <span th:text="'₹ ' + ${#numbers.formatDecimal(invoice.grandTotal, 1, 2)}">₹ 0.00</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(invoice.grandTotal != null ? invoice.grandTotal : 0, 1, 2)}">₹ 0.00</span>
       </div>
     </div>
 
     <!-- WhatsApp Share Button (Direct to customer if phone available, or generic share) -->
-    <a th:if="${waDirectCustomerUrl}" th:href="${waDirectCustomerUrl}" target="_blank" class="btn btn-whatsapp">
+    <a th:if="${waDirectCustomerUrl}" th:href="${waDirectCustomerUrl}" class="btn btn-whatsapp">
       📱 Send Bill to Client on WhatsApp
     </a>
-    <a th:unless="${waDirectCustomerUrl}" th:href="${waShareUrl}" target="_blank" class="btn btn-whatsapp">
+    <a th:unless="${waDirectCustomerUrl}" th:href="${waShareUrl}" class="btn btn-whatsapp">
       📱 Share Bill via WhatsApp
     </a>
 

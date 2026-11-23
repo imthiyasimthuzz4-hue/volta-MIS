@@ -47,9 +47,16 @@
     <p>The requested page was refreshed or updated. You can return directly to the mobile portal or dashboard below.</p>
     
     <div class="btn-group">
-      <a th:href="@{/mobile}" class="btn btn-primary">📱 Open Mobile App Portal</a>
+      <button type="button" onclick="if (window.history.length > 1) { window.history.back(); } else { window.location.href='/mobile'; }" class="btn btn-primary">↩ Return to Previous Screen</button>
+      <a th:href="@{/mobile}" class="btn btn-secondary">📱 Open Mobile App Portal</a>
       <a th:href="@{/attendance/self-punch}" class="btn btn-secondary">⚡ Site Attendance Punch</a>
       <a th:href="@{/dashboard}" class="btn btn-secondary">🖥️ Management Dashboard</a>
+    </div>
+
+    <div style="margin-top: 18px;">
+      <a href="https://wa.me/919400942235" style="display:inline-flex; align-items:center; justify-content:center; gap:6px; color:#16a34a; font-weight:700; font-size:12.5px; text-decoration:none;">
+        💬 Contact Support on WhatsApp: +91 94009 42235
+      </a>
     </div>
   </div>
 </body>

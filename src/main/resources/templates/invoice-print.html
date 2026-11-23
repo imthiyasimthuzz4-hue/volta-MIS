@@ -643,7 +643,7 @@
 </head>
 <body>
 <div class="invoice-box"
-     th:attr="data-invoice-number=${invoice.invoiceNumber}, data-grand-total=${#numbers.formatDecimal(invoice.grandTotal, 1, 2)}, data-customer-name=${invoice.customerName != null ? invoice.customerName : 'Valued Client'}, data-customer-phone=${invoice.customerPhone != null ? invoice.customerPhone : ''}">
+     th:attr="data-invoice-number=${invoice.invoiceNumber}, data-grand-total=${#numbers.formatDecimal(invoice.grandTotal != null ? invoice.grandTotal : 0, 1, 2)}, data-customer-name=${invoice.customerName != null ? invoice.customerName : 'Valued Client'}, data-customer-phone=${invoice.customerPhone != null ? invoice.customerPhone : ''}">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 
@@ -767,27 +767,27 @@
           </td>
           <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 10px;" th:text="${it.hsnSac}">995461</td>
           <td style="text-align: right;">
-            <span style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.quantity, 1, 2)}">1.00</span>
+            <span style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.quantity != null ? it.quantity : 0, 1, 2)}">1.00</span>
             <small style="color: #64748b; margin-left: 2px;" th:text="${it.unit}">Lot</small>
           </td>
-          <td style="text-align: right;" th:text="${#numbers.formatDecimal(it.unitPrice, 1, 2)}">0.00</td>
-          <td style="text-align: right; font-weight: 600;" th:text="${#numbers.formatDecimal(it.taxableValue, 1, 2)}">0.00</td>
+          <td style="text-align: right;" th:text="${#numbers.formatDecimal(it.unitPrice != null ? it.unitPrice : 0, 1, 2)}">0.00</td>
+          <td style="text-align: right; font-weight: 600;" th:text="${#numbers.formatDecimal(it.taxableValue != null ? it.taxableValue : 0, 1, 2)}">0.00</td>
           <!-- CGST -->
           <td th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right;">
-            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.cgstAmount, 1, 2)}">0.00</div>
-            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.cgstRate, 1, (it.cgstRate % 1 == 0 ? 0 : 2))} + '%)'">(9%)</div>
+            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.cgstAmount != null ? it.cgstAmount : 0, 1, 2)}">0.00</div>
+            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.cgstRate != null ? it.cgstRate : 0, 1, 2)} + '%)'">(9%)</div>
           </td>
           <!-- SGST -->
           <td th:if="${invoice.supplyType != 'INTER_STATE'}" style="text-align: right;">
-            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.sgstAmount, 1, 2)}">0.00</div>
-            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.sgstRate, 1, (it.sgstRate % 1 == 0 ? 0 : 2))} + '%)'">(9%)</div>
+            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.sgstAmount != null ? it.sgstAmount : 0, 1, 2)}">0.00</div>
+            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.sgstRate != null ? it.sgstRate : 0, 1, 2)} + '%)'">(9%)</div>
           </td>
           <!-- IGST -->
           <td th:if="${invoice.supplyType == 'INTER_STATE'}" style="text-align: right;">
-            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.igstAmount, 1, 2)}">0.00</div>
-            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.igstRate, 1, (it.igstRate % 1 == 0 ? 0 : 2))} + '%)'">(18%)</div>
+            <div style="font-weight: 600;" th:text="${#numbers.formatDecimal(it.igstAmount != null ? it.igstAmount : 0, 1, 2)}">0.00</div>
+            <div style="font-size: 8.5px; color: #64748b; line-height: 1.1; margin-top: 1px;" th:text="'(' + ${#numbers.formatDecimal(it.igstRate != null ? it.igstRate : 0, 1, 2)} + '%)'">(18%)</div>
           </td>
-          <td style="text-align: right; font-weight: 700; color: #003366;" th:text="${#numbers.formatDecimal(it.totalAmount, 1, 2)}">0.00</td>
+          <td style="text-align: right; font-weight: 700; color: #003366;" th:text="${#numbers.formatDecimal(it.totalAmount != null ? it.totalAmount : 0, 1, 2)}">0.00</td>
         </tr>
       </tbody>
     </table>
@@ -799,7 +799,7 @@
       <div class="mobile-item-header">
         <span class="mobile-item-num" th:text="'#' + ${stat.index + 1}">#1</span>
         <div class="mobile-item-desc" th:text="${it.description}">Polycab 4C 16sqmm Armoured Cable</div>
-        <div class="mobile-item-total" th:text="'₹ ' + ${#numbers.formatDecimal(it.totalAmount, 1, 2)}">₹ 13,275.00</div>
+        <div class="mobile-item-total" th:text="'₹ ' + ${#numbers.formatDecimal(it.totalAmount != null ? it.totalAmount : 0, 1, 2)}">₹ 13,275.00</div>
       </div>
       <div class="mobile-item-grid">
         <div class="mobile-data-pill">
@@ -808,27 +808,27 @@
         </div>
         <div class="mobile-data-pill">
           <span class="mobile-data-label">Qty & Unit:</span>
-          <span class="mobile-data-val"><strong th:text="${#numbers.formatDecimal(it.quantity, 1, 2)}">25.00</strong> <span th:text="${it.unit}">Meters</span></span>
+          <span class="mobile-data-val"><strong th:text="${#numbers.formatDecimal(it.quantity != null ? it.quantity : 0, 1, 2)}">25.00</strong> <span th:text="${it.unit}">Meters</span></span>
         </div>
         <div class="mobile-data-pill">
           <span class="mobile-data-label">Rate / Unit:</span>
-          <span class="mobile-data-val" th:text="'₹ ' + ${#numbers.formatDecimal(it.unitPrice, 1, 2)}">₹ 450.00</span>
+          <span class="mobile-data-val" th:text="'₹ ' + ${#numbers.formatDecimal(it.unitPrice != null ? it.unitPrice : 0, 1, 2)}">₹ 450.00</span>
         </div>
         <div class="mobile-data-pill">
           <span class="mobile-data-label">Taxable:</span>
-          <span class="mobile-data-val" style="color: #003366;" th:text="'₹ ' + ${#numbers.formatDecimal(it.taxableValue, 1, 2)}">₹ 11,250.00</span>
+          <span class="mobile-data-val" style="color: #003366;" th:text="'₹ ' + ${#numbers.formatDecimal(it.taxableValue != null ? it.taxableValue : 0, 1, 2)}">₹ 11,250.00</span>
         </div>
         <div class="mobile-data-pill" th:if="${invoice.supplyType != 'INTER_STATE'}">
-          <span class="mobile-data-label" th:text="'CGST (' + ${#numbers.formatDecimal(it.cgstRate, 1, (it.cgstRate % 1 == 0 ? 0 : 2))} + '%):'">CGST (9%):</span>
-          <span class="mobile-data-val" th:text="'₹ ' + ${#numbers.formatDecimal(it.cgstAmount, 1, 2)}">₹ 1,012.50</span>
+          <span class="mobile-data-label" th:text="'CGST (' + ${#numbers.formatDecimal(it.cgstRate != null ? it.cgstRate : 0, 1, 2)} + '%):'">CGST (9%):</span>
+          <span class="mobile-data-val" th:text="'₹ ' + ${#numbers.formatDecimal(it.cgstAmount != null ? it.cgstAmount : 0, 1, 2)}">₹ 1,012.50</span>
         </div>
         <div class="mobile-data-pill" th:if="${invoice.supplyType != 'INTER_STATE'}">
-          <span class="mobile-data-label" th:text="'SGST (' + ${#numbers.formatDecimal(it.sgstRate, 1, (it.sgstRate % 1 == 0 ? 0 : 2))} + '%):'">SGST (9%):</span>
-          <span class="mobile-data-val" th:text="'₹ ' + ${#numbers.formatDecimal(it.sgstAmount, 1, 2)}">₹ 1,012.50</span>
+          <span class="mobile-data-label" th:text="'SGST (' + ${#numbers.formatDecimal(it.sgstRate != null ? it.sgstRate : 0, 1, 2)} + '%):'">SGST (9%):</span>
+          <span class="mobile-data-val" th:text="'₹ ' + ${#numbers.formatDecimal(it.sgstAmount != null ? it.sgstAmount : 0, 1, 2)}">₹ 1,012.50</span>
         </div>
         <div class="mobile-data-pill" th:if="${invoice.supplyType == 'INTER_STATE'}">
-          <span class="mobile-data-label" th:text="'IGST (' + ${#numbers.formatDecimal(it.igstRate, 1, (it.igstRate % 1 == 0 ? 0 : 2))} + '%):'">IGST (18%):</span>
-          <span class="mobile-data-val" th:text="'₹ ' + ${#numbers.formatDecimal(it.igstAmount, 1, 2)}">₹ 2,025.00</span>
+          <span class="mobile-data-label" th:text="'IGST (' + ${#numbers.formatDecimal(it.igstRate != null ? it.igstRate : 0, 1, 2)} + '%):'">IGST (18%):</span>
+          <span class="mobile-data-val" th:text="'₹ ' + ${#numbers.formatDecimal(it.igstAmount != null ? it.igstAmount : 0, 1, 2)}">₹ 2,025.00</span>
         </div>
       </div>
     </div>
@@ -843,8 +843,8 @@
 
       <!-- Payment Summary -->
       <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 4px; padding: 6px 10px; font-size: 11px; line-height: 1.5;">
-        <div><strong>Paid Amount:</strong> ₹ <span th:text="${#numbers.formatDecimal(invoice.paidAmount, 1, 2)}">0.00</span> (<span th:text="${invoice.paymentMode}">BANK_TRANSFER</span>)</div>
-        <div><strong>Balance Due:</strong> <strong style="color: #dc2626;">₹ <span th:text="${#numbers.formatDecimal(invoice.balanceAmount, 1, 2)}">0.00</span></strong></div>
+        <div><strong>Paid Amount:</strong> ₹ <span th:text="${#numbers.formatDecimal(invoice.paidAmount != null ? invoice.paidAmount : 0, 1, 2)}">0.00</span> (<span th:text="${invoice.paymentMode}">BANK_TRANSFER</span>)</div>
+        <div><strong>Balance Due:</strong> <strong style="color: #dc2626;">₹ <span th:text="${#numbers.formatDecimal(invoice.balanceAmount != null ? invoice.balanceAmount : 0, 1, 2)}">0.00</span></strong></div>
       </div>
     </div>
 
@@ -852,31 +852,31 @@
     <div class="calc-box-print">
       <div class="calc-row-print">
         <span>Total Taxable Value:</span>
-        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.taxableAmount, 1, 2)}">₹ 0.00</strong>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.taxableAmount != null ? invoice.taxableAmount : 0, 1, 2)}">₹ 0.00</strong>
       </div>
       <div class="calc-row-print" th:if="${invoice.supplyType != 'INTER_STATE'}">
         <span>Central Tax (CGST):</span>
-        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.cgstAmount, 1, 2)}">₹ 0.00</strong>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.cgstAmount != null ? invoice.cgstAmount : 0, 1, 2)}">₹ 0.00</strong>
       </div>
       <div class="calc-row-print" th:if="${invoice.supplyType != 'INTER_STATE'}">
         <span>State Tax (SGST):</span>
-        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.sgstAmount, 1, 2)}">₹ 0.00</strong>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.sgstAmount != null ? invoice.sgstAmount : 0, 1, 2)}">₹ 0.00</strong>
       </div>
       <div class="calc-row-print" th:if="${invoice.supplyType == 'INTER_STATE'}">
         <span>Integrated Tax (IGST):</span>
-        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.igstAmount, 1, 2)}">₹ 0.00</strong>
+        <strong th:text="'₹ ' + ${#numbers.formatDecimal(invoice.igstAmount != null ? invoice.igstAmount : 0, 1, 2)}">₹ 0.00</strong>
       </div>
       <div class="calc-row-print">
         <span>Total Tax Amount (GST):</span>
-        <strong style="color: #059669;" th:text="'₹ ' + ${#numbers.formatDecimal(invoice.totalGstAmount, 1, 2)}">₹ 0.00</strong>
+        <strong style="color: #059669;" th:text="'₹ ' + ${#numbers.formatDecimal(invoice.totalGstAmount != null ? invoice.totalGstAmount : 0, 1, 2)}">₹ 0.00</strong>
       </div>
       <div class="calc-row-print" th:if="${invoice.roundOff != null and invoice.roundOff != 0}">
         <span>Round Off:</span>
-        <span th:text="${#numbers.formatDecimal(invoice.roundOff, 1, 2)}">0.00</span>
+        <span th:text="${#numbers.formatDecimal(invoice.roundOff != null ? invoice.roundOff : 0, 1, 2)}">0.00</span>
       </div>
       <div class="calc-row-print grand">
         <span>Net Invoice Value:</span>
-        <span th:text="'₹ ' + ${#numbers.formatDecimal(invoice.grandTotal, 1, 2)}">₹ 0.00</span>
+        <span th:text="'₹ ' + ${#numbers.formatDecimal(invoice.grandTotal != null ? invoice.grandTotal : 0, 1, 2)}">₹ 0.00</span>
       </div>
     </div>
   </div>

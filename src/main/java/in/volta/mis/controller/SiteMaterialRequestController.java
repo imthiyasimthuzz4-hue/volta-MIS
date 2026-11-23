@@ -90,9 +90,12 @@ public class SiteMaterialRequestController {
         return "redirect:/material-requests";
     }
 
-    @GetMapping({"/print/{id}", "/{id}/print"})
-    public String printPackingSlip(@PathVariable Long id, Model m) {
-        SiteMaterialRequest req = siteRequestRepo.findById(id).orElse(null);
+    @GetMapping({"/print", "/print/{id}", "/{id}/print"})
+    public String printPackingSlip(@PathVariable(required = false) Long id, Model m) {
+        SiteMaterialRequest req = null;
+        if (id != null) {
+            req = siteRequestRepo.findById(id).orElse(null);
+        }
         if (req == null) {
             req = siteRequestRepo.findAllByOrderByRequestDateDescIdDesc().stream().findFirst().orElse(null);
         }

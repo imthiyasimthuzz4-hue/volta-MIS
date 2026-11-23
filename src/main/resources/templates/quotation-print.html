@@ -455,7 +455,7 @@
 </head>
 <body>
 <div class="quote-box"
-     th:attr="data-quotation-number=${quotation.quotationNumber}, data-grand-total=${#numbers.formatDecimal(quotation.grandTotal, 1, 2)}, data-customer-name=${quotation.customerName != null ? quotation.customerName : 'Valued Client'}, data-customer-phone=''">
+     th:attr="data-quotation-number=${quotation.quotationNumber}, data-grand-total=${#numbers.formatDecimal(quotation.grandTotal != null ? quotation.grandTotal : 0, 1, 2)}, data-customer-name=${quotation.customerName != null ? quotation.customerName : 'Valued Client'}, data-customer-phone=''">
   <div class="watermark-logo" th:style="'background-image: url(' + @{${company.logoPath}} + ');'"></div>
   <div class="top-accent-stripe"></div>
 
@@ -532,7 +532,7 @@
             <strong th:text="${quotation.projectName}">Project Name</strong>
             <div style="white-space: pre-wrap; color: #475569; font-size: 11.5px; margin-top: 6px;" th:text="${quotation.description}">Technical details</div>
           </td>
-          <td class="col-q-amt" style="text-align: right; font-weight: 700;" th:text="${#numbers.formatDecimal(quotation.subTotal, 1, 2)}">0.00</td>
+          <td class="col-q-amt" style="text-align: right; font-weight: 700;" th:text="${#numbers.formatDecimal(quotation.subTotal != null ? quotation.subTotal : 0, 1, 2)}">0.00</td>
         </tr>
       </tbody>
     </table>
@@ -544,7 +544,7 @@
       <div class="mobile-item-header">
         <span class="mobile-item-num">#1</span>
         <div class="mobile-item-desc" th:text="${quotation.projectName}">Project Name</div>
-        <div class="mobile-item-total" th:text="'₹ ' + ${#numbers.formatDecimal(quotation.subTotal, 1, 2)}">₹ 0.00</div>
+        <div class="mobile-item-total" th:text="'₹ ' + ${#numbers.formatDecimal(quotation.subTotal != null ? quotation.subTotal : 0, 1, 2)}">₹ 0.00</div>
       </div>
       <div style="color: #475569; font-size: 11.5px; margin-top: 4px; line-height: 1.45; white-space: pre-wrap;" th:text="${quotation.description}">Technical details</div>
     </div>
@@ -554,15 +554,15 @@
   <div class="total-box">
     <div class="total-row">
       <span>Sub-Total Taxable:</span>
-      <strong th:text="'₹ ' + ${#numbers.formatDecimal(quotation.subTotal, 1, 2)}">₹ 0.00</strong>
+      <strong th:text="'₹ ' + ${#numbers.formatDecimal(quotation.subTotal != null ? quotation.subTotal : 0, 1, 2)}">₹ 0.00</strong>
     </div>
     <div class="total-row">
-      <span th:text="'GST (' + ${quotation.gstPercent} + '%):'">GST (18%):</span>
-      <strong th:text="'₹ ' + ${#numbers.formatDecimal(quotation.gstAmount, 1, 2)}">₹ 0.00</strong>
+      <span th:text="'GST (' + ${quotation.gstPercent != null ? quotation.gstPercent : 0} + '%):'">GST (18%):</span>
+      <strong th:text="'₹ ' + ${#numbers.formatDecimal(quotation.gstAmount != null ? quotation.gstAmount : 0, 1, 2)}">₹ 0.00</strong>
     </div>
     <div class="total-row grand">
       <span>Grand Total:</span>
-      <span th:text="'₹ ' + ${#numbers.formatDecimal(quotation.grandTotal, 1, 2)}">₹ 0.00</span>
+      <span th:text="'₹ ' + ${#numbers.formatDecimal(quotation.grandTotal != null ? quotation.grandTotal : 0, 1, 2)}">₹ 0.00</span>
     </div>
   </div>
 

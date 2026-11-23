@@ -70,9 +70,12 @@ public class WorkOrderController {
         return "redirect:/work-orders";
     }
 
-    @GetMapping({"/print/{id}", "/{id}/print"})
-    public String print(@PathVariable Long id, Model m) {
-        WorkOrder wo = workOrderRepo.findById(id).orElse(null);
+    @GetMapping({"/print", "/print/{id}", "/{id}/print"})
+    public String print(@PathVariable(required = false) Long id, Model m) {
+        WorkOrder wo = null;
+        if (id != null) {
+            wo = workOrderRepo.findById(id).orElse(null);
+        }
         if (wo == null) {
             wo = workOrderRepo.findAll().stream().findFirst().orElse(null);
         }

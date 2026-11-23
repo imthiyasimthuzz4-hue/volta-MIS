@@ -122,7 +122,7 @@
       <div>
         <div class="company-title" th:text="${company.companyName}">VOLTA ELECTRICAL ASSOCIATES</div>
         <div class="company-sub" th:text="${company.address}">Valluvambram, Malappuram, Kerala</div>
-        <div class="company-sub" th:text="'Govt. Lic: ' + ${company.licenseNumber} + ' | GSTIN: ' + ${company.gstin}">Govt Licensed Electrical Contractors</div>
+        <div class="company-sub" th:text="'Govt. Lic: ' + (${company.licenseNo != null ? company.licenseNo : company.licenseNumber}) + ' | GSTIN: ' + ${company.gstin}">Govt Licensed Electrical Contractors</div>
       </div>
       <div style="text-align:right;">
         <span class="slip-badge">MATERIAL PACKING & DISPATCH SLIP</span>
