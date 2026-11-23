@@ -36,7 +36,7 @@ public class InitialAdmin {
                 u.setPassword(encoder.encode("Admin@12345"));
                 u.setFullName("Er. Zubair (Managing Director)");
                 u.setEmail("zubairvoltavvm@gmail.com");
-                u.setPhone("+91 94474 12235");
+                u.setPhone("+91 94009 42235");
                 u.setRole("ADMIN");
                 u.setEnabled(true);
                 users.save(u);
@@ -45,7 +45,10 @@ public class InitialAdmin {
                 if (u.getFullName() == null || u.getFullName().isBlank()) {
                     u.setFullName("Er. Zubair (Managing Director)");
                     u.setEmail("zubairvoltavvm@gmail.com");
-                    u.setPhone("+91 94474 12235");
+                    u.setPhone("+91 94009 42235");
+                    users.save(u);
+                } else if (u.getPhone() == null || u.getPhone().contains("94474 12235")) {
+                    u.setPhone("+91 94009 42235");
                     users.save(u);
                 }
             }
@@ -97,8 +100,8 @@ public class InitialAdmin {
             if (cp.getEmail() == null || cp.getEmail().contains("contact@voltaelectricals.in")) {
                 cp.setEmail("zubairvoltavvm@gmail.com");
             }
-            if (cp.getPhone() == null || cp.getPhone().contains("94470 00000")) {
-                cp.setPhone("+91 94474 12235, +91 85903 94345");
+            if (cp.getPhone() == null || cp.getPhone().contains("94470 00000") || cp.getPhone().contains("94474 12235")) {
+                cp.setPhone("+91 94009 42235, +91 85903 94345");
             }
             if (cp.getTagline() == null || cp.getTagline().contains("Engineering Consultants")) {
                 cp.setTagline("Govt. Licensed Electrical Contractors & Engineers");
@@ -112,8 +115,8 @@ public class InitialAdmin {
             if (cp.getInstagram() == null || cp.getInstagram().isBlank()) {
                 cp.setInstagram("https://www.instagram.com/volta_vvm/");
             }
-            if (cp.getWhatsapp() == null || cp.getWhatsapp().isBlank()) {
-                cp.setWhatsapp("+91 94474 12235");
+            if (cp.getWhatsapp() == null || cp.getWhatsapp().isBlank() || cp.getWhatsapp().contains("94474 12235")) {
+                cp.setWhatsapp("+91 94009 42235");
             }
             if (cp.getFacebook() == null || cp.getFacebook().isBlank()) {
                 cp.setFacebook("https://www.facebook.com/");

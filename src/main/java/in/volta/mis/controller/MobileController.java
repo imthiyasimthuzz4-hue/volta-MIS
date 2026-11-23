@@ -400,10 +400,10 @@ public class MobileController {
 
         String encodedWa = URLEncoder.encode(wa.toString(), StandardCharsets.UTF_8);
 
-        // Resolve official company WhatsApp number (target: +91 94474 12235)
+        // Resolve official company WhatsApp number (target: +91 94009 42235)
         String rawWa = (company.getWhatsapp() != null && !company.getWhatsapp().isBlank())
                 ? company.getWhatsapp()
-                : ((company.getPhone() != null && !company.getPhone().isBlank()) ? company.getPhone().split(",")[0] : "9447412235");
+                : ((company.getPhone() != null && !company.getPhone().isBlank()) ? company.getPhone().split(",")[0] : "9400942235");
         String officeClean = rawWa.replaceAll("[^0-9]", "");
         if (officeClean.length() == 10) {
             officeClean = "91" + officeClean;
@@ -411,13 +411,13 @@ public class MobileController {
             officeClean = "91" + officeClean.substring(1);
         }
         if (officeClean.length() != 12) {
-            officeClean = "919447412235";
+            officeClean = "919400942235";
         }
 
         String waOfficeDirect = "https://wa.me/" + officeClean + "?text=" + encodedWa;
         m.addAttribute("waOfficeUrl", waOfficeDirect);
         m.addAttribute("waShareUrl", "https://api.whatsapp.com/send?text=" + encodedWa);
-        m.addAttribute("officePhoneFormatted", "+91 94474 12235");
+        m.addAttribute("officePhoneFormatted", "+91 94009 42235");
 
         m.addAttribute("siteRequest", req);
         m.addAttribute("company", company);

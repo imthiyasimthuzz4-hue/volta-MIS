@@ -34,7 +34,7 @@
           <span style="background:#ecfdf5;color:#059669;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;" th:text="${staff.status}">ACTIVE</span>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:16px;font-size:12.5px;color:#475569;margin-top:6px;">
-          <span>📞 Phone: <strong th:text="${staff.phone}">+91 94474 12235</strong></span>
+          <span>📞 Phone: <strong th:text="${staff.phone}">+91 94009 42235</strong></span>
           <span>💼 Rate: <strong th:text="${staff.effectiveWageDisplay}">₹ 950 / Day</strong></span>
           <span th:if="${staff.bankName}">🏦 Bank: <strong th:text="${staff.bankName + ' (A/C: ' + staff.bankAccountNumber + ')'}">Bank</strong></span>
           <span th:if="${staff.upiId}">📱 UPI: <strong th:text="${staff.upiId}">upi@okaxis</strong></span>

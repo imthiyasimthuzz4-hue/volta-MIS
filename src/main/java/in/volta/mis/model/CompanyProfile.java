@@ -15,11 +15,11 @@ public class CompanyProfile {
     private String gstin = "32AAAAA0000A1Z5";
     private String panNo = "AAAAA0000A";
     private String email = "zubairvoltavvm@gmail.com";
-    private String phone = "+91 94474 12235, +91 85903 94345";
+    private String phone = "+91 94009 42235, +91 85903 94345";
     private String address = "Kozhikode Road, Valluvambram, Malappuram, Kerala - 673642";
     private String website = "https://voltaelectricalassociates.com";
     private String instagram = "https://www.instagram.com/volta_vvm/";
-    private String whatsapp = "+91 94474 12235";
+    private String whatsapp = "+91 94009 42235";
     private String facebook = "https://www.facebook.com/";
     private String linkedin = "https://www.linkedin.com/";
     private String logoPath = "/images/logo.png";
