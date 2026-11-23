@@ -399,15 +399,25 @@ public class MobileController {
         wa.append("\n_Sent from VOLTA Mobile App Portal_");
 
         String encodedWa = URLEncoder.encode(wa.toString(), StandardCharsets.UTF_8);
-        m.addAttribute("waShareUrl", "https://api.whatsapp.com/send?text=" + encodedWa);
 
-        if (company.getPhone() != null && !company.getPhone().isBlank()) {
-            String officeClean = company.getPhone().replaceAll("[^0-9]", "");
-            if (officeClean.length() == 10) officeClean = "91" + officeClean;
-            m.addAttribute("waOfficeUrl", "https://wa.me/" + officeClean + "?text=" + encodedWa);
-        } else {
-            m.addAttribute("waOfficeUrl", "https://api.whatsapp.com/send?text=" + encodedWa);
+        // Resolve official company WhatsApp number (target: +91 94474 12235)
+        String rawWa = (company.getWhatsapp() != null && !company.getWhatsapp().isBlank())
+                ? company.getWhatsapp()
+                : ((company.getPhone() != null && !company.getPhone().isBlank()) ? company.getPhone().split(",")[0] : "9447412235");
+        String officeClean = rawWa.replaceAll("[^0-9]", "");
+        if (officeClean.length() == 10) {
+            officeClean = "91" + officeClean;
+        } else if (officeClean.startsWith("0") && officeClean.length() == 11) {
+            officeClean = "91" + officeClean.substring(1);
         }
+        if (officeClean.length() != 12) {
+            officeClean = "919447412235";
+        }
+
+        String waOfficeDirect = "https://wa.me/" + officeClean + "?text=" + encodedWa;
+        m.addAttribute("waOfficeUrl", waOfficeDirect);
+        m.addAttribute("waShareUrl", "https://api.whatsapp.com/send?text=" + encodedWa);
+        m.addAttribute("officePhoneFormatted", "+91 94474 12235");
 
         m.addAttribute("siteRequest", req);
         m.addAttribute("company", company);

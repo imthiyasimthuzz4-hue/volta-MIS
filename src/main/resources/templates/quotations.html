@@ -128,7 +128,7 @@
                 <span th:class="'badge badge-' + ${#strings.toLowerCase(q.status)}" th:text="${q.status}">DRAFT</span>
               </td>
               <td>
-                <a class="button-link" style="padding:5px 8px;font-size:11px" th:href="@{/quotations/print/{id}(id=${q.id})}" target="_blank">🖨️ Quote</a>
+                <a class="button-link" style="padding:5px 8px;font-size:11px" th:href="@{/quotations/print/{id}(id=${q.id})}">🖨️ Quote</a>
                 <a class="button-link" style="padding:5px 8px;font-size:11px;background:#059669;" th:href="@{/invoices/from-quotation/{id}(id=${q.id})}" title="Generate Official GST Tax Invoice" th:if="${canManageFinancials}">🧾 Convert to GST Bill</a>
                 <a class="button-link button-secondary" style="padding:5px 8px;font-size:11px" th:href="@{/quotations/edit/{id}(id=${q.id})}" th:if="${canManageOperations}">Edit</a>
                 <form style="display:inline" th:action="@{/quotations/delete/{id}(id=${q.id})}" method="post" onsubmit="return confirm('Delete this quotation?')" th:if="${canDelete}">

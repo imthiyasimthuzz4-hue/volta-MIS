@@ -144,7 +144,7 @@
               </td>
               <td th:text="${w.targetDate}">-</td>
               <td>
-                <a class="button-link" style="padding:6px 10px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}" target="_blank">🖨️ Job Card</a>
+                <a class="button-link" style="padding:6px 10px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}">🖨️ Job Card</a>
                 <a class="button-link button-secondary" style="padding:6px 10px;font-size:11px" th:href="@{/work-orders/edit/{id}(id=${w.id})}" th:if="${canManageOperations}">Edit</a>
                 <form style="display:inline" th:action="@{/work-orders/delete/{id}(id=${w.id})}" method="post" onsubmit="return confirm('Delete this Work Order?')" th:if="${canDelete}">
                   <button class="danger" type="submit">Delete</button>

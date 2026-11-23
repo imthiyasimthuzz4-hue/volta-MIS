@@ -255,6 +255,7 @@
           <span th:if="${isAccountant}" style="background:#0284c7;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">💼 CHIEF ACCOUNTANT</span>
           <span th:if="${isViewer}" style="background:#64748b;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">👁️ AUDITOR / VIEWER</span>
         </span>
+        <a class="button-link" href="https://wa.me/919447412235" target="_blank" style="font-size:12px; background:#25D366; color:#fff; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 8px rgba(37,211,102,0.3); border-radius:20px; font-weight:700;">💬 WhatsApp: +91 94474 12235</a>
         <a class="button-link button-secondary" href="https://voltaelectricalassociates.com" target="_blank" style="font-size:12px;">🌐 Official Website</a>
         <span class="status"><i></i> System Online</span>
       </div>
@@ -273,7 +274,8 @@
         <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px;">
           <a href="https://voltaelectricalassociates.com" target="_blank" style="color:#fef3c7;text-decoration:underline;">🌐 voltaelectricalassociates.com</a>
           <a th:href="@{/attendance/self-punch}" target="_blank" style="color:#86efac;font-weight:700;text-decoration:underline;">📱 Open Mobile Site Punch Portal</a>
-          <span style="color:#e2e8f0;">📞 +91 94474 12235, +91 85903 94345</span>
+          <a href="https://wa.me/919447412235" target="_blank" style="color:#86efac;font-weight:700;text-decoration:underline;">💬 WhatsApp: +91 94474 12235</a>
+          <span style="color:#e2e8f0;">📞 +91 85903 94345</span>
         </div>
       </div>
       <div class="welcome-symbol">
@@ -289,7 +291,8 @@
         <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px;">
           <a href="https://voltaelectricalassociates.com" target="_blank" style="color:#fef3c7;text-decoration:underline;">🌐 voltaelectricalassociates.com</a>
           <a th:href="@{/payroll}" style="color:#fef3c7;text-decoration:underline;">💰 Master Payroll Register</a>
-          <span style="color:#e2e8f0;">📞 +91 94474 12235, +91 85903 94345</span>
+          <a href="https://wa.me/919447412235" target="_blank" style="color:#86efac;font-weight:700;text-decoration:underline;">💬 WhatsApp: +91 94474 12235</a>
+          <span style="color:#e2e8f0;">📞 +91 85903 94345</span>
         </div>
       </div>
       <div class="welcome-symbol">
@@ -320,6 +323,7 @@
         <p>Active Role: <strong>Managing Director (System Administrator)</strong>. Complete control of commercial wiring projects, 11kV/33kV substation works, work orders, quotations, staff payroll, materials, financials, and user security roles.</p>
         <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px;">
           <a href="https://voltaelectricalassociates.com" target="_blank" style="color:#fef3c7;text-decoration:underline;">🌐 voltaelectricalassociates.com</a>
+          <a href="https://wa.me/919447412235" target="_blank" style="color:#86efac;font-weight:700;text-decoration:underline;">💬 WhatsApp: +91 94474 12235</a>
           <a href="https://www.instagram.com/volta_vvm/" target="_blank" style="color:#fef3c7;text-decoration:underline;">📸 Instagram: @volta_vvm</a>
           <a th:href="@{/users}" style="color:#fef3c7;text-decoration:underline;">🔐 Manage System Roles (RBAC)</a>
         </div>
@@ -551,7 +555,7 @@
                       🚚 Dispatch
                     </button>
                   </form>
-                  <a th:href="@{/material-requests/print/{id}(id=${r.id})}" target="_blank" class="button-link button-secondary" style="padding:4px 8px; font-size:11px;">
+                  <a th:href="@{/material-requests/print/{id}(id=${r.id})}" class="button-link button-secondary" style="padding:4px 8px; font-size:11px;">
                     🖨️ Slip
                   </a>
                 </div>
@@ -593,7 +597,7 @@
               <td><span th:class="'pill priority-' + ${#strings.toLowerCase(w.priority)}" th:text="${w.priority}">MEDIUM</span></td>
               <td><span th:class="'badge badge-' + ${#strings.toLowerCase(w.status)}" th:text="${w.status}">PENDING</span></td>
               <td>
-                <a class="button-link" style="padding:4px 8px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}" target="_blank">Print Job Card</a>
+                <a class="button-link" style="padding:4px 8px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}">Print Job Card</a>
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(recentWorkOrders)}">
@@ -696,7 +700,7 @@
               <td class="strong" style="color:var(--navy);" th:text="'₹ ' + ${#numbers.formatDecimal(inv.grandTotal, 1, 2)}">₹ 0.00</td>
               <td><span th:class="'badge ' + (${inv.paymentStatus == 'PAID'} ? 'badge-green' : (${inv.paymentStatus == 'PARTIAL'} ? 'badge-blue' : 'badge-red'))" th:text="${inv.paymentStatus}">UNPAID</span></td>
               <td>
-                <a class="button-link" style="padding:4px 8px;font-size:11px;" th:href="@{/invoices/print/{id}(id=${inv.id})}" target="_blank">🖨️ Print Invoice</a>
+                <a class="button-link" style="padding:4px 8px;font-size:11px;" th:href="@{/invoices/print/{id}(id=${inv.id})}">🖨️ Print Invoice</a>
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(recentInvoices)}">
@@ -735,7 +739,7 @@
               <td><span th:class="'pill priority-' + ${#strings.toLowerCase(w.priority)}" th:text="${w.priority}">MEDIUM</span></td>
               <td><span th:class="'badge badge-' + ${#strings.toLowerCase(w.status)}" th:text="${w.status}">PENDING</span></td>
               <td>
-                <a class="button-link" style="padding:4px 8px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}" target="_blank">Print Job Card</a>
+                <a class="button-link" style="padding:4px 8px;font-size:11px" th:href="@{/work-orders/print/{id}(id=${w.id})}">Print Job Card</a>
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(recentWorkOrders)}">

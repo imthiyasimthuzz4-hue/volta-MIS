@@ -672,7 +672,7 @@
       ('https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(text)) : 
       ('https://api.whatsapp.com/send?text=' + encodeURIComponent(text));
 
-    window.open(waUrl, '_blank');
+    window.location.href = waUrl;
   }
 </script>
 </body>

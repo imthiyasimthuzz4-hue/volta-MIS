@@ -23,8 +23,8 @@ public class SecurityConfig {
         http.userDetailsService(users)
             .csrf(csrf -> csrf.ignoringRequestMatchers("/attendance/**", "/mobile/**", "/attendance/self-punch/**"))
             .authorizeHttpRequests(auth -> auth
-                // Public assets, login, uploads, worker site self-punch, mobile hub & public print previews
-                .requestMatchers("/login", "/attendance/self-punch", "/attendance/self-punch/**", "/mobile", "/mobile/hub", "/mobile/indent/**", "/mobile/materials/request/**", "/uploads/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/manifest.json", "/sw.js", "/error", "/invoices/print/**", "/invoices/*/print", "/quotations/print/**", "/quotations/*/print", "/payroll/payslip/**", "/work-orders/print/**", "/work-orders/*/print", "/material-requests/print/**", "/material-requests/*/print").permitAll()
+                // Public assets, login, uploads, worker site self-punch, mobile hub & site indents, public print previews
+                .requestMatchers("/login", "/error", "/attendance/self-punch", "/attendance/self-punch/**", "/mobile", "/mobile/**", "/uploads/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/manifest.json", "/sw.js", "/invoices/print/**", "/invoices/*/print", "/quotations/print/**", "/quotations/*/print", "/payroll/payslip/**", "/work-orders/print/**", "/work-orders/*/print", "/material-requests/print/**", "/material-requests/*/print").permitAll()
 
                 // Admin Only: User Management & Company Profile Settings
                 .requestMatchers("/users/**", "/company-settings/**").hasRole("ADMIN")
@@ -34,8 +34,8 @@ public class SecurityConfig {
                 .requestMatchers("/payroll/**").hasAnyRole("ADMIN", "ACCOUNTANT", "ENGINEER", "VIEWER")
 
                 // Financials & Invoices: Admin, Accountant & Field Site Engineers/Supervisors can generate bills
-                .requestMatchers("/invoices/save", "/invoices/edit/**", "/invoices/delete/**", "/invoices/add-item/**", "/invoices/record-payment/**", "/mobile/quick-bill/**").hasAnyRole("ADMIN", "ACCOUNTANT", "ENGINEER")
-                .requestMatchers("/invoices/**", "/mobile/**").hasAnyRole("ADMIN", "ACCOUNTANT", "ENGINEER", "VIEWER")
+                .requestMatchers("/invoices/save", "/invoices/edit/**", "/invoices/delete/**", "/invoices/add-item/**", "/invoices/record-payment/**").hasAnyRole("ADMIN", "ACCOUNTANT", "ENGINEER")
+                .requestMatchers("/invoices/**").hasAnyRole("ADMIN", "ACCOUNTANT", "ENGINEER", "VIEWER")
 
                 // Quotations: Admin, Accountant & Engineer create/edit; Viewer can view/print
                 .requestMatchers("/quotations/save", "/quotations/edit/**", "/quotations/delete/**", "/quotations/add-item/**").hasAnyRole("ADMIN", "ACCOUNTANT", "ENGINEER")

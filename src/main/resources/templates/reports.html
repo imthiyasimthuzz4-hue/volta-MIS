@@ -143,7 +143,7 @@
           <tbody>
             <tr th:each="inv : ${invoices}">
               <td class="strong">
-                <a th:href="@{/invoices/print/{id}(id=${inv.id})}" target="_blank" style="font-family:'JetBrains Mono',monospace;color:var(--navy);" th:text="${inv.invoiceNumber}">INV-001</a>
+                <a th:href="@{/invoices/print/{id}(id=${inv.id})}" style="font-family:'JetBrains Mono',monospace;color:var(--navy);" th:text="${inv.invoiceNumber}">INV-001</a>
               </td>
               <td th:text="${inv.invoiceDate}">2026-10-15</td>
               <td class="strong" th:text="${inv.customerName}">Customer</td>

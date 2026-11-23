@@ -288,7 +288,7 @@
           <tbody>
             <tr th:each="inv : ${invoices}">
               <td class="strong">
-                <a th:href="@{/invoices/print/{id}(id=${inv.id})}" target="_blank" style="color:var(--navy);font-family:'JetBrains Mono',monospace;font-weight:700;" th:text="${inv.invoiceNumber}">INV-001</a>
+                <a th:href="@{/invoices/print/{id}(id=${inv.id})}" style="color:var(--navy);font-family:'JetBrains Mono',monospace;font-weight:700;" th:text="${inv.invoiceNumber}">INV-001</a>
               </td>
               <td th:text="${inv.invoiceDate}">2026-10-15</td>
               <td>
@@ -307,7 +307,7 @@
                 <span th:class="'badge ' + (${inv.paymentStatus == 'PAID'} ? 'badge-green' : (${inv.paymentStatus == 'PARTIAL'} ? 'badge-blue' : 'badge-red'))" th:text="${inv.paymentStatus}">UNPAID</span>
               </td>
               <td style="white-space:nowrap;">
-                <a class="button-link" style="padding:5px 9px;font-size:11px;" th:href="@{/invoices/print/{id}(id=${inv.id})}" target="_blank">🖨️ Print Tax Invoice</a>
+                <a class="button-link" style="padding:5px 9px;font-size:11px;" th:href="@{/invoices/print/{id}(id=${inv.id})}">🖨️ Print Tax Invoice</a>
                 <a class="button-link button-secondary" style="padding:5px 8px;font-size:11px;" th:href="@{/invoices/edit/{id}(id=${inv.id})}" th:if="${canManageFinancials}">Edit</a>
                 <form style="display:inline" th:action="@{/invoices/delete/{id}(id=${inv.id})}" method="post" onsubmit="return confirm('Delete this GST Invoice?')" th:if="${canDelete}">
                   <button class="danger" style="padding:5px 8px;font-size:11px;" type="submit">Delete</button>
